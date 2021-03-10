@@ -30,11 +30,11 @@ code_race <- function(race, hisp) {
   return(race)
 }
 
-code_fractional_race <- function(race_name) {
+code_fractional_race <- function(race, race_name) {
   race_frac <- case_when(
     is.na(race) ~ NA_real_,
-    race=="White" ~ 1,
-    str_detect(race, "/White|White/") ~ 0.5,
+    race==race_name ~ 1,
+    str_detect(race, paste("/",race_name,"|",race_name,"/",sep="")) ~ 0.5,
     TRUE ~ 0)
   return(race_frac)
 }
@@ -79,31 +79,11 @@ acs <- acs %>%
          race=ifelse(race_mother==race_father, race_mother, 
                      pmap_chr(list(race_mother, race_father),
                               ~paste(sort(c(...)), collapse = "/"))),
-         white=case_when(
-           is.na(race) ~ NA_real_,
-           race=="White" ~ 1,
-           str_detect(race, "/White|White/") ~ 0.5,
-           TRUE ~ 0),
-         black=case_when(
-           is.na(race) ~ NA_real_,
-           race=="Black" ~ 1,
-           str_detect(race, "/Black|Black/") ~ 0.5,
-           TRUE ~ 0),
-         aian=case_when(
-           is.na(race) ~ NA_real_,
-           race=="AIAN" ~ 1,
-           str_detect(race, "/AIAN|AIAN/") ~ 0.5,
-           TRUE ~ 0),
-         api=case_when(
-           is.na(race) ~ NA_real_,
-           race=="API" ~ 1,
-           str_detect(race, "/API|API/") ~ 0.5,
-           TRUE ~ 0),
-         latino=case_when(
-           is.na(race) ~ NA_real_,
-           race=="Latino" ~ 1,
-           str_detect(race, "/Latino|Latino/") ~ 0.5,
-           TRUE ~ 0),
+         white=code_fractional_race(race, "White"),
+         black=code_fractional_race(race, "Black"),
+         aian=code_fractional_race(race, "AIAN"),
+         api=code_fractional_race(race, "API"),
+         latino=code_fractional_race(race, "Latino"),
          aian_api=race=="AIAN/API",
          aian_black=race=="AIAN/Black",
          aian_latino=race=="AIAN/Latino",
