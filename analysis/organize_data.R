@@ -30,6 +30,15 @@ code_race <- function(race, hisp) {
   return(race)
 }
 
+code_fractional_race <- function(race_name) {
+  race_frac <- case_when(
+    is.na(race) ~ NA_real_,
+    race=="White" ~ 1,
+    str_detect(race, "/White|White/") ~ 0.5,
+    TRUE ~ 0)
+  return(race_frac)
+}
+
 
 # Read the raw data -------------------------------------------------------
 
@@ -49,8 +58,20 @@ acs <- read_fwf(here("analysis","input","usa_00109.dat.gz"),
                        col_types = cols(.default = "i"),
                        progress = FALSE)
 
+#what percent of cases have both mom and dad's race
+mean(!is.na(acs$raced_pop) & !is.na(acs$raced_mom) & 
+       !is.na(acs$hispand_pop) & !is.na(acs$hispand_mom))
+
 
 # Recode variables --------------------------------------------------------
+
+#I worry a little bit about specifying grade retention for the older grades where
+#grade retention is only possible at ages when kids are often out of the household
+#and therefore not eligible for the sample. Might create some weird biases.
+
+#Code grade retention
+#for now just use the level+6 as above grade, but this probably needs refinement
+#to address lots of issues.
 
 acs <- acs %>% 
   mutate(race_mother=code_race(raced_mom, hispand_mom),
@@ -111,10 +132,6 @@ acs <- acs %>%
          below_exp_grade=age>=as.numeric(current_grade)+6,
          not_attending=school==1) 
 
-#what percent of cases have both mom and dad's race
-#mean(!is.na(acs$raced_pop) & !is.na(acs$raced_mom) & 
-#       !is.na(acs$hispand_pop) & !is.na(acs$hispand_mom))
-
 table(acs$race_mother, acs$race_father, exclude=NULL)
 
 #grade-age progression
@@ -123,16 +140,6 @@ with(subset(acs, !not_attending),
 
 acs$both_missing <- is.na(acs$race_father) & is.na(acs$race_mother)
 round(tapply(acs$both_missing, acs[,c("age","current_grade")], mean, na.rm=TRUE), 3)
-
-#I worry a little bit about specifying grade retention for the older grades where
-#grade retention is only possible at ages when kids are often out of the household
-#and therefore not eligible for the sample. Might create some weird biases.
-
-#Code grade retention
-#for now just use the level+6 as above grade, but this probably needs refinement
-#to address lots of issues.
-
-
 
 # Trim to analytical data -------------------------------------------------
 
@@ -145,8 +152,6 @@ acs <- acs %>%
 
 
 # Some models -------------------------------------------------------------
-
-
 
 #try a model
 model <- glm(below_exp_grade~black+aian+api+latino+
