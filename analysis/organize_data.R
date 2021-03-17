@@ -30,6 +30,7 @@ code_race <- function(race, hisp) {
   return(race)
 }
 
+#not using this anymore because I am coding by contrasts (much cleaner)
 code_fractional_race <- function(race, race_name) {
   race_frac <- case_when(
     is.na(race) ~ NA_real_,
@@ -79,21 +80,6 @@ acs <- acs %>%
          race=ifelse(race_mother==race_father, race_mother, 
                      pmap_chr(list(race_mother, race_father),
                               ~paste(sort(c(...)), collapse = "/"))),
-         white=code_fractional_race(race, "White"),
-         black=code_fractional_race(race, "Black"),
-         aian=code_fractional_race(race, "AIAN"),
-         api=code_fractional_race(race, "API"),
-         latino=code_fractional_race(race, "Latino"),
-         aian_api=race=="AIAN/API",
-         aian_black=race=="AIAN/Black",
-         aian_latino=race=="AIAN/Latino",
-         aian_white=race=="AIAN/White",
-         api_black=race=="API/Black",
-         api_latino=race=="API/Latino",
-         api_white=race=="API/White",
-         black_latino=race=="Black/Latino",
-         black_white=race=="Black/White",
-         latino_white=race=="Latino/White",
          current_grade=factor(case_when(
            gradeattd == 20 ~ "K",
            gradeattd == 31 ~ "1st",
@@ -112,6 +98,27 @@ acs <- acs %>%
          below_exp_grade=age>=as.numeric(current_grade)+6,
          not_attending=school==1) 
 
+#code the contrast matrix for race to adjust for fractions
+acs$race <- factor(acs$race,
+                   levels=c("White","Black","AIAN","API","Latino",
+                            "AIAN/API","AIAN/Black","AIAN/Latino","AIAN/White",
+                            "API/Black","API/Latino","API/White",
+                            "Black/Latino","Black/White",
+                            "Latino/White"))
+#the default treatment contrast will do most of the work, but I need to 
+#put in the 0.5 cases
+contr_race <- contrasts(acs$race)
+#lets loop through rows for multiracials and decide where the 0.5 should go
+for(i in str_which(rownames(contr_race),"/")) {
+  race_name <- rownames(contr_race)[i]
+  comp_races <- str_split(race_name, "/")[[1]]
+  fraction <- 1/length(comp_races)
+  #one category is missing because it is the reference so remove if so
+  comp_races <- comp_races[comp_races %in% colnames(contr_race)]
+  contr_race[race_name, comp_races] <- fraction
+}
+contrasts(acs$race) <- contr_race
+
 table(acs$race_mother, acs$race_father, exclude=NULL)
 
 #grade-age progression
@@ -125,20 +132,14 @@ round(tapply(acs$both_missing, acs[,c("age","current_grade")], mean, na.rm=TRUE)
 
 acs <- acs %>%
   select(year, age, current_grade, below_exp_grade, not_attending,
-         race_mother, race_father, race, white, black, aian, api, latino,
-         aian_api, aian_black, aian_latino, aian_white, api_black, api_latino,
-         api_white, black_latino, black_white, latino_white) %>%
+         race_mother, race_father, race) %>%
   filter(!is.na(race_mother) & !is.na(race_father))
 
 
 # Some models -------------------------------------------------------------
 
 #try a model
-model <- glm(below_exp_grade~black+aian+api+latino+
-               aian_api+aian_black+aian_latino+aian_white+
-               api_black+api_latino+api_white+
-               black_latino+black_white+
-               latino_white, 
+model <- glm(below_exp_grade~race, 
              data=acs, family=binomial)
 
 model2 <- glm(below_exp_grade~relevel(as.factor(race), "White"), 
