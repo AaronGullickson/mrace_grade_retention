@@ -31,3 +31,17 @@ model4 <- update(model3, .~.+foreign_born_mother+foreign_born_father)
 
 knitreg(list(model1, model2, model3, model4))
 ```
+
+
+```{r}
+coef_table <- tidy(model4) %>%
+  filter(str_detect(term, "race") & str_detect(term, "/") & !str_detect(term, "Multiracial")) %>%
+  mutate(term=str_remove(term, "race"))
+
+ggplot(coef_table, aes(x=reorder(term, estimate, mean), y=estimate, 
+                       ymin=estimate-1.96*std.error, ymax=estimate+1.96*std.error))+
+  geom_hline(yintercept = 0, linetype=2)+
+  geom_pointrange()+
+  coord_flip()+
+  theme_bw()
+```
