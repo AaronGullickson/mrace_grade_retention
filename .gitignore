@@ -4,3 +4,5 @@
 **/*.bbl
 **/*.ent
 .Rproj.user
+analysis/input/*.dat.gz
+analysis/output/
