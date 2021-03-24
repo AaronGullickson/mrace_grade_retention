@@ -29,33 +29,5 @@ model2 <- update(model1, .~.+degree_mother+degree_father)
 model3 <- update(model2, .~.+sqrt(family_income/10000)+own_home+parents_married)
 model4 <- update(model3, .~.+foreign_born_mother+foreign_born_father)
 
-coef_map <- list("(Intercept)"="Intercept",
-                 "raceBlack"  ="Black",
-                 "raceAIAN"   ="AIAN",
-                 "raceAPI"    ="API",
-                 "raceLatino" ="Latino",
-                 "raceAIAN/API"="AIAN/API",
-                 "raceAIAN/Black"="AIAN/Black",
-                 "raceAIAN/White"="AIAN/White",
-                 "raceAPI/Black"="API/Black",
-                 "raceAPI/Latino"="API/Latino",
-                 "raceAPI/White"="API/White",
-                 "raceBlack/Latino"="Black/Latino",
-                 "raceBlack/White"="Black/White",
-                 "raceLatino/White"="Latino/White",
-                 "degree_motherHS diploma"="HS Diploma, Mother",
-                 "degree_motherAA degree"="AA Degree, Mother",
-                 "degree_motherBA degree"="BA degree, Mother",
-                 "degree_motherGrad degree"="Grad degree, Mother",
-                 "degree_fatherHS diploma"="HS Diploma, Father",
-                 "degree_fatherAA degree"="AA Degree, Father",
-                 "degree_fatherBA degree"="BA degree, Father",
-                 "degree_fatherGrad degree"="Grad degree, Father",
-                 "sqrt(family_income/10000)"="family income (sqrt)",
-                 "own_homeTRUE"="Family owns home",
-                 "parents_marriedTRUE"="Parents married",
-                 "foreign_born_motherTRUE"="Mother foreign-born",
-                 "foreign_born_motherTRUE"="Father foreign-born")
-
 knitreg(list(model1, model2, model3, model4))
 ```
