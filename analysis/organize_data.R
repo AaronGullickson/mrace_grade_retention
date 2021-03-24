@@ -3,8 +3,9 @@
 #' author: ""
 #' ---
 
-# This script will read in raw data from the input directory, clean it up to produce 
-# the analytical dataset, and then write the analytical data to the output directory. 
+# This script will read in raw data from the input directory, clean it up to
+# produce the analytical dataset, and then write the analytical data to the
+# output directory.
 
 
 # Load libraries and functions --------------------------------------------
@@ -16,17 +17,15 @@ source(here("analysis","useful_functions.R"))
 options(max.print=999999)
 
 code_race <- function(race, hisp) {
-  #TODO: split out pacific islanders
-  #TODO: handle multiracial groups that are single big race (e.g Chinese/Japanese)
   race <- case_when(
     is.na(race) | is.na(hisp) ~ NA_character_,
     hisp != 0 ~ "Latino",
     race == 100 ~ "White",
     race == 200 ~ "Black",
-    race >= 300 & race < 400 ~ "AIAN",
-    race >= 400 & race < 700 ~ "API",
-#    race == 700 ~ "Other",
-#    race > 700 ~ "Multiracial"
+    (race >= 300 & race < 400) | (race>=680 & race<700)  ~ "Indigenous",
+    race >= 400 & race < 680 ~ "Asian",
+    race > 700 ~ "Multiracial",
+    TRUE ~ NA_character_
   )
   return(race)
 }
@@ -74,9 +73,10 @@ acs <- read_fwf(here("analysis","input","usa_00110.dat.gz"),
 #for now just use the level+5 as above grade, but this probably needs refinement
 #to address lots of issues.
 
-#I worry a little bit about specifying grade retention for the older grades where
-#grade retention is only possible at ages when kids are often out of the household
-#and therefore not eligible for the sample. Might create some weird biases.
+#I worry a little bit about specifying grade retention for the older grades
+#where grade retention is only possible at ages when kids are often out of the
+#household and therefore not eligible for the sample. Might create some weird
+#biases.
 
 acs <- acs %>% 
   mutate(race_mother=code_race(raced_mom, hispand_mom),
@@ -115,11 +115,26 @@ acs <- acs %>%
 
 #code the contrast matrix for race to adjust for fractions
 acs$race <- factor(acs$race,
-                   levels=c("White","Black","AIAN","API","Latino",
-                            "AIAN/API","AIAN/Black","AIAN/Latino","AIAN/White",
-                            "API/Black","API/Latino","API/White",
-                            "Black/Latino","Black/White",
-                            "Latino/White"))
+                   levels=c("White","Black","Indigenous","Asian","Latino",
+                            "Black/White","Black/Indigenous","Black/Latino",
+                            "Asian/Black",
+                            "Indigenous/White","Latino/White","Asian/White",
+                            "Indigenous/Latino","Asian/Indigenous",
+                            "Asian/Latino",
+                            "Multiracial",
+                            "Black/Multiracial","Multiracial/White",
+                            "Indigenous/Multiracial","Latino/Multiracial",
+                            "Asian/Multiracial"),
+                   labels=c("White","Black","Indigenous","Asian","Latino",
+                            "Black/White","Black/Indigenous","Black/Latino",
+                            "Black/Asian",
+                            "White/Indigenous","White/Latino","White/Asian",
+                            "Indigenous/Latino","Indigenous/Asian",
+                            "Latino/Asian",
+                            "Multiracial",
+                            "Black/Multiracial","White/Multiracial",
+                            "Indigenous/Multiracial","Latino/Multiracial",
+                            "Asian/Multiracial"))
 #the default treatment contrast will do most of the work, but I need to 
 #put in the 0.5 cases
 contr_race <- contrasts(acs$race)
