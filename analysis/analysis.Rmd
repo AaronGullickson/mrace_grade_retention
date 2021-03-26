@@ -24,7 +24,7 @@ Use this R Markdown to perform the main analysis for the project. I use this bas
 
 ```{r}
 #try a model
-model1 <- glm(below_exp_grade~race+as.factor(year), data=acs, family=binomial)
+model1 <- glm(below_exp_grade~race+as.factor(year)+foreign_born, data=acs, family=binomial)
 model2 <- update(model1, .~.+degree_mother+degree_father)
 model3 <- update(model2, .~.+sqrt(family_income/10000)+own_home+parents_married)
 model4 <- update(model3, .~.+foreign_born_mother+foreign_born_father)
@@ -96,13 +96,19 @@ plot_mr_effects(model4)
 ```{r}
 resources_race <- acs %>% 
   group_by(race) %>%
-  summarize(mean_age=mean(age),
+  summarize(prop_held_back=mean(below_exp_grade),
+            mean_age=mean(age),
             prop_foreign_born=mean(foreign_born),
             mean_fam_inc=mean(family_income),
             prop_own_home=mean(own_home),
+            prop_hs_diploma=mean(degree_father>="HS diploma" | 
+                                   degree_mother>="HS diploma"),
+            prop_ba_degree=mean(degree_father>="BA degree" | 
+                                  degree_mother>="BA degree"),
             prop_parents_married=mean(parents_married),
             mean_age_parents=mean((age_birth_mother+age_birth_father)/2),
-            prop_parent_foreign_born=mean(foreign_born_father | foreign_born_mother)) %>%
+            prop_parent_foreign_born=mean(foreign_born_father | 
+                                            foreign_born_mother)) %>%
   ungroup() %>%
   filter(!str_detect(race,"Multiracial"))
 
