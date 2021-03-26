@@ -32,16 +32,82 @@ model4 <- update(model3, .~.+foreign_born_mother+foreign_born_father)
 knitreg(list(model1, model2, model3, model4))
 ```
 
+```{r}
+#try a LPM
+model1_lpm <- lm(below_exp_grade~race+as.factor(year), data=acs)
+model2_lpn <- update(model1, .~.+degree_mother+degree_father)
+model3_lpm <- update(model2, .~.+sqrt(family_income/10000)+own_home+parents_married)
+model4_lpm <- update(model3, .~.+foreign_born_mother+foreign_born_father)
+
+knitreg(list(model1_lpm, model2_lpm, model3_lpm, model4_lpm), digits=3)
+```
 
 ```{r}
-coef_table <- tidy(model4) %>%
-  filter(str_detect(term, "race") & str_detect(term, "/") & !str_detect(term, "Multiracial")) %>%
-  mutate(term=str_remove(term, "race"))
+plot_mr_effects <- function(model) {
+  coef_table <- tidy(model) %>%
+    filter(str_detect(term, "race") & str_detect(term, "/") & !str_detect(term, "Multiracial")) %>%
+    mutate(term=str_remove(term, "race"))
+  
+  #add in the placements for each single race group
+  single_race <- tidy(model) %>%
+    filter(str_detect(term, "race") & !str_detect(term, "/") & !str_detect(term, "Multiracial")) %>%
+    select(term, estimate) %>%
+    mutate(term=str_remove(term, "race"))
+  x <- c(0, single_race$estimate)
+  names(x) <- c("White",single_race$term)
+  coef_table$lower <- NA
+  coef_table$higher <- NA
+  for(i in 1:nrow(coef_table)) {
+    groups <- str_split(coef_table$term[i], "/")[[1]]
+    temp <- diff(sort(x[groups]))/2
+    coef_table$lower[i] <- -temp
+    coef_table$higher[i] <- temp
+  }
+  
+  # ggplot(coef_table, aes(x=reorder(term, estimate, mean), y=estimate, 
+  #                        ymin=estimate-1.96*std.error, ymax=estimate+1.96*std.error))+
+  #   geom_hline(yintercept = 0, linetype=2)+
+  #   geom_pointrange()+
+  #   geom_point(aes(x=reorder(term, estimate, mean), y=higher, color="red"))+
+  #   geom_point(aes(x=reorder(term, estimate, mean), y=lower, color="red"))+
+  #   coord_flip()+
+  #   theme_bw()
+  
+  ggplot(coef_table, aes(x=reorder(term, higher, mean), y=estimate, 
+                         ymin=estimate-1.96*std.error, ymax=estimate+1.96*std.error))+
+    geom_hline(yintercept = 0, linetype=2)+
+    geom_pointrange()+
+    geom_point(aes(x=reorder(term, higher, mean), y=higher, color="red"))+
+    geom_point(aes(x=reorder(term, higher, mean), y=lower, color="red"))+
+    coord_flip()+
+    theme_bw()
+}
+```
 
-ggplot(coef_table, aes(x=reorder(term, estimate, mean), y=estimate, 
-                       ymin=estimate-1.96*std.error, ymax=estimate+1.96*std.error))+
-  geom_hline(yintercept = 0, linetype=2)+
-  geom_pointrange()+
-  coord_flip()+
-  theme_bw()
+
+```{r}
+plot_mr_effects(model1)
+```
+
+```{r}
+plot_mr_effects(model4)
+```
+
+```{r}
+resources_race <- acs %>% 
+  group_by(race) %>%
+  summarize(mean_age=mean(age),
+            prop_foreign_born=mean(foreign_born),
+            mean_fam_inc=mean(family_income),
+            prop_own_home=mean(own_home),
+            prop_parents_married=mean(parents_married),
+            mean_age_parents=mean((age_birth_mother+age_birth_father)/2),
+            prop_parent_foreign_born=mean(foreign_born_father | foreign_born_mother)) %>%
+  ungroup() %>%
+  filter(!str_detect(race,"Multiracial"))
+
+
+ggplot(resources_race, aes(x=reorder(race, mean_fam_inc, mean), y=mean_fam_inc))+
+  geom_col()+
+  coord_flip()
 ```
