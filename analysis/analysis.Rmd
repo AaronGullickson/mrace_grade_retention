@@ -24,7 +24,8 @@ Use this R Markdown to perform the main analysis for the project. I use this bas
 
 ```{r}
 #try a model
-model1 <- glm(below_exp_grade~race+as.factor(year)+foreign_born, data=acs, family=binomial)
+model1 <- glm(below_exp_grade~race+as.factor(year)+foreign_born, data=acs, 
+              family=binomial)
 model2 <- update(model1, .~.+degree_mother+degree_father)
 model3 <- update(model2, .~.+sqrt(family_income/10000)+own_home+parents_married)
 model4 <- update(model3, .~.+foreign_born_mother+foreign_born_father)
