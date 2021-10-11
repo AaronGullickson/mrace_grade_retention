@@ -118,3 +118,20 @@ ggplot(resources_race, aes(x=reorder(race, mean_fam_inc, mean), y=mean_fam_inc))
   geom_col()+
   coord_flip()
 ```
+
+```{r}
+#make a plot showing difference from middle expectation by model
+coef_table <- bind_rows(tidy(model1) %>%
+                          filter(str_detect(term, "race") & 
+                                   str_detect(term, "/") & 
+                                   !str_detect(term, "Multiracial")) %>%
+                          mutate(model="model1"),
+                        tidy(model4) %>%
+                          filter(str_detect(term, "race") & 
+                                   str_detect(term, "/") & 
+                                   !str_detect(term, "Multiracial")) %>%
+                          mutate(model="model4"))
+ggplot(coef_table, aes(x=reorder(term, estimate, mean), y=estimate, color=model, group=model))+
+  geom_point(position="dodge")+
+  coord_flip()
+```
