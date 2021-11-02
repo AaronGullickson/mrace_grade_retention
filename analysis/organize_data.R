@@ -226,16 +226,3 @@ acs <- acs %>%
   filter(!is.na(race) & !is.na(current_grade) & current_grade!="Pre-K")
 
 save(acs, file=here("analysis","output","acs.RData"))
-
-
-# Some models -------------------------------------------------------------
-
-#try a model
-#model <- glm(below_exp_grade~race, 
-#             data=acs, family=binomial)
-
-#model2 <- glm(below_exp_grade~relevel(as.factor(race), "White"), 
-#              data=acs, family=binomial)
-
-  
-  
