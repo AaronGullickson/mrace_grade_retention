@@ -16,32 +16,152 @@ source(here("analysis","useful_functions.R"))
 load(here("analysis","output","acs.RData"))
 ```
 
-# Introduction
-<a href="#top">Back to top</a>
 
-Use this R Markdown to perform the main analysis for the project. I use this basically as a lab notebook. It contains the main analysis and a variety of sensitivity analysis. The code in this documents serves as a baseline for the eventual tables and figures that will go into the paper. At the same time it will serve as a record of all supplementary analyses performed. 
+# Grade Retention Profile
 
+OK, first lets just confirm that the grade retention variable is working as expected on our sample. I start by looking at the number of kids by age and current grade:
+
+```{r}
+table(acs$age, acs$current_grade)
+```
+
+Ok, this looks more or less like what I would expect. We observe two modal ages for each grade. Some of the more extreme age values for older grades seem a little strange given that these are only supposed to be currently enrolled students. 20-year old sixth graders? I mean there are relatively few of these cases but still. Its also interesting how this really starts expanding past 5th - did the Census Bureau "correct" values below 6th or something?
+
+Now lets calculate the percentage of cases TRUE on the dependent variable across this same table, just to confirm its all working correctly.
+
+```{r}
+tapply(acs$below_exp_grade,acs[,c("age","current_grade")], mean)
+```
+
+Ok, that looks good. NAs indicate cells with no cases. The 1 values start with 7 year old Kindergarteners and then move down in a perfect diagonal from there. So this looks good.
+
+What do the grade retention probabilities look like by grade:
+
+```{r}
+round(tapply(acs$below_exp_grade, acs$current_grade, mean), 3)*100
+```
+
+I guess those numbers look pretty reasonable. Its hard to benchmark it off anything. Warren et. al. estimate annual retention rates by grade but that is different than what I am measuring here because this is cumulative (but can also reflect students being caught up). In general, these must be underestimates because they do not capture kids who were held back but are still within the modal age. 
+
+What about by year?
+
+```{r}
+round(tapply(acs$below_exp_grade, acs[,c("current_grade","year")], mean), 3)*100
+```
+
+Some evidence of declining grade retention prevalence at higher grades.
+
+# Lets look at the multiracial sample
+
+How big is it?
+
+```{r}
+acs %>%
+  filter(str_detect(race, "/") & !str_detect(race, "Multiracial")) %>%
+  ggplot(aes(x=reorder(race, race, length))) +
+  geom_bar()+
+  coord_flip()+
+  labs(x=NULL)+
+  theme_bw()
+```
+
+```{r}
+resources_race <- acs %>% 
+  group_by(race) %>%
+  summarize(prop_held_back=mean(below_exp_grade),
+            mean_age=mean(age),
+            prop_foreign_born=mean(foreign_born),
+            mean_fam_inc=mean(family_income),
+            prop_own_home=mean(own_home),
+            prop_hs_diploma=mean(degree_father>="HS diploma" | 
+                                   degree_mother>="HS diploma"),
+            prop_ba_degree=mean(degree_father>="BA degree" | 
+                                  degree_mother>="BA degree"),
+            prop_parents_married=mean(parents_married),
+            mean_age_parents=mean((age_birth_mother+age_birth_father)/2),
+            prop_parent_foreign_born=mean(foreign_born_father | 
+                                            foreign_born_mother)) %>%
+  ungroup() %>%
+  filter(!str_detect(race,"Multiracial")) %>%
+  mutate(multiracial=str_detect(race, "/"))
+```
+
+```{r}
+ggplot(resources_race, aes(x=reorder(race, mean_fam_inc, mean), y=mean_fam_inc,
+                           fill=multiracial))+
+  geom_col()+
+  coord_flip()+
+  labs(x=NULL, y="mean family income")
+```
+
+```{r}
+ggplot(resources_race, aes(x=reorder(race, prop_own_home, mean), y=prop_own_home,
+                           fill=multiracial))+
+  geom_col()+
+  coord_flip()+
+  labs(x=NULL, y="Proportion who own their own home")
+```
+
+```{r}
+ggplot(resources_race, aes(x=reorder(race, prop_hs_diploma, mean), y=prop_hs_diploma,
+                           fill=multiracial))+
+  geom_col()+
+  coord_flip()+
+  labs(x=NULL, y="Proportion where one parent has HS diploma")
+```
+
+```{r}
+ggplot(resources_race, aes(x=reorder(race, prop_ba_degree, mean), y=prop_ba_degree,
+                           fill=multiracial))+
+  geom_col()+
+  coord_flip()+
+  labs(x=NULL, y="Proportion where one parent has college degree")
+```
+
+## Raw differences in grade retention
+
+```{r}
+ggplot(resources_race, aes(x=reorder(race, prop_held_back, mean), y=prop_held_back,
+                           fill=multiracial))+
+  geom_col()+
+  coord_flip()
+```
+
+## Build some models
+
+Here are the model structure that I will use:
+
+0. Baseline model with dummies for current grade and year
+1. Add race.
+2. Add kids and parents foreign-born status.
+2. Add mother and father highest degree
+3. Add family income (square rooted), own your own home, and whether parents are married.
+
+All models are estimated as logit models. Race is coded using the average between the two monoracial groups as the reference category for all multiracial responses.
 
 ```{r}
 #try a model
-model1 <- glm(below_exp_grade~race+as.factor(year)+foreign_born, data=acs, 
-              family=binomial)
-model2 <- update(model1, .~.+degree_mother+degree_father)
-model3 <- update(model2, .~.+sqrt(family_income/10000)+own_home+parents_married)
-model4 <- update(model3, .~.+foreign_born_mother+foreign_born_father)
+model0 <- glm(below_exp_grade~as.factor(year)+current_grade, 
+              data=acs, family=binomial)
+model1 <- update(model0, .~.+race)
+model2 <- update(model1, .~.+foreign_born+foreign_born_mother+foreign_born_father)
+model3 <- update(model2, .~.+degree_mother+degree_father)
+model4 <- update(model3, .~.+sqrt(family_income/10000)+own_home+parents_married)
 
 knitreg(list(model1, model2, model3, model4))
 ```
 
-```{r}
-#try a LPM
-model1_lpm <- lm(below_exp_grade~race+as.factor(year), data=acs)
-model2_lpn <- update(model1, .~.+degree_mother+degree_father)
-model3_lpm <- update(model2, .~.+sqrt(family_income/10000)+own_home+parents_married)
-model4_lpm <- update(model3, .~.+foreign_born_mother+foreign_born_father)
 
-knitreg(list(model1_lpm, model2_lpm, model3_lpm, model4_lpm), digits=3)
+```{r}
+#run separate models by grade groups
+model4a <- update(model4, data=subset(acs, as.numeric(current_grade)<=7))
+model4b <- update(model4, data=subset(acs, as.numeric(current_grade)>7 &
+                                        as.numeric(current_grade)<10))
+model4c <- update(model4, data=subset(acs, as.numeric(current_grade)>=10))
+
+knitreg(list(model4a, model4b, model4c))
 ```
+
 
 ```{r}
 plot_mr_effects <- function(model) {
@@ -64,16 +184,7 @@ plot_mr_effects <- function(model) {
     coef_table$lower[i] <- -temp
     coef_table$higher[i] <- temp
   }
-  
-  # ggplot(coef_table, aes(x=reorder(term, estimate, mean), y=estimate, 
-  #                        ymin=estimate-1.96*std.error, ymax=estimate+1.96*std.error))+
-  #   geom_hline(yintercept = 0, linetype=2)+
-  #   geom_pointrange()+
-  #   geom_point(aes(x=reorder(term, estimate, mean), y=higher, color="red"))+
-  #   geom_point(aes(x=reorder(term, estimate, mean), y=lower, color="red"))+
-  #   coord_flip()+
-  #   theme_bw()
-  
+
   ggplot(coef_table, aes(x=reorder(term, higher, mean), y=estimate, 
                          ymin=estimate-1.96*std.error, ymax=estimate+1.96*std.error))+
     geom_hline(yintercept = 0, linetype=2)+
@@ -87,7 +198,7 @@ plot_mr_effects <- function(model) {
 
 
 ```{r}
-plot_mr_effects(model1)
+plot_mr_effects(model2)
 ```
 
 ```{r}
@@ -126,12 +237,74 @@ coef_table <- bind_rows(tidy(model1) %>%
                                    str_detect(term, "/") & 
                                    !str_detect(term, "Multiracial")) %>%
                           mutate(model="model1"),
+                        tidy(model2) %>%
+                          filter(str_detect(term, "race") & 
+                                   str_detect(term, "/") & 
+                                   !str_detect(term, "Multiracial")) %>%
+                          mutate(model="model2"),
                         tidy(model4) %>%
                           filter(str_detect(term, "race") & 
                                    str_detect(term, "/") & 
                                    !str_detect(term, "Multiracial")) %>%
                           mutate(model="model4"))
-ggplot(coef_table, aes(x=reorder(term, estimate, mean), y=estimate, color=model, group=model))+
+ggplot(coef_table, aes(x=reorder(term, estimate, min), y=estimate, color=model, group=model))+
   geom_point(position="dodge")+
   coord_flip()
+```
+
+
+Try a plot that shows the expectation based on being exactly in the middle on the x-axis and the actual value on the y-axis.
+
+```{r}
+plot_effect_scatter <- function(model) {
+  coef_table <- tidy(model) %>%
+    filter(str_detect(term, "race") & !str_detect(term, "Multiracial")) %>%
+    mutate(term=str_remove(term, "race")) %>%
+    select(term, estimate, std.error) %>%
+    bind_rows(tibble(term="White", estimate=0, std.error=NA)) %>%
+    mutate(multiracial=str_detect(term, "/"))
+ 
+  #calculate midway points
+  temp <- coef_table %>%
+    filter(!multiracial) %>%
+    select(term, estimate)
+  means <- apply(expand.grid(temp$estimate,temp$estimate), 1, mean)
+  coef_table <- expand.grid(temp$term,temp$term) %>%
+    mutate(term=paste(Var1, Var2, sep="/"),
+           estimate_midpoint=means) %>%
+    filter(Var1!=Var2) %>%
+    select(term, estimate_midpoint) %>%
+    right_join(coef_table) %>%
+    mutate(estimate_midpoint=ifelse(is.na(estimate_midpoint), estimate,
+                                    estimate_midpoint),
+           estimate=ifelse(estimate==estimate_midpoint, 0, estimate))
+    
+  ggplot(coef_table, aes(x=estimate_midpoint, y=estimate_midpoint+estimate,
+                         color=multiracial,
+                         ymin=estimate_midpoint+estimate-1.96*std.error,
+                         ymax=estimate_midpoint+estimate+1.96*std.error))+
+    geom_abline(intercept = 0, slope=1, linetype=2, color="grey70")+
+   # geom_hline(yintercept = 0, linetype=2, color="grey40")+
+  #  geom_vline(xintercept = 0, linetype=2, color="grey40")+
+    geom_linerange(alpha=0.5)+
+    geom_point()+
+    geom_text_repel(aes(label=term), min.segment.length = 0)+
+    theme_bw()+
+    scale_color_viridis_d(end=0.6)+
+    labs(x="expected log odds ratio based on midway point",
+         y="actual log odds ratio")
+}
+```
+
+## Logit panic sensitivity results
+
+
+```{r, eval=FALSE}
+#try a LPM
+model1_lpm <- lm(below_exp_grade~race+as.factor(year), data=acs)
+model2_lpn <- update(model1, .~.+degree_mother+degree_father)
+model3_lpm <- update(model2, .~.+sqrt(family_income/10000)+own_home+parents_married)
+model4_lpm <- update(model3, .~.+foreign_born_mother+foreign_born_father)
+
+knitreg(list(model1_lpm, model2_lpm, model3_lpm, model4_lpm), digits=3)
 ```
