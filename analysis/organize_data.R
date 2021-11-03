@@ -185,6 +185,25 @@ acs <- acs %>%
 # groups but not something completely unrelated. That is a pretty complicated
 # function though given the number of categories available.
 
+mean(acs$raced==acs$raced_mom & acs$hispand==acs$hispand_mom)
+mean(acs$raced==acs$raced_pop & acs$hispand==acs$hispand_pop)
+
+mean((acs$raced==acs$raced_mom & acs$hispand==acs$hispand_mom)  | 
+       (acs$raced==acs$raced_pop & acs$hispand==acs$hispand_pop))
+
+#About 95.2% of cases are exactly consistent with either mother or father
+
+# Based on this, I created a function that tries to identify consistent cases.
+# TODO: It allows multiracial kids to be considered ok in any multiracial category. I 
+# should probably refine that a bit in the future.
+
+mean(is_race_consistent(acs$raced, acs$hispand, acs$raced_mom, acs$hispand_mom,
+                        acs$raced_pop, acs$hispand_pop, acs$race))
+
+acs <- acs %>%
+  filter(is_race_consistent(raced, hispand, raced_mom, hispand_mom, raced_pop, 
+                            hispand_pop, race))
+
 # Trim to analytical data -------------------------------------------------
 
 acs <- acs %>%

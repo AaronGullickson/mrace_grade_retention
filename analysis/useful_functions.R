@@ -48,6 +48,39 @@ ordered_factor <- function(fact_var) {
 }
 
 ## Determine if race coding is consistent with reported race
+is_race_consistent <- function(race_child, hispan_child, race_mom, hispan_mom,
+                               race_dad, hispan_dad, race_constructed) {
+  ## CASE 1: child's race is exactly consistent with one of parent's races
+  ## This case should take care of about 95% of the data
+  TF <- (race_child==race_mom & hispan_child==hispan_mom)  | 
+    (race_child==race_dad & hispan_child==hispan_dad)
+
+  #if both parents report indigenous allow a couple of residual indigenous
+  #categories
+  TF <- TF | 
+    (race_constructed=="Indigenous" & (race_child==361 | race_child==362))
+  
+  #if both parents report Asian allow residual and some combined categories
+  TF <- TF |
+    (race_constructed=="Asian" & race_child %in% c(671:679))
+
+  #if both parents are Latino, allow residual category
+  TF <- TF |
+    (race_constructed=="Latino" & hispan_child==498)
+  
+  #if neither parent is Latino, but child is classified as Latino then reject
+  TF <- TF & 
+    (str_detect(race_constructed, "Latino") | 
+       (!str_detect(race_constructed, "Latino") & hispan_child==0))
+  
+  #if multiracial category, we will consider other or any multiracial category
+  #as ok
+  TF <- TF | 
+    (str_detect(race_constructed, "/") & race_child>=700)
+  
+  return(TF)
+}
+
 
 #first create vectors of values from raced that include each of the major
 #race groups (with the exception of Latinos who are defined differently)
