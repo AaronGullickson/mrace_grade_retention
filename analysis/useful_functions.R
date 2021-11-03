@@ -55,18 +55,19 @@ is_race_consistent <- function(race_child, hispan_child, race_mom, hispan_mom,
   TF <- (race_child==race_mom & hispan_child==hispan_mom)  | 
     (race_child==race_dad & hispan_child==hispan_dad)
 
-  #if both parents report indigenous allow a couple of residual indigenous
-  #categories
+  #if at least one parent reports indigenous allow a couple of residual 
+  #indigenous categories
   TF <- TF | 
-    (race_constructed=="Indigenous" & (race_child==361 | race_child==362))
+    (str_detect(race_constructed, "Indigenous") & race_child %in% 361:362)
   
-  #if both parents report Asian allow residual and some combined categories
+  #if at least one parent reports Asian allow residual and some combined 
+  #categories
   TF <- TF |
-    (race_constructed=="Asian" & race_child %in% c(671:679))
+    (str_detect(race_constructed, "Asian") & race_child %in% 671:679)
 
-  #if both parents are Latino, allow residual category
+  #if at least one parent is Latino, allow residual category
   TF <- TF |
-    (race_constructed=="Latino" & hispan_child==498)
+    (str_detect(race_constructed, "Latino") & hispan_child==498)
   
   #if neither parent is Latino, but child is classified as Latino then reject
   TF <- TF & 
