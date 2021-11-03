@@ -73,32 +73,24 @@ acs <- read_fwf(here("analysis","input","usa_00112.dat.gz"),
                               113,117,120,134,141,145,149,158,163,170,171,176,
                               179,188,191,200,203,212,215),
                     col_names = c("year","serial","hhwt","cluster","state",
-                                  "metro","strata","ownership","hhincome",
+                                  "metro","strata","ownershp","hhincome",
                                   "perwt","momrule","poprule","related",
                                   "sex","age","raced","hispand","bpl",
-                                  "gradattd","ftotinc","related_mom",
+                                  "gradeattd","ftotinc","related_mom",
                                   "related_pop","age_mom","age_pop","marst_mom",
                                   "marst_pop","raced_mom","raced_pop",
                                   "hispand_mom","hispand_pop","bpl_mom",
-                                  "bpl_dad","educd_mom","educd_pop")),
+                                  "bpl_pop","educd_mom","educd_pop")),
                 col_types = cols(.default = "i",
                                  cluster = col_double()),
                 progress = FALSE)
 
 # Recode variables ------------------------------------------------------------
 
-#Code grade retention
-#for now just use the level+5 as above grade, but this probably needs refinement
-#to address lots of issues.
-
-#I worry a little bit about specifying grade retention for the older grades
-#where grade retention is only possible at ages when kids are often out of the
-#household and therefore not eligible for the sample. Might create some weird
-#biases.
-
 acs <- acs %>% 
-  #remove cases without both parents
-  filter(momrule!=0 & poprule!=0) %>%
+  #remove cases without both parents and pre-K
+  filter(momrule!=0 & poprule!=0 & gradeattd>10) %>%
+  #recode variables
   mutate(race_mother=code_race(raced_mom, hispand_mom),
          race_father=code_race(raced_pop, hispand_pop),
          age_birth_mother=age_mom-age,
@@ -112,7 +104,6 @@ acs <- acs %>%
                      pmap_chr(list(race_mother, race_father),
                               ~paste(sort(c(...)), collapse = "/"))),
          current_grade=factor(case_when(
-           gradeattd == 10 ~ "Pre-K",
            gradeattd == 20 ~ "K",
            gradeattd == 31 ~ "1st",
            gradeattd == 32 ~ "2nd",
@@ -126,12 +117,17 @@ acs <- acs %>%
            gradeattd == 52 ~ "10th",
            gradeattd == 53 ~ "11th",
            gradeattd == 54 ~ "12th"),
-           levels=c("Pre-K","K","1st","2nd","3rd",paste(4:12,"th",sep=""))),
-         below_exp_grade=age>=as.numeric(current_grade)+5,
+           levels=c("K","1st","2nd","3rd",paste(4:12,"th",sep=""))),
+         below_exp_grade=age>=as.numeric(current_grade)+6,
          family_income=ifelse(ftotinc==9999999, NA, 
                               ifelse(ftotinc<0, 0, ftotinc)),
          own_home=ifelse(ownershp==0, NA, ownershp==1),
-         foreign_born=bpl>=100)
+         foreign_born=bpl>=100,
+         sex=factor(sex, levels=1:2, labels=c("Male","Female")),
+         metro=factor(metro, levels=0:4, 
+                      labels=c("Indeterminable","Non-metro","Central city",
+                               "Metro non-central","Metro indeterminable")),
+         hhid=serial*10000+year)
 
 #code the contrast matrix for race to adjust for fractions
 acs$race <- factor(acs$race,
@@ -185,11 +181,6 @@ table(acs$race_mother, acs$race_father, acs$race, exclude=NULL)
 table(acs$educd_mom, acs$degree_mother, exclude=NULL)
 table(acs$educd_pop, acs$degree_father, exclude=NULL)
 
-##parents age
-#TODO: some fishy stuff here
-summary(acs$age_birth_mother)
-summary(acs$age_birth_father)
-
 ##parents foreign born status
 table(acs$bpl_mom, acs$foreign_born_mother, exclude=NULL)
 table(acs$bpl_pop, acs$foreign_born_father, exclude=NULL)
@@ -208,17 +199,7 @@ table(acs$gradeattd, acs$current_grade, exclude=NULL)
 
 #grade-age progression
 table(acs$age, acs$current_grade, exclude=NULL)
-
 tapply(acs$below_exp_grade, acs[,c("age","current_grade")], mean)
-
-#how does missingness of both parents change by grade and age
-acs$both_missing <- is.na(acs$race_father) & is.na(acs$race_mother)
-round(tapply(acs$both_missing, acs[,c("age","current_grade")], mean, 
-             na.rm=TRUE), 3)
-
-mean(acs$both_missing)
-
-mean(!is.na(acs$race_mother) & !is.na(acs$race_father))
 
 # Trim to analytical data -------------------------------------------------
 
