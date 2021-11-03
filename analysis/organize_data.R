@@ -201,8 +201,18 @@ mean(is_race_consistent(acs$raced, acs$hispand, acs$raced_mom, acs$hispand_mom,
                         acs$raced_pop, acs$hispand_pop, acs$race))
 
 acs <- acs %>%
-  filter(is_race_consistent(raced, hispand, raced_mom, hispand_mom, raced_pop, 
-                            hispand_pop, race))
+  mutate(race_consistent=is_race_consistent(raced, hispand, raced_mom, 
+                                            hispand_mom, raced_pop, 
+                                            hispand_pop, race))
+
+mean(acs$race_consistent)
+
+tapply(acs$race_consistent, acs$race, mean)
+
+#its a bit low for Latino/Asian which may I think reflect some issues for 
+#Filipinos, but in general pretty good.
+acs <- acs %>%
+  filter(race_consistent)
 
 # Trim to analytical data -------------------------------------------------
 
