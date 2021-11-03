@@ -116,6 +116,9 @@ is_race_consistent <- function(race_child, hispan_child, race_mom, hispan_mom,
        race_child %in% c(850:854,856:868,880:886,890:893,905,910:925,930,
                          932:944,950,952:976,980:990))
   
+  #Part-Latino respondents should have already been picked up by other
+  #conditions.
+  
   #if neither parent is Latino, but child is classified as Latino then reject
   #this should have been dealt with by first two conditions, but may have been
   #re-introduced in later cases
@@ -123,19 +126,5 @@ is_race_consistent <- function(race_child, hispan_child, race_mom, hispan_mom,
     (str_detect(race_constructed, "Latino") | 
        (!str_detect(race_constructed, "Latino") & hispan_child==0))
 
-  
   return(TF)
 }
-
-
-#first create vectors of values from raced that include each of the major
-#race groups (with the exception of Latinos who are defined differently)
-# other should be considered consistent with all cases 
-
-#include_white <- c(100,700,801:827,901:922,950:964,990)
-#include_black <- c(200,700,801,830:845,901:904,917,930:935,950:955,970:973,
-#                   980:983, 985:986,990)
-#include_indig <- c(300:399,680:699,700,802,820:825,840:842,850:856,860,
-#                   865:868,890:893,901,903,905:907,
-#                   890)
-#include_asian <- c()
