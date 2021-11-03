@@ -63,22 +63,24 @@ ordered_factor <- function(fact_var) {
 
 # Read the raw data -------------------------------------------------------
 
-acs <- read_fwf(here("analysis","input","usa_00110.dat.gz"), 
+acs <- read_fwf(here("analysis","input","usa_00112.dat.gz"), 
                 col_positions = 
                   fwf_positions(
-                    start = c(1,11,32,42,55,56,61,74,77,88,98, 99,104,108,111,
-                              126,128,135,138,147,148,151,154,163,166,175,178,
-                              187,190),
-                    end   = c(4,18,41,54,55,60,72,74,83,97,98,101,106,110,113,
-                              127,134,137,140,147,148,153,156,165,168,177,180,
-                              189,192),
-                    col_names = c("year","serial","hhwt","cluster","metro",
-                                  "puma","strata","ownershp","hhincome","perwt",
+                    start = c(1,11,32,42,55,57,58,71,74,85,95,97,101,105,106,
+                              111,115,118,133,135,142,146,158,161,170,171,174,
+                              177,186,189,198,201,210,213),
+                    end   = c(4,18,41,54,56,57,69,71,80,94,96,98,104,105,108,
+                              113,117,120,134,141,145,149,158,163,170,171,176,
+                              179,188,191,200,203,212,215),
+                    col_names = c("year","serial","hhwt","cluster","state",
+                                  "metro","strata","ownership","hhincome",
+                                  "perwt","momrule","poprule","related",
                                   "sex","age","raced","hispand","bpl",
-                                  "gradeattd","ftotinc","age_mom","age_pop",
-                                  "marst_mom","marst_pop","raced_mom",
-                                  "raced_pop","hispand_mom","hispand_pop",
-                                  "bpl_mom","bpl_pop","educd_mom","educd_pop")),
+                                  "gradattd","ftotinc","related_mom",
+                                  "related_pop","age_mom","age_pop","marst_mom",
+                                  "marst_pop","raced_mom","raced_pop",
+                                  "hispand_mom","hispand_pop","bpl_mom",
+                                  "bpl_dad","educd_mom","educd_pop")),
                 col_types = cols(.default = "i",
                                  cluster = col_double()),
                 progress = FALSE)
@@ -95,6 +97,8 @@ acs <- read_fwf(here("analysis","input","usa_00110.dat.gz"),
 #biases.
 
 acs <- acs %>% 
+  #remove cases without both parents
+  filter(momrule!=0 & poprule!=0) %>%
   mutate(race_mother=code_race(raced_mom, hispand_mom),
          race_father=code_race(raced_pop, hispand_pop),
          age_birth_mother=age_mom-age,
