@@ -141,7 +141,7 @@ All models are estimated as logit models. Race is coded using the average betwee
 
 ```{r}
 #try a model
-model0 <- glm(below_exp_grade~as.factor(year)+current_grade, 
+model0 <- glm(below_exp_grade~as.factor(year)+current_grade+as.factor(state)+metro, 
               data=acs, family=binomial)
 model1 <- update(model0, .~.+race)
 model2 <- update(model1, .~.+foreign_born+foreign_born_mother+foreign_born_father)
@@ -154,9 +154,9 @@ knitreg(list(model1, model2, model3, model4))
 
 ```{r}
 #run separate models by grade groups
-model4a <- update(model4, data=subset(acs, as.numeric(current_grade)<=7))
-model4b <- update(model4, data=subset(acs, as.numeric(current_grade)>7 &
-                                        as.numeric(current_grade)<10))
+model4a <- update(model4, data=subset(acs, as.numeric(current_grade)<=6))
+model4b <- update(model4, data=subset(acs, as.numeric(current_grade)>6 &
+                                        as.numeric(current_grade)<=9))
 model4c <- update(model4, data=subset(acs, as.numeric(current_grade)>=10))
 
 knitreg(list(model4a, model4b, model4c))
@@ -196,7 +196,6 @@ plot_mr_effects <- function(model) {
 }
 ```
 
-
 ```{r}
 plot_mr_effects(model2)
 ```
@@ -204,54 +203,6 @@ plot_mr_effects(model2)
 ```{r}
 plot_mr_effects(model4)
 ```
-
-```{r}
-resources_race <- acs %>% 
-  group_by(race) %>%
-  summarize(prop_held_back=mean(below_exp_grade),
-            mean_age=mean(age),
-            prop_foreign_born=mean(foreign_born),
-            mean_fam_inc=mean(family_income),
-            prop_own_home=mean(own_home),
-            prop_hs_diploma=mean(degree_father>="HS diploma" | 
-                                   degree_mother>="HS diploma"),
-            prop_ba_degree=mean(degree_father>="BA degree" | 
-                                  degree_mother>="BA degree"),
-            prop_parents_married=mean(parents_married),
-            mean_age_parents=mean((age_birth_mother+age_birth_father)/2),
-            prop_parent_foreign_born=mean(foreign_born_father | 
-                                            foreign_born_mother)) %>%
-  ungroup() %>%
-  filter(!str_detect(race,"Multiracial"))
-
-
-ggplot(resources_race, aes(x=reorder(race, mean_fam_inc, mean), y=mean_fam_inc))+
-  geom_col()+
-  coord_flip()
-```
-
-```{r}
-#make a plot showing difference from middle expectation by model
-coef_table <- bind_rows(tidy(model1) %>%
-                          filter(str_detect(term, "race") & 
-                                   str_detect(term, "/") & 
-                                   !str_detect(term, "Multiracial")) %>%
-                          mutate(model="model1"),
-                        tidy(model2) %>%
-                          filter(str_detect(term, "race") & 
-                                   str_detect(term, "/") & 
-                                   !str_detect(term, "Multiracial")) %>%
-                          mutate(model="model2"),
-                        tidy(model4) %>%
-                          filter(str_detect(term, "race") & 
-                                   str_detect(term, "/") & 
-                                   !str_detect(term, "Multiracial")) %>%
-                          mutate(model="model4"))
-ggplot(coef_table, aes(x=reorder(term, estimate, min), y=estimate, color=model, group=model))+
-  geom_point(position="dodge")+
-  coord_flip()
-```
-
 
 Try a plot that shows the expectation based on being exactly in the middle on the x-axis and the actual value on the y-axis.
 
