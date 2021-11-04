@@ -16,85 +16,36 @@ source(here("analysis","check_packages.R"))
 source(here("analysis","useful_functions.R"))
 options(max.print=999999)
 
-code_race <- function(race, hisp) {
-  race <- case_when(
-    is.na(race) | is.na(hisp) ~ NA_character_,
-    hisp != 0 ~ "Latino",
-    race == 100 ~ "White",
-    race == 200 ~ "Black",
-    (race >= 300 & race < 400) | (race>=680 & race<700)  ~ "Indigenous",
-    race >= 400 & race < 680 ~ "Asian",
-    race > 700 ~ "Multiracial",
-    TRUE ~ NA_character_
-  )
-  return(race)
-}
-
-code_degree <- function(educd) {
-  degree <- case_when(
-    is.na(educd) | educd==1 ~  NA_character_,
-    educd<62 ~ "Less than HS",
-    educd<81 ~ "HS diploma",
-    educd<101 ~ "AA degree",
-    educd==101 ~ "BA degree",
-    TRUE ~ "Grad degree"
-  )
-  degree <- factor(degree,
-                 levels=c("Less than HS","HS diploma","AA degree","BA degree",
-                          "Grad degree"),
-                 ordered=TRUE)
-  degree <- ordered_factor(degree)
-  return(degree)
-}
-
-#change contrasts for ordered factors to stairstep style
-ordered_factor <- function(fact_var) {
-  ord_fact <- factor(fact_var, ordered=TRUE)
-  categories <- levels(fact_var)
-  n_cat <- length(categories)
-  cont <- matrix(0, n_cat, n_cat-1)
-  cont[col(cont)<row(cont)] <- 1
-  rownames(cont) <- categories
-  colnames(cont) <- paste(categories[2:n_cat], categories[1:(n_cat-1)],
-                          sep=" vs. ")
-  contrasts(ord_fact) <- cont
-  return(ord_fact)
-}
-
 # Read the raw data -------------------------------------------------------
 
-acs <- read_fwf(here("analysis","input","usa_00110.dat.gz"), 
+acs <- read_fwf(here("analysis","input","usa_00112.dat.gz"), 
                 col_positions = 
                   fwf_positions(
-                    start = c(1,11,32,42,55,56,61,74,77,88,98, 99,104,108,111,
-                              126,128,135,138,147,148,151,154,163,166,175,178,
-                              187,190),
-                    end   = c(4,18,41,54,55,60,72,74,83,97,98,101,106,110,113,
-                              127,134,137,140,147,148,153,156,165,168,177,180,
-                              189,192),
-                    col_names = c("year","serial","hhwt","cluster","metro",
-                                  "puma","strata","ownershp","hhincome","perwt",
+                    start = c(1,11,32,42,55,57,58,71,74,85,95,97,101,105,106,
+                              111,115,118,133,135,142,146,158,161,170,171,174,
+                              177,186,189,198,201,210,213),
+                    end   = c(4,18,41,54,56,57,69,71,80,94,96,98,104,105,108,
+                              113,117,120,134,141,145,149,160,163,170,171,176,
+                              179,188,191,200,203,212,215),
+                    col_names = c("year","serial","hhwt","cluster","state",
+                                  "metro","strata","ownershp","hhincome",
+                                  "perwt","momrule","poprule","related",
                                   "sex","age","raced","hispand","bpl",
-                                  "gradeattd","ftotinc","age_mom","age_pop",
-                                  "marst_mom","marst_pop","raced_mom",
-                                  "raced_pop","hispand_mom","hispand_pop",
-                                  "bpl_mom","bpl_pop","educd_mom","educd_pop")),
+                                  "gradeattd","ftotinc","related_mom",
+                                  "related_pop","age_mom","age_pop","marst_mom",
+                                  "marst_pop","raced_mom","raced_pop",
+                                  "hispand_mom","hispand_pop","bpl_mom",
+                                  "bpl_pop","educd_mom","educd_pop")),
                 col_types = cols(.default = "i",
                                  cluster = col_double()),
                 progress = FALSE)
 
 # Recode variables ------------------------------------------------------------
 
-#Code grade retention
-#for now just use the level+5 as above grade, but this probably needs refinement
-#to address lots of issues.
-
-#I worry a little bit about specifying grade retention for the older grades
-#where grade retention is only possible at ages when kids are often out of the
-#household and therefore not eligible for the sample. Might create some weird
-#biases.
-
 acs <- acs %>% 
+  #remove cases without both parents and pre-K
+  filter(momrule!=0 & poprule!=0 & gradeattd>10) %>%
+  #recode variables
   mutate(race_mother=code_race(raced_mom, hispand_mom),
          race_father=code_race(raced_pop, hispand_pop),
          age_birth_mother=age_mom-age,
@@ -108,7 +59,6 @@ acs <- acs %>%
                      pmap_chr(list(race_mother, race_father),
                               ~paste(sort(c(...)), collapse = "/"))),
          current_grade=factor(case_when(
-           gradeattd == 10 ~ "Pre-K",
            gradeattd == 20 ~ "K",
            gradeattd == 31 ~ "1st",
            gradeattd == 32 ~ "2nd",
@@ -122,12 +72,19 @@ acs <- acs %>%
            gradeattd == 52 ~ "10th",
            gradeattd == 53 ~ "11th",
            gradeattd == 54 ~ "12th"),
-           levels=c("Pre-K","K","1st","2nd","3rd",paste(4:12,"th",sep=""))),
-         below_exp_grade=age>=as.numeric(current_grade)+5,
+           levels=c("K","1st","2nd","3rd",paste(4:12,"th",sep=""))),
+         below_exp_grade=age>=as.numeric(current_grade)+6,
          family_income=ifelse(ftotinc==9999999, NA, 
                               ifelse(ftotinc<0, 0, ftotinc)),
          own_home=ifelse(ownershp==0, NA, ownershp==1),
-         foreign_born=bpl>=100)
+         foreign_born=bpl>=100,
+         sex=factor(sex, levels=1:2, labels=c("Male","Female")),
+         metro=factor(metro, levels=0:4, 
+                      labels=c("Indeterminable","Non-metro","Central city",
+                               "Metro non-central","Metro indeterminable")),
+         hhid=serial*10000+year) %>%
+  #remove respondents with multiracial parents
+  filter(!str_detect(race, "Multiracial"))
 
 #code the contrast matrix for race to adjust for fractions
 acs$race <- factor(acs$race,
@@ -136,21 +93,13 @@ acs$race <- factor(acs$race,
                             "Asian/Black",
                             "Indigenous/White","Latino/White","Asian/White",
                             "Indigenous/Latino","Asian/Indigenous",
-                            "Asian/Latino",
-                            "Multiracial",
-                            "Black/Multiracial","Multiracial/White",
-                            "Indigenous/Multiracial","Latino/Multiracial",
-                            "Asian/Multiracial"),
+                            "Asian/Latino"),
                    labels=c("White","Black","Indigenous","Asian","Latino",
                             "Black/White","Black/Indigenous","Black/Latino",
                             "Black/Asian",
                             "White/Indigenous","White/Latino","White/Asian",
                             "Indigenous/Latino","Indigenous/Asian",
-                            "Latino/Asian",
-                            "Multiracial",
-                            "Black/Multiracial","White/Multiracial",
-                            "Indigenous/Multiracial","Latino/Multiracial",
-                            "Asian/Multiracial"))
+                            "Latino/Asian"))
 #the default treatment contrast will do most of the work, but I need to 
 #put in the 0.5 cases
 contr_race <- contrasts(acs$race)
@@ -181,11 +130,6 @@ table(acs$race_mother, acs$race_father, acs$race, exclude=NULL)
 table(acs$educd_mom, acs$degree_mother, exclude=NULL)
 table(acs$educd_pop, acs$degree_father, exclude=NULL)
 
-##parents age
-#TODO: some fishy stuff here
-summary(acs$age_birth_mother)
-summary(acs$age_birth_father)
-
 ##parents foreign born status
 table(acs$bpl_mom, acs$foreign_born_mother, exclude=NULL)
 table(acs$bpl_pop, acs$foreign_born_father, exclude=NULL)
@@ -204,25 +148,81 @@ table(acs$gradeattd, acs$current_grade, exclude=NULL)
 
 #grade-age progression
 table(acs$age, acs$current_grade, exclude=NULL)
-
 tapply(acs$below_exp_grade, acs[,c("age","current_grade")], mean)
 
-#how does missingness of both parents change by grade and age
-acs$both_missing <- is.na(acs$race_father) & is.na(acs$race_mother)
-round(tapply(acs$both_missing, acs[,c("age","current_grade")], mean, 
-             na.rm=TRUE), 3)
 
-mean(acs$both_missing)
+# Restrict to probable biological parents ---------------------------------
 
-mean(!is.na(acs$race_mother) & !is.na(acs$race_father))
+#lets look at the mom and pop rules by relationship of ego to HH
+table(acs$poprule, acs$related)
+table(acs$momrule, acs$related)
+table(acs$poprule, acs$momrule)
+#as expected all bio children to the HH are identified by a direct link
+
+#also note this
+table(acs$poprule, acs$parents_married)
+# I only identify non-married parents when there is a direct link. Its not 
+# immediately clear to me why grandchild links could also not include unmarried
+# parents, so I may want to look into that at some point
+
+# lets look at age at birth of parents
+summary(acs$age_birth_mother)
+summary(acs$age_birth_father)
+
+#clearly some outliers, including some Bill & Ted moms (and dads)!. IPUMS 
+#restricts probable cases to age 15-44 for women and 15-60 for men. That seems
+#pretty reasonable. What percentage are outside those ranges
+mean(acs$age_birth_mother<15 | acs$age_birth_mother>44)
+mean(acs$age_birth_father<15 | acs$age_birth_father>60)
+
+#pretty small number of cases, so lets go ahead and apply this restriction
+acs <- acs %>%
+  filter((age_birth_mother>=15 & age_birth_mother<=44) &
+           (age_birth_father>=15 & age_birth_father<=60))
+
+# A further restriction that I want to apply is that the child's reported race
+# should be consistent with the parents. It could select one or both racial
+# groups but not something completely unrelated. That is a pretty complicated
+# function though given the number of categories available.
+
+mean(acs$raced==acs$raced_mom & acs$hispand==acs$hispand_mom)
+mean(acs$raced==acs$raced_pop & acs$hispand==acs$hispand_pop)
+
+mean((acs$raced==acs$raced_mom & acs$hispand==acs$hispand_mom)  | 
+       (acs$raced==acs$raced_pop & acs$hispand==acs$hispand_pop))
+
+#About 95.2% of cases are exactly consistent with either mother or father
+
+# Based on this, I created a function that tries to identify consistent cases.
+# TODO: It allows multiracial kids to be considered ok in any multiracial category. I 
+# should probably refine that a bit in the future.
+
+mean(is_race_consistent(acs$raced, acs$hispand, acs$raced_mom, acs$hispand_mom,
+                        acs$raced_pop, acs$hispand_pop, acs$race))
+
+acs <- acs %>%
+  mutate(race_consistent=is_race_consistent(raced, hispand, raced_mom, 
+                                            hispand_mom, raced_pop, 
+                                            hispand_pop, race))
+
+mean(acs$race_consistent)
+
+tapply(acs$race_consistent, acs$race, mean)
+
+#its a bit low for Latino/Asian which may I think reflect some issues for 
+#Filipinos, but in general pretty good.
+acs <- acs %>%
+  filter(race_consistent)
 
 # Trim to analytical data -------------------------------------------------
 
 acs <- acs %>%
-  select(year, age, current_grade, below_exp_grade, race, age_birth_mother, 
-         age_birth_father, degree_mother, degree_father, foreign_born_mother,
-         foreign_born_father, parents_married, family_income, own_home,
-         foreign_born) %>%
-  filter(!is.na(race) & !is.na(current_grade) & current_grade!="Pre-K")
+  select(hhid, perwt, year, state, 
+         age, current_grade, below_exp_grade, 
+         race, sex, metro,
+         age_birth_mother, age_birth_father, degree_mother, degree_father, 
+         parents_married, family_income, own_home,
+         foreign_born_mother, foreign_born_father, foreign_born) %>%
+  filter(!is.na(below_exp_grade))
 
 save(acs, file=here("analysis","output","acs.RData"))
