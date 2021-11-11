@@ -165,17 +165,6 @@ knitreg(list(model4a, model4b, model4c))
 
 Try a plot that shows the expectation based on being exactly in the middle on the x-axis and the actual value on the y-axis.
 
-```{r}
-
-```
-
-```{r}
-plot_effect_scatter(model4)
-```
-
-```{r}
-
-```
 
 ```{r}
 plot_effect_point(model4)
