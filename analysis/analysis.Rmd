@@ -163,47 +163,6 @@ knitreg(list(model4a, model4b, model4c))
 ```
 
 
-```{r}
-plot_mr_effects <- function(model) {
-  coef_table <- tidy(model) %>%
-    filter(str_detect(term, "race") & str_detect(term, "/") & !str_detect(term, "Multiracial")) %>%
-    mutate(term=str_remove(term, "race"))
-  
-  #add in the placements for each single race group
-  single_race <- tidy(model) %>%
-    filter(str_detect(term, "race") & !str_detect(term, "/") & !str_detect(term, "Multiracial")) %>%
-    select(term, estimate) %>%
-    mutate(term=str_remove(term, "race"))
-  x <- c(0, single_race$estimate)
-  names(x) <- c("White",single_race$term)
-  coef_table$lower <- NA
-  coef_table$higher <- NA
-  for(i in 1:nrow(coef_table)) {
-    groups <- str_split(coef_table$term[i], "/")[[1]]
-    temp <- diff(sort(x[groups]))/2
-    coef_table$lower[i] <- -temp
-    coef_table$higher[i] <- temp
-  }
-
-  ggplot(coef_table, aes(x=reorder(term, higher, mean), y=estimate, 
-                         ymin=estimate-1.96*std.error, ymax=estimate+1.96*std.error))+
-    geom_hline(yintercept = 0, linetype=2)+
-    geom_pointrange()+
-    geom_point(aes(x=reorder(term, higher, mean), y=higher, color="red"))+
-    geom_point(aes(x=reorder(term, higher, mean), y=lower, color="red"))+
-    coord_flip()+
-    theme_bw()
-}
-```
-
-```{r}
-plot_mr_effects(model2)
-```
-
-```{r}
-plot_mr_effects(model4)
-```
-
 Try a plot that shows the expectation based on being exactly in the middle on the x-axis and the actual value on the y-axis.
 
 ```{r}
@@ -256,7 +215,7 @@ plot_effect_scatter <- function(model) {
 ```
 
 ```{r}
-temp <- plot_effect_scatter(model4)
+plot_effect_scatter(model4)
 ```
 
 ## Logit panic sensitivity results
