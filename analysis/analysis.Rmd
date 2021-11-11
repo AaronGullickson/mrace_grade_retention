@@ -207,44 +207,53 @@ plot_mr_effects(model4)
 Try a plot that shows the expectation based on being exactly in the middle on the x-axis and the actual value on the y-axis.
 
 ```{r}
-plot_effect_scatter <- function(model) {
-  coef_table <- tidy(model) %>%
-    filter(str_detect(term, "race") & !str_detect(term, "Multiracial")) %>%
-    mutate(term=str_remove(term, "race")) %>%
-    select(term, estimate, std.error) %>%
-    bind_rows(tibble(term="White", estimate=0, std.error=NA)) %>%
-    mutate(multiracial=str_detect(term, "/"))
- 
-  #calculate midway points
-  temp <- coef_table %>%
-    filter(!multiracial) %>%
-    select(term, estimate)
-  means <- apply(expand.grid(temp$estimate,temp$estimate), 1, mean)
-  coef_table <- expand.grid(temp$term,temp$term) %>%
-    mutate(term=paste(Var1, Var2, sep="/"),
-           estimate_midpoint=means) %>%
-    filter(Var1!=Var2) %>%
-    select(term, estimate_midpoint) %>%
-    right_join(coef_table) %>%
-    mutate(estimate_midpoint=ifelse(is.na(estimate_midpoint), estimate,
-                                    estimate_midpoint),
+plot_effect_scatter <- function(models) {
+  coef_table <- models %>%
+    map(function(x) {
+      coefs <- tidy(x) %>%
+        filter(str_detect(term, "race") & !str_detect(term, "Multiracial")) %>%
+        mutate(term=str_remove(term, "race")) %>%
+        select(term, estimate, std.error) %>%
+        bind_rows(tibble(term="White", estimate=0, std.error=NA)) %>%
+        mutate(multiracial=str_detect(term, "/"))
+      
+      #now get midpoint values
+      temp <- coefs %>%
+        filter(!multiracial) %>%
+        select(term, estimate)
+      means <- apply(expand.grid(temp$estimate,temp$estimate), 1, mean)
+      coefs <- expand.grid(temp$term,temp$term) %>%
+        mutate(term=paste(Var1, Var2, sep="/"),
+               estimate_midpoint=means) %>%
+        filter(Var1!=Var2) %>%
+        select(term, estimate_midpoint) %>%
+        right_join(coefs) %>%
+        mutate(estimate_midpoint=ifelse(is.na(estimate_midpoint), estimate,
+                                        estimate_midpoint),
            estimate=ifelse(estimate==estimate_midpoint, 0, estimate))
+    }) %>%
+    bind_rows(.id="model") %>%
+    mutate(model=factor(model, levels=names(models)))
     
   ggplot(coef_table, aes(x=estimate_midpoint, y=estimate_midpoint+estimate,
                          color=multiracial,
                          ymin=estimate_midpoint+estimate-1.96*std.error,
                          ymax=estimate_midpoint+estimate+1.96*std.error))+
     geom_abline(intercept = 0, slope=1, linetype=2, color="grey70")+
-   # geom_hline(yintercept = 0, linetype=2, color="grey40")+
-  #  geom_vline(xintercept = 0, linetype=2, color="grey40")+
     geom_linerange(alpha=0.5)+
     geom_point()+
     geom_text_repel(aes(label=term), min.segment.length = 0)+
+    facet_wrap(~model)+
     theme_bw()+
-    scale_color_viridis_d(end=0.6)+
+    theme(legend.position = "none")+
+    scale_color_viridis_d(end=0.6, direction = -1)+
     labs(x="expected log odds ratio based on midway point",
          y="actual log odds ratio")
 }
+```
+
+```{r}
+plot_effect_scatter(list("controls for birthplace"=model2, "+controls for parent resources"=model4))
 ```
 
 ## Logit panic sensitivity results
