@@ -182,14 +182,30 @@ plot_effect_scatter <- function(model) {
          y="actual log odds ratio of grade retenion")
 }
 
-plot_effect_point <- function(model) {
+calculate_cond_means <- function(model, type="response") {
   
-  coefs <- tidy(model) %>%
-    filter(str_detect(term, "race") & !str_detect(term, "Multiracial")) %>%
-    mutate(term=str_remove(term, "race")) %>%
-    select(term, estimate, std.error) %>%
-    bind_rows(tibble(term="White", estimate=0, std.error=NA)) %>%
+  #TODO: Estimate means for each variable, currently just supplying some
+  #reasonable baseline
+  fake_data <- data.frame(race=levels(acs$race),
+                          year=2015,
+                          current_grade="6th",
+                          state=13,
+                          metro="Metro non-central",
+                          foreign_born=FALSE,
+                          foreign_born_mother=FALSE,
+                          foreign_born_father=FALSE,
+                          degree_mother="HS",
+                          degree_father="HS",
+                          family_income=mean(acs$family_income),
+                          own_home=TRUE,
+                          parents_married=TRUE)
+  
+  predicted <- predict(model, fake_data, se=TRUE, type=type)
+  
+  coefs <- tibble(term=fake_data$race, estimate=predicted$fit, 
+                  se=predicted$se.fit) %>%
     mutate(multiracial=str_detect(term, "/"))
+  
   
   #ok convert this to have single race groups for each multiracial group
   #panel and get the assumed midpoint value
@@ -210,16 +226,11 @@ plot_effect_point <- function(model) {
              estimate_mid=ifelse(multiracial, 
                                  mean(estimate[!multiracial]),
                                  estimate),
-             estimate=ifelse(multiracial, estimate_mid+estimate,
-                             estimate))
+             se_mid=ifelse(multiracial, 
+                                  sqrt(sum(se[!multiracial]^2)/4),
+                                  se))
   }) %>%
     bind_rows()
-  
-  # I want term to be ordered so that multiracial groups are always between two
-  # constituent monoracial groups and monoracial groups to be sorted by the 
-  # magnitude of the estimate option. This is complicated but I should be able
-  # to do this by inserting multiracial groups immediately below the higher 
-  # of the two groups
   
   #get terms ordered
   race_names <- levels(reorder(factor(coef_table$term), coef_table$estimate))
@@ -239,20 +250,23 @@ plot_effect_point <- function(model) {
   coef_table <- coef_table %>%
     mutate(term=factor(term, levels=race_full))
   
-  ggplot(coef_table, aes(x=term, y=estimate,
-                         color=multiracial,
-                         ymin=estimate-1.96*std.error,
-                         ymax=estimate+1.96*std.error))+
-    geom_hline(aes(yintercept=estimate_mid, linetype=multiracial), 
-               color="grey80")+
-    geom_linerange(alpha=0.5)+
-    geom_point()+
-    coord_flip()+
-    facet_wrap(~mrace, ncol=3, scales="free_y")+
-    theme_bw()+
-    theme(legend.position = "none", panel.grid = element_blank())+
-    scale_color_manual(values=c("grey40","black"))+
-    scale_linetype_manual(values=c(3,1))+
-    labs(x=NULL,
-         y="actual log odds ratio of grade retenion")
+  return(coef_table)
 }
+
+#test ggplot code, will need to move eventually
+ggplot(coef_table, aes(x=term, y=estimate,
+                       color=multiracial,
+                       ymin=estimate-1.39*se,
+                       ymax=estimate+1.39*se))+
+  geom_hline(aes(yintercept=estimate_mid, linetype=multiracial), 
+             color="grey80")+
+  geom_linerange(alpha=0.5)+
+  geom_point()+
+  coord_flip()+
+  facet_wrap(~mrace, ncol=3, scales="free_y")+
+  theme_bw()+
+  theme(legend.position = "none", panel.grid = element_blank())+
+  scale_color_manual(values=c("grey40","black"))+
+  scale_linetype_manual(values=c(3,1))+
+  labs(x=NULL,
+       y="actual log odds ratio of grade retenion")
