@@ -135,53 +135,6 @@ is_race_consistent <- function(race_child, hispan_child, race_mom, hispan_mom,
 
 # Functions for plotting effects ------------------------------------------
 
-plot_effect_scatter <- function(model) {
-  
-  coefs <- tidy(model) %>%
-    filter(str_detect(term, "race") & !str_detect(term, "Multiracial")) %>%
-    mutate(term=str_remove(term, "race")) %>%
-    select(term, estimate, std.error) %>%
-    bind_rows(tibble(term="White", estimate=0, std.error=NA)) %>%
-    mutate(multiracial=str_detect(term, "/"))
-  
-  #ok convert this to have single race groups for each multiracial group
-  #panel and get the assumed midpoint value
-  coef_table <- map(as.list(str_subset(coefs$term, "/")), function(x) {
-    coefs %>%
-      filter(term %in% c(x, str_split(x, "/")[[1]])) %>%
-      mutate(mrace=factor(x,
-                          levels=c("Black/White","White/Indigenous",
-                                   "Black/Indigenous",
-                                   "White/Latino","Black/Latino",
-                                   "Indigenous/Latino",
-                                   "White/Asian","Black/Asian",
-                                   "Indigenous/Asian","Latino/Asian")),
-             estimate_mid=ifelse(multiracial, 
-                                 mean(estimate[!multiracial]),
-                                 estimate),
-             estimate=ifelse(multiracial, estimate_mid+estimate,
-                             estimate))
-  }) %>%
-    bind_rows()
-  
-  ggplot(coef_table, aes(x=estimate_mid, y=estimate,
-                         color=multiracial,
-                         ymin=estimate-1.96*std.error,
-                         ymax=estimate+1.96*std.error))+
-    geom_abline(intercept = 0, slope=1, linetype=1, color="grey80")+
-    geom_hline(data=subset(coef_table, !multiracial),
-               aes(yintercept=estimate), linetype=3, color="grey80")+
-    geom_linerange(alpha=0.5)+
-    geom_point()+
-    geom_text_repel(aes(label=term), size=3)+
-    facet_wrap(~mrace, ncol=3)+
-    theme_bw()+
-    theme(legend.position = "none", panel.grid = element_blank())+
-    scale_color_manual(values=c("grey40","black"))+
-    labs(x="expected log odds ratio of grade retention based on midpoint",
-         y="actual log odds ratio of grade retenion")
-}
-
 calculate_cond_means <- function(model, type="response") {
   
   #TODO: Estimate means for each variable, currently just supplying some
