@@ -253,20 +253,3 @@ calculate_cond_means <- function(model, type="response") {
   return(coef_table)
 }
 
-#test ggplot code, will need to move eventually
-ggplot(coef_table, aes(x=term, y=estimate,
-                       color=multiracial,
-                       ymin=estimate-1.39*se,
-                       ymax=estimate+1.39*se))+
-  geom_hline(aes(yintercept=estimate_mid, linetype=multiracial), 
-             color="grey80")+
-  geom_linerange(alpha=0.5)+
-  geom_point()+
-  coord_flip()+
-  facet_wrap(~mrace, ncol=3, scales="free_y")+
-  theme_bw()+
-  theme(legend.position = "none", panel.grid = element_blank())+
-  scale_color_manual(values=c("grey40","black"))+
-  scale_linetype_manual(values=c(3,1))+
-  labs(x=NULL,
-       y="actual log odds ratio of grade retenion")

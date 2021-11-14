@@ -167,7 +167,26 @@ Try a plot that shows the expectation based on being exactly in the middle on th
 
 
 ```{r}
-plot_effect_point(model4)
+coef_table <- calculate_cond_means(model4)
+
+ggplot(coef_table, aes(x=term, y=estimate,
+                       color=multiracial,
+                       ymin=estimate-1.39*se,
+                       ymax=estimate+1.39*se))+
+  geom_rect(aes(xmax=Inf, xmin=-Inf, ymin=estimate_mid-1.39*se_mid,
+                ymax=estimate_mid+1.39*se_mid), 
+            fill="grey90", color="grey90", alpha=0.7)+
+  geom_linerange(data=subset(coef_table, multiracial))+
+  geom_point()+
+  coord_flip()+
+  facet_wrap(~mrace, ncol=3, scales="free_y")+
+  theme_bw()+
+  theme(legend.position = "none", panel.grid = element_blank())+
+  scale_color_manual(values=c("grey40","red"))+
+  scale_linetype_manual(values=c(3,1))+
+  scale_y_continuous(labels = scales::percent)+
+  labs(x=NULL,
+       y="predicted probability of being behind expected grade")
 ```
 
 ## Logit panic sensitivity results
