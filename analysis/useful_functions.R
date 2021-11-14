@@ -150,27 +150,11 @@ is_race_consistent <- function(race_child, hispan_child, race_mom, hispan_mom,
 
 # Functions for plotting effects ------------------------------------------
 
-calculate_cond_means <- function(model, type="response") {
+calculate_cond_means <- function(model, at=df_pred, type="response") {
   
-  #TODO: Estimate means for each variable, currently just supplying some
-  #reasonable baseline
-  fake_data <- data.frame(race=levels(acs$race),
-                          year=2015,
-                          current_grade="6th",
-                          state=13,
-                          metro="Metro non-central",
-                          foreign_born=FALSE,
-                          foreign_born_mother=FALSE,
-                          foreign_born_father=FALSE,
-                          degree_mother="HS",
-                          degree_father="HS",
-                          family_income=mean(acs$family_income),
-                          own_home=TRUE,
-                          parents_married=TRUE)
+  predicted <- predict(model, df_pred, se=TRUE, type=type)
   
-  predicted <- predict(model, fake_data, se=TRUE, type=type)
-  
-  coefs <- tibble(term=fake_data$race, estimate=predicted$fit, 
+  coefs <- tibble(term=df_pred$race, estimate=predicted$fit, 
                   se=predicted$se.fit) %>%
     mutate(multiracial=str_detect(term, "/"))
   
