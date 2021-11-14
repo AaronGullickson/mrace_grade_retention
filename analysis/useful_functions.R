@@ -47,6 +47,24 @@ ordered_factor <- function(fact_var) {
   return(ord_fact)
 }
 
+#This function will return contrasts using fractions of single race
+#responses for multiracial respondents
+race_half_contrast <- function(race) {
+  #the default treatment contrast will do most of the work, but I need to 
+  #put in the 0.5 cases
+  contr_race <- contrasts(race)
+  #lets loop through rows for multiracials and decide where the 0.5 should go
+  for(i in str_which(rownames(contr_race),"/")) {
+    race_name <- rownames(contr_race)[i]
+    comp_races <- str_split(race_name, "/")[[1]]
+    fraction <- 1/length(comp_races)
+    #one category is missing because it is the reference so remove if so
+    comp_races <- comp_races[comp_races %in% colnames(contr_race)]
+    contr_race[race_name, comp_races] <- fraction
+  }
+  return(contr_race)
+}
+
 ## Determine if race coding is consistent with reported race
 is_race_consistent <- function(race_child, hispan_child, race_mom, hispan_mom,
                                race_dad, hispan_dad, race_constructed) {
