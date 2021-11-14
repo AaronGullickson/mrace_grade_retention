@@ -22,17 +22,14 @@ code_race <- function(race, hisp) {
 code_degree <- function(educd) {
   degree <- case_when(
     is.na(educd) | educd==1 ~  NA_character_,
-    educd<62 ~ "Less than HS",
-    educd<81 ~ "HS diploma",
-    educd<101 ~ "AA degree",
-    educd==101 ~ "BA degree",
-    TRUE ~ "Grad degree"
+    educd<62 ~ "LHS",
+    educd<81 ~ "HS",
+    educd<101 ~ "AA",
+    educd==101 ~ "BA",
+    TRUE ~ "G"
   )
   degree <- factor(degree,
-                   levels=c("Less than HS","HS diploma","AA degree","BA degree",
-                            "Grad degree"),
-                   ordered=TRUE)
-  degree <- ordered_factor(degree)
+                   levels=c("LHS","HS","AA","BA","G"))
   return(degree)
 }
 
