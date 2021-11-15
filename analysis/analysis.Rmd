@@ -23,9 +23,49 @@ OK, first lets just confirm that the grade retention variable is working as expe
 ```{r tab-grade-by-age}
 tbl <- table(acs$age, acs$current_grade) 
 
-tbl %>%
-  kbl(caption="Cross-tabulation of age and current grade of student") %>%
-  kable_minimal()
+acs %>% 
+  tabyl(age, current_grade) %>%
+  mutate_if(is.numeric, format, big.mark=",") %>%
+  kbl(caption="Cross-tabulation of age and current grade of student",
+      align=c("l",rep("r",13))) %>%
+  kable_paper() %>%
+  column_spec(2, background=c(rep("#D3D3D3",2), rep("white", 14))) %>%
+  column_spec(3, background=c("white", 
+                              rep("#D3D3D3",2), 
+                              rep("white", 13))) %>%
+  column_spec(4, background=c(rep("white", 2), 
+                              rep("#D3D3D3",2), 
+                              rep("white", 12))) %>%
+  column_spec(5, background=c(rep("white", 3), 
+                              rep("#D3D3D3",2), 
+                              rep("white", 11))) %>%
+  column_spec(6, background=c(rep("white", 4), 
+                              rep("#D3D3D3",2), 
+                              rep("white", 10))) %>%
+  column_spec(7, background=c(rep("white", 5), 
+                              rep("#D3D3D3",2), 
+                              rep("white", 9))) %>%
+  column_spec(8, background=c(rep("white", 6), 
+                              rep("#D3D3D3",2), 
+                              rep("white", 8))) %>%
+  column_spec(9, background=c(rep("white", 7), 
+                              rep("#D3D3D3",2), 
+                              rep("white", 7))) %>%
+  column_spec(10, background=c(rep("white", 8), 
+                               rep("#D3D3D3",2), 
+                               rep("white", 6))) %>%
+  column_spec(11, background=c(rep("white", 9), 
+                               rep("#D3D3D3",2), 
+                               rep("white", 5))) %>%
+  column_spec(12, background=c(rep("white", 10), 
+                               rep("#D3D3D3",2), 
+                               rep("white", 4))) %>%
+  column_spec(13, background=c(rep("white", 11), 
+                               rep("#D3D3D3",2), 
+                               rep("white", 3))) %>%
+  column_spec(14, background=c(rep("white", 12), 
+                               rep("#D3D3D3",2), 
+                               rep("white", 2)))
 ```
 
 Ok, this looks more or less like what I would expect. We observe two modal ages for each grade. Some of the more extreme age values for older grades seem a little strange given that these are only supposed to be currently enrolled students. 20-year old sixth graders? I mean there are relatively few of these cases but still seems a bit odd. Its also interesting how this really starts expanding past 5th - did the Census Bureau "correct" values below 6th or something?
