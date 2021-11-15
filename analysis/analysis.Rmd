@@ -21,11 +21,11 @@ load(here("analysis","output","acs.RData"))
 
 OK, first lets just confirm that the grade retention variable is working as expected on our sample. I start by looking at the number of kids by age and current grade:
 
-```{r}
+```{r tab-grade-by-age}
 table(acs$age, acs$current_grade)
 ```
 
-Ok, this looks more or less like what I would expect. We observe two modal ages for each grade. Some of the more extreme age values for older grades seem a little strange given that these are only supposed to be currently enrolled students. 20-year old sixth graders? I mean there are relatively few of these cases but still. Its also interesting how this really starts expanding past 5th - did the Census Bureau "correct" values below 6th or something?
+Ok, this looks more or less like what I would expect. We observe two modal ages for each grade. Some of the more extreme age values for older grades seem a little strange given that these are only supposed to be currently enrolled students. 20-year old sixth graders? I mean there are relatively few of these cases but still seems a bit odd. Its also interesting how this really starts expanding past 5th - did the Census Bureau "correct" values below 6th or something?
 
 Now lets calculate the percentage of cases TRUE on the dependent variable across this same table, just to confirm its all working correctly.
 
@@ -131,13 +131,13 @@ ggplot(resources_race, aes(x=reorder(race, prop_held_back, mean), y=prop_held_ba
 
 Here are the model structure that I will use:
 
-0. Baseline model with dummies for current grade and year
-1. Add race.
+0. Raw race differences
+1. Add fixed effects for state, current grade, year, and metro
 2. Add kids and parents foreign-born status.
-2. Add mother and father highest degree
-3. Add family income (square rooted), own your own home, and whether parents are married.
+3. Add mother and father highest degree
+4. Add family income (square rooted), own your own home, and whether parents are married.
 
-All models are estimated as logit models. Race is coded using the average between the two monoracial groups as the reference category for all multiracial responses.
+All models are estimated as logit models. In order to calculate conditional means for the plots below, I need to be able to feed back in data to the `predict` command, including fractional values for 1/0 dummy variables. Therefore, rather than use the `acs` data itself, I need to create a purely numeric design matrix where each factor variable is expanded out into a set of 1/0 dummies.
 
 ```{r design-matrix}
 
@@ -174,31 +174,41 @@ degree <- as.data.frame(degree)
 design_matrix <- cbind(states, years, grades, metro, degree)
 
 design_matrix$foreign_born <- acs$foreign_born-mean(acs$foreign_born)
-design_matrix$foreign_born_mother <- acs$foreign_born_mother-mean(acs$foreign_born_mother)
-design_matrix$foreign_born_father <- acs$foreign_born_father-mean(acs$foreign_born_father)
+design_matrix$foreign_born_mother <- acs$foreign_born_mother-
+  mean(acs$foreign_born_mother)
+design_matrix$foreign_born_father <- acs$foreign_born_father-
+  mean(acs$foreign_born_father)
 
 design_matrix$income_trans <- sqrt(acs$family_income/10000)
-design_matrix$income_trans <- design_matrix$income_trans-mean(design_matrix$income_trans)
+design_matrix$income_trans <- design_matrix$income_trans-
+  mean(design_matrix$income_trans)
 design_matrix$own_home <- acs$own_home-mean(acs$own_home)
-design_matrix$parents_married <- acs$parents_married-mean(acs$parents_married)
+design_matrix$parents_married <- acs$parents_married-
+  mean(acs$parents_married)
 
 design_matrix$race <- acs$race
 design_matrix$below_exp_grade <- acs$below_exp_grade
 ```
 
+Now, I can run the models. Warning, the code chunks below take a bit of time to run!
+
 ```{r}
-#start with raw race differences
 model0 <- glm(below_exp_grade~race, data=design_matrix, family=binomial)
-model1 <- update(model0, .~.+y2011+y2012+y2013+y2014+y2015+y2016+y2017+y2018+y2019+
-                current_grade1st+current_grade2nd+current_grade3rd+current_grade4th+
-                current_grade5th+current_grade6th+current_grade7th+current_grade8th+
-                current_grade9th+current_grade10th+current_grade11th+current_grade10th+
-                current_grade11th+current_grade12th+
-                met_non_metro+met_central_city+met_non_central_city+met_city_indeter+
-                s1+s2+s3+s4+s5+s6+s7+s8+s9+s10+s11+s12+s13+s14+s15+s16+s17+s18+s19+
-                s20+s21+s22+s23+s24+s25+s26+s27+s28+s29+s30+s31+s32+s33+s34+s35+s36+
-                s37+s38+s39+s40+s41+s42+s43+s44+s45+s46+s47+s48+s49+s50)
-model2 <- update(model1, .~.+foreign_born+foreign_born_mother+foreign_born_father)
+model1 <- update(model0, 
+                 .~.+y2011+y2012+y2013+y2014+y2015+y2016+y2017+y2018+y2019+
+                   current_grade1st+current_grade2nd+current_grade3rd+
+                   current_grade4th+current_grade5th+current_grade6th+
+                   current_grade7th+current_grade8th+current_grade9th+
+                   current_grade10th+current_grade11th+current_grade10th+
+                   current_grade11th+current_grade12th+
+                   met_non_metro+met_central_city+met_non_central_city+
+                   met_city_indeter+
+                   s1+s2+s3+s4+s5+s6+s7+s8+s9+s10+s11+s12+s13+s14+s15+s16+s17+
+                   s18+s19+s20+s21+s22+s23+s24+s25+s26+s27+s28+s29+s30+s31+s32+
+                   s33+s34+s35+s36+s37+s38+s39+s40+s41+s42+s43+s44+s45+s46+s47+
+                   s48+s49+s50)
+model2 <- update(model1, .~.+foreign_born+foreign_born_mother+
+                   foreign_born_father)
 model3 <- update(model2, .~.+degree_motherHS+degree_motherAA+degree_motherBA+
                    degree_motherG+degree_fatherHS+degree_fatherAA+
                    degree_fatherBA+degree_fatherG)
@@ -207,18 +217,21 @@ model4 <- update(model3, .~.+income_trans+own_home+parents_married)
 knitreg(list(model0, model1, model2, model3, model4))
 ```
 
-```{r eval=FALSE}
-#run separate models by grade groups
-model4a <- update(model4, data=subset(acs, as.numeric(current_grade)<=6))
-model4b <- update(model4, data=subset(acs, as.numeric(current_grade)>6 &
-                                        as.numeric(current_grade)<=9))
-model4c <- update(model4, data=subset(acs, as.numeric(current_grade)>=10))
+The model results themselves are not that useful. I want to compare each multiracial group to:
 
-knitreg(list(model4a, model4b, model4c))
-```
+1. Its two constituent monoracial groups (e.g. Compare Black/White to White and Black)
+2. The assumption that the biracial group will be halfway between the two constituent monoracial groups.
 
+I can do this by calculating conditional means (or proportions to be more accurate) of the dependent variable across all of the possible race groups. For each conditional mean, I can also calculate standard errors for these estimates by the delta method. This can all be done via the `predict` command. 
 
-Try a plot that shows the expectation based on being exactly in the middle on the x-axis and the actual value on the y-axis.
+To compare the results for each biracial gropu to the halfway assumption, I need to calculate the value midway between the two consituent groups and the standard error of that value. Calculating the midway value is just a straightforward mean calculation. To calculate the standard error, I take:
+
+$$\frac{\sqrt{s_1^2+s_2^2}}{2}$$
+where $s_1$ is the standard error for monoracial group 1 and $s_2$ is the standard error for monoracial group 2. This formula follows from the standard formulas for the variance of the sum of random variables. 
+
+There are two additional issues that have to be addressed though. First, I need to decide whether I want to calculate conditional means at the level of the response (proportions) or the linear transformation (log-odds). For ease of interpretability, I think the best option here is the former for the main presentation of results, but I also want to test the sensitivity of these results if I do it the other way. 
+
+Second, the conditional means only apply at specific values of the independent variables. So I need to hold all of the other variables at some value. Now the relative difference between racial groups wouldn't change if this was a linear model (or if I used log-odds rather than proportions) so those values wouldn't matter much in that case. However, if I am estimating the actual proportions, then I no longer have a linear model and I am now caught up indirectly in the *logit panic*. I don't think it will matter that much because the range of predicted values of grade retention is not going to be that high (like between 2% and 10%). However, I should test the sensitivity of the results to different specifications. As a default, it makes sense to use the mean values for all other variables. Thankfully, because I already mean-centered the design matrix, this means that all other variables should be at zero. 
 
 ```{r}
 #dateset for predict
@@ -244,17 +257,59 @@ df_pred <- data.frame(race=levels(acs$race),
                       income_trans=0, own_home=0, parents_married=0)
 ```
 
+Now in order to calculate all the values that I need, I have created a function that will put this into a nice table for later plotting.
+
+```{r}
+coef_table <- calculate_cond_means(model0)
+```
+
+
+Now I can use this nice table to plot out the results. I illustrate what this basic plot looks like below for the case of black/white individuals.
+
+```{r}
+g <- coef_table %>%
+  filter(mrace=="Black/White") %>%
+  ggplot(aes(x=term, y=estimate, color=multiracial,
+             ymin=estimate-1.386*se, ymax=estimate+1.386*se))+
+  geom_rect(aes(xmax=Inf, xmin=-Inf, ymin=estimate_mid-1.386*se_mid,
+                ymax=estimate_mid+1.386*se_mid, fill=multiracial), 
+            color=NA, alpha=0.2)+
+  geom_linerange(data=subset(coef_table, multiracial & mrace=="Black/White"))+
+  geom_point()+
+  coord_flip()+
+  theme_bw()+
+  theme(legend.position = "none", panel.grid = element_blank())+
+  scale_color_manual(values=c("grey40","red"))+
+  scale_fill_manual(values=c("grey40","red"))+
+  scale_linetype_manual(values=c(3,1))+
+  scale_y_continuous(labels = scales::percent)+
+  labs(x=NULL,
+       y="predicted probability of being behind expected grade",
+       title="Probability of being behind grade for biracial black/white respondents and\nmonoracial comparison groups",
+       caption="Non-overlap in confidence bands indicates statistically significant difference at the 5% level")
+
+g+annotate("text", 1, 0.037, hjust="left",
+             label="Grey bands give 83%\nconfidence interval around\nmonoracial estimates")+
+  annotate("text", 2, 0.0475, hjust="left",
+             label="Red band gives 83%\nconfidence interval around\nmidpoint estimate")+
+  annotate("text", 2.5, 0.038, hjust="left",
+             label="Actual biracial estimate\nshown with 83% confidence\ninterval")
+```
+This result is from the baseline model with no control variables, so this would be identical to the result you would get by just calculating raw proportions and their binomial standard errors. The grey bands for the monoracial groups bookmark the range of results we might expect and the red band gives what would be the midpoint value between the groups, adjusting for statistical uncertainty. I can then see where the actual biracial estimate falls within this range. The results here indicate that biracial black/white students have probabilities of grade retention much closer to the lower values of white than black students. However, their probability is still a bit higher than that for whites. 
+
+Why I am using 83% (technically 83.4%) confidence intervals? This is a nice visual trick. People often incorrectly believe that overlapping 95% confidence intervals on two means indicates that the difference in the means is not statistically significant at $p<.05$. This is not always true and leads in practice to a much lower $\alpha$ for rejection. For that to be true, one needs to use 1.386 rather than 1.96 in estimating the confidence interval which produces an 83.4% confidence interval. It turns out that 1.386 is equal to $1.96/\sqrt{2}$. The intuition behind this technique is given nicely [here](https://chris-said.io/2014/12/01/independent-t-tests-and-the-83-confidence-interval-a-useful-trick-for-eyeballing-your-data/). Because I use this interval, we can know that if intervals (or bands) do not overlap, then the difference in means between the two groups is statistically significant at $p<.05$. In this case, the biracial estimate is statistically significantly different from both monoracial estimates as well as the "halfway" estimate. In short, biracial black/white students are held back at rates much closer but somewhat higher than whites, rather than blacks. 
+
+The results here are the same as the raw differences, but I can also fit this graph to any of the models, so I can effectively give conditional probabilities. The plot below does this for model 4, by panelizing each multiracial group.
+
 
 ```{r}
 coef_table <- calculate_cond_means(model4)
 
-ggplot(coef_table, aes(x=term, y=estimate,
-                       color=multiracial,
-                       ymin=estimate-1.39*se,
-                       ymax=estimate+1.39*se))+
-  geom_rect(aes(xmax=Inf, xmin=-Inf, ymin=estimate_mid-1.39*se_mid,
-                ymax=estimate_mid+1.39*se_mid), 
-            fill="grey90", color="grey90", alpha=0.7)+
+ggplot(coef_table, aes(x=term, y=estimate, color=multiracial,
+                       ymin=estimate-1.386*se, ymax=estimate+1.386*se))+
+  geom_rect(aes(xmax=Inf, xmin=-Inf, ymin=estimate_mid-1.386*se_mid,
+                ymax=estimate_mid+1.386*se_mid, fill=multiracial), 
+            color=NA, alpha=0.2)+
   geom_linerange(data=subset(coef_table, multiracial))+
   geom_point()+
   coord_flip()+
@@ -262,20 +317,76 @@ ggplot(coef_table, aes(x=term, y=estimate,
   theme_bw()+
   theme(legend.position = "none", panel.grid = element_blank())+
   scale_color_manual(values=c("grey40","red"))+
+  scale_fill_manual(values=c("grey40","red"))+
   scale_linetype_manual(values=c(3,1))+
   scale_y_continuous(labels = scales::percent)+
   labs(x=NULL,
-       y="predicted probability of being behind expected grade")
+       y="predicted probability of being behind expected grade",
+       title="Probability of being behind grade for biracial respondents and\nmonoracial comparison groups",
+       caption="Non-overlap in confidence bands indicates statistically significant difference at the 5% level")
 ```
 
-## Logit panic sensitivity results
+As the table here shows, after controlling for other stuff, most multiracial groups are quite similar to the monoracial constituent group with the lower grade retention rate. The only case where the biracial group is more like the higher monoracial group is for Latino/Asians. The results for indigenous groups are also quite noisy due to small size, but are generally consistent with the "below the halfway point." 
 
-```{r, eval=FALSE}
-#try a LPM
-model1_lpm <- lm(below_exp_grade~race+as.factor(year), data=acs)
-model2_lpn <- update(model1, .~.+degree_mother+degree_father)
-model3_lpm <- update(model2, .~.+sqrt(family_income/10000)+own_home+parents_married)
-model4_lpm <- update(model3, .~.+foreign_born_mother+foreign_born_father)
+To compare these results across models, I can try a very large figure that panelizes by model on the column and group on the row.
 
-knitreg(list(model1_lpm, model2_lpm, model3_lpm, model4_lpm), digits=3)
+```{r, fig.height=12}
+coef_table <- calculate_cond_means(model0) %>%
+  mutate(model="crude")
+coef_table <- calculate_cond_means(model1) %>%
+  mutate(model="fixed effects") %>%
+  bind_rows(coef_table)
+coef_table <- calculate_cond_means(model2) %>%
+  mutate(model="cultural resources") %>%
+  bind_rows(coef_table)
+coef_table <- calculate_cond_means(model4) %>%
+  mutate(model="parent resources") %>%
+  bind_rows(coef_table) %>%
+  mutate(model=factor(model, levels=c("crude","fixed effects",
+                                      "cultural resources",
+                                      "parent resources")),
+         mrace=factor(mrace, levels=c("Black/White",
+                                      "Black/Latino",
+                                      "Black/Asian",
+                                      "Black/Indigenous",
+                                      "White/Indigenous",
+                                      "White/Latino",
+                                      "White/Asian",
+                                      "Latino/Asian",
+                                      "Indigenous/Latino",
+                                      "Indigenous/Asian")))
+
+ggplot(coef_table, aes(x=term, y=estimate, color=multiracial,
+                       ymin=estimate-1.386*se, ymax=estimate+1.386*se))+
+  geom_rect(aes(xmax=Inf, xmin=-Inf, ymin=estimate_mid-1.386*se_mid,
+                ymax=estimate_mid+1.386*se_mid, fill=multiracial), 
+            color=NA, alpha=0.2)+
+  geom_linerange(data=subset(coef_table, multiracial))+
+  geom_point()+
+  coord_flip()+
+  facet_grid(mrace~model, scales="free_y")+
+  theme_bw()+
+  theme(legend.position = "none", panel.grid = element_blank())+
+  scale_color_manual(values=c("grey40","red"))+
+  scale_fill_manual(values=c("grey40","red"))+
+  scale_linetype_manual(values=c(3,1))+
+  scale_y_continuous(labels = scales::percent)+
+  labs(x=NULL,
+       y="predicted probability of being behind expected grade",
+       title="Probability of being behind grade for biracial respondents and\nmonoracial comparison groups",
+       caption="Non-overlap in confidence bands indicates statistically significant difference at the 5% level")
+```
+
+Summarize these results.
+
+## Sensitivity tests
+
+```{r eval=FALSE}
+#run separate models by grade groups
+model4a <- update(model4, data=subset(acs, as.numeric(current_grade)<=6))
+model4b <- update(model4, data=subset(acs, as.numeric(current_grade)>6 &
+                                        as.numeric(current_grade)<=9))
+model4c <- update(model4, data=subset(acs, as.numeric(current_grade)>=10))
+
+knitreg(list(model4a, model4b, model4c))
 ```
