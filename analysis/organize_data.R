@@ -100,20 +100,6 @@ acs$race <- factor(acs$race,
                             "White/Indigenous","White/Latino","White/Asian",
                             "Indigenous/Latino","Indigenous/Asian",
                             "Latino/Asian"))
-#the default treatment contrast will do most of the work, but I need to 
-#put in the 0.5 cases
-contr_race <- contrasts(acs$race)
-#lets loop through rows for multiracials and decide where the 0.5 should go
-for(i in str_which(rownames(contr_race),"/")) {
-  race_name <- rownames(contr_race)[i]
-  comp_races <- str_split(race_name, "/")[[1]]
-  fraction <- 1/length(comp_races)
-  #one category is missing because it is the reference so remove if so
-  comp_races <- comp_races[comp_races %in% colnames(contr_race)]
-  contr_race[race_name, comp_races] <- fraction
-}
-contrasts(acs$race) <- contr_race
-
 
 # Check Yourself Before You Wreck Yourself --------------------------------
 
