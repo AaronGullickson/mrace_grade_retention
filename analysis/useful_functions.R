@@ -152,10 +152,12 @@ is_race_consistent <- function(race_child, hispan_child, race_mom, hispan_mom,
 
 calculate_cond_means <- function(model, at=df_pred, type="response") {
   
-  predicted <- predict(model, df_pred, se=TRUE, type=type)
+  predicted <- predict(model, df_pred, se.fit=TRUE, type=type)
   
-  coefs <- tibble(term=df_pred$race, estimate=predicted$fit, 
-                  se=predicted$se.fit) %>%
+  #figuring out how to pull things out of this object is really 
+  #annoying
+  coefs <- tibble(term=df_pred$race, estimate=coef(predicted), 
+                  se=as.vector(sqrt(vcov(predicted)))) %>%
     mutate(multiracial=str_detect(term, "/"))
   
   

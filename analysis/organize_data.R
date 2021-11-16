@@ -81,8 +81,7 @@ acs <- acs %>%
          sex=factor(sex, levels=1:2, labels=c("Male","Female")),
          metro=factor(metro, levels=0:4, 
                       labels=c("Indeterminable","Non-metro","Central city",
-                               "Metro non-central","Metro indeterminable")),
-         hhid=serial*10000+year) %>%
+                               "Metro non-central","Metro indeterminable"))) %>%
   #remove respondents with multiracial parents
   filter(!str_detect(race, "Multiracial"))
 
@@ -203,7 +202,8 @@ acs <- acs %>%
 # Trim to analytical data -------------------------------------------------
 
 acs <- acs %>%
-  select(hhid, perwt, year, state, 
+  select(cluster, strata, perwt,
+         year, state, 
          age, current_grade, below_exp_grade, 
          race, sex, metro,
          age_birth_mother, age_birth_father, degree_mother, degree_father, 
