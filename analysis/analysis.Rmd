@@ -228,10 +228,7 @@ design_matrix$cluster <- acs$cluster
 design_matrix$strata <- acs$strata
 design_matrix$perwt <- acs$perwt
 
-#TODO: It won't let me add strata - gives some error. This sucks because 
-#strata may help to reduce SEs
-design_matrix <- svydesign(ids=~cluster, weights=~perwt, data=design_matrix)
-
+design_matrix <- svydesign(ids=~cluster, data=design_matrix)
 ```
 
 Now, I can run the models. I am using the `svyglm` command which (given the design set up above) adjusts for clustering and weights observations based on sample weights. I also want to figure out how to adjust for strata, but `svydesign` is throwing up errors when I attemp to do that. Warning, the code chunks below take a bit of time to run!
