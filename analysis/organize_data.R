@@ -202,7 +202,7 @@ acs <- acs %>%
 # Trim to analytical data -------------------------------------------------
 
 acs <- acs %>%
-  select(pcluster, strata, perwt,
+  select(cluster, strata, perwt,
          year, state, 
          age, current_grade, below_exp_grade, 
          race, sex, metro,
