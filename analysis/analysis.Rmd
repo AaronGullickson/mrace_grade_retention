@@ -222,12 +222,22 @@ design_matrix$parents_married <- acs$parents_married-
 
 design_matrix$race <- acs$race
 design_matrix$below_exp_grade <- acs$below_exp_grade
+
+# add design effects
+design_matrix$cluster <- acs$cluster
+design_matrix$strata <- acs$strata
+design_matrix$perwt <- acs$perwt
+
+#TODO: It won't let me add strata - gives some error. This sucks because 
+#strata may help to reduce SEs
+design_matrix <- svydesign(ids=~cluster, weights=~perwt, data=design_matrix)
+
 ```
 
-Now, I can run the models. Warning, the code chunks below take a bit of time to run!
+Now, I can run the models. I am using the `svyglm` command which (given the design set up above) adjusts for clustering and weights observations based on sample weights. I also want to figure out how to adjust for strata, but `svydesign` is throwing up errors when I attemp to do that. Warning, the code chunks below take a bit of time to run!
 
 ```{r build-models, results='asis'}
-model0 <- glm(below_exp_grade~race, data=design_matrix, family=binomial)
+model0 <- svyglm(below_exp_grade~race, design=design_matrix, family=binomial)
 model1 <- update(model0, 
                  .~.+y2011+y2012+y2013+y2014+y2015+y2016+y2017+y2018+y2019+
                    current_grade1st+current_grade2nd+current_grade3rd+
@@ -320,11 +330,11 @@ g <- coef_table %>%
        title="Probability of being behind grade for biracial black/white respondents and monoracial\ncomparison groups",
        caption="Non-overlap in confidence bands indicates statistically significant difference at the 5% level")
 
-g+annotate("text", 1, 0.037, hjust="left",
+g+annotate("text", 1, 0.0375, hjust="left",
              label="Grey bands give 83%\nconfidence interval around\nmonoracial estimates")+
-  annotate("text", 2, 0.0475, hjust="left",
+  annotate("text", 2, 0.048, hjust="left",
              label="Red band gives 83%\nconfidence interval around\nmidpoint estimate")+
-  annotate("text", 2.5, 0.038, hjust="left",
+  annotate("text", 2.5, 0.039, hjust="left",
              label="Actual biracial estimate\nshown with 83% confidence\ninterval")
 ```
 
