@@ -76,6 +76,18 @@ acs <- acs %>%
          below_exp_grade=age>=as.numeric(current_grade)+6,
          family_income=ifelse(ftotinc==9999999, NA, 
                               ifelse(ftotinc<0, 0, ftotinc)),
+         #now adjust for inflation
+         family_income=case_when(
+           year==2010 ~ family_income*1.18,
+           year==2011 ~ family_income*1.14,
+           year==2012 ~ family_income*1.12,
+           year==2013 ~ family_income*1.10,
+           year==2014 ~ family_income*1.08,
+           year==2015 ~ family_income*1.08,
+           year==2016 ~ family_income*1.07,
+           year==2017 ~ family_income*1.05,
+           year==2018 ~ family_income*1.02,
+           year==2019 ~ family_income*1),
          own_home=ifelse(ownershp==0, NA, ownershp==1),
          foreign_born=bpl>=100,
          sex=factor(sex, levels=1:2, labels=c("Male","Female")),
