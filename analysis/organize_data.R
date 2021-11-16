@@ -203,7 +203,8 @@ acs <- acs %>%
 # Trim to analytical data -------------------------------------------------
 
 acs <- acs %>%
-  select(hhid, perwt, year, state, 
+  select(hhid, perwt, cluster, strata,
+         year, state, 
          age, current_grade, below_exp_grade, 
          race, sex, metro,
          age_birth_mother, age_birth_father, degree_mother, degree_father, 
