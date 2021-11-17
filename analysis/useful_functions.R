@@ -162,14 +162,16 @@ is_race_consistent <- function(race_child, hispan_child, race_mom, hispan_mom,
 
 # Functions for plotting effects ------------------------------------------
 
-calculate_cond_means <- function(model, at=df_pred, type="response") {
+calculate_marg_means <- function(model, cluster_var=acs$cluster) {
   
-  predicted <- predict(model, df_pred, se.fit=TRUE, type=type)
+  means_marginal <- marg(model, "race", type="levels", 
+                         vcov_mat=vcovCL(model, cluster=cluster_var))[[1]]
   
   #figuring out how to pull things out of this object is really 
   #annoying
-  coefs <- tibble(term=df_pred$race, estimate=coef(predicted), 
-                  se=as.vector(sqrt(vcov(predicted)))) %>%
+  coefs <- tibble(term=str_remove(means_marginal$Label, "race = "), 
+                  estimate=means_marginal$Margin, 
+                  se=means_marginal$Standard.Error) %>%
     mutate(multiracial=str_detect(term, "/"))
   
   
