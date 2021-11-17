@@ -18,24 +18,29 @@ options(max.print=999999)
 
 # Read the raw data -------------------------------------------------------
 
-acs <- read_fwf(here("analysis","input","usa_00112.dat.gz"), 
+acs <- read_fwf(here("analysis","input","usa_00114.dat.gz"), 
                 col_positions = 
                   fwf_positions(
-                    start = c(1,11,32,42,55,57,58,71,74,85,95,97,101,105,106,
-                              111,115,118,133,135,142,146,158,161,170,171,174,
-                              177,186,189,198,201,210,213),
-                    end   = c(4,18,41,54,56,57,69,71,80,94,96,98,104,105,108,
-                              113,117,120,134,141,145,149,160,163,170,171,176,
-                              179,188,191,200,203,212,215),
-                    col_names = c("year","serial","hhwt","cluster","state",
-                                  "metro","strata","ownershp","hhincome",
-                                  "perwt","momrule","poprule","related",
-                                  "sex","age","raced","hispand","bpl",
-                                  "gradeattd","ftotinc","related_mom",
-                                  "related_pop","age_mom","age_pop","marst_mom",
-                                  "marst_pop","raced_mom","raced_pop",
-                                  "hispand_mom","hispand_pop","bpl_mom",
-                                  "bpl_pop","educd_mom","educd_pop")),
+                    start = c(1,42,55,57,58,71,85,95,97,101,105,106,111,115,118,
+                              126,134,136,143,144,145,146,147,151,163,166,175,
+                              176,179,182,191,194,203,206,215,216,219,222,231,
+                              232,235,236),
+                    end   = c(4,54,56,57,69,71,94,96,98,104,105,108,113,117,120,
+                              126,135,142,143,144,145,146,150,154,165,168,175,
+                              176,181,184,193,196,205,208,215,216,221,224,231,
+                              232,235,236),
+                    col_names = c("year","cluster","state","metro","strata",
+                                  "ownershp","perwt","momrule","poprule",
+                                  "related","sex","age","raced","hispand",
+                                  "bpl","speakeng","gradeattd","ftotinc",
+                                  "qage","qhispan","qrace","qgradeat",
+                                  "related_mom","related_pop","age_mom",
+                                  "age_pop","marst_mom","marst_pop","raced_mom",
+                                  "raced_pop","hispand_mom","hispand_pop",
+                                  "bpl_mom","bpl_pop","speakeng_mom",
+                                  "speakeng_pop","educd_mom","educd_pop",
+                                  "qhispan_mom","qhispan_pop","qrace_mom",
+                                  "qrace_pop")),
                 col_types = cols(.default = "i",
                                  cluster = col_double()),
                 progress = FALSE)
@@ -44,7 +49,11 @@ acs <- read_fwf(here("analysis","input","usa_00112.dat.gz"),
 
 acs <- acs %>% 
   #remove cases without both parents and pre-K
-  filter(momrule!=0 & poprule!=0 & gradeattd>10) %>%
+  #as well as cases where either parents race is imputed
+  #as well as cases with imputed grade attended or age for respondent
+  filter(momrule!=0 & poprule!=0 & gradeattd>10 & 
+           qrace_mom==0 & qrace_pop==0 & qhispan_mom==0 & qhispan_pop==0 &
+           qgradeat==0 & qage==0) %>%
   #recode variables
   mutate(race_mother=code_race(raced_mom, hispand_mom),
          race_father=code_race(raced_pop, hispand_pop),
@@ -54,6 +63,8 @@ acs <- acs %>%
          foreign_born_father=bpl_pop>=100,
          degree_mother=code_degree(educd_mom),
          degree_father=code_degree(educd_pop),
+         spk_eng_mother=code_speakeng(speakeng_mom),
+         spk_eng_father=code_speakeng(speakeng_pop),
          parents_married=marst_mom==1 & marst_pop==1,
          race=ifelse(race_mother==race_father, race_mother, 
                      pmap_chr(list(race_mother, race_father),
@@ -90,6 +101,7 @@ acs <- acs %>%
            year==2019 ~ family_income*1),
          own_home=ifelse(ownershp==0, NA, ownershp==1),
          foreign_born=bpl>=100,
+         spk_eng=code_speakeng(speakeng),
          sex=factor(sex, levels=1:2, labels=c("Male","Female")),
          metro=factor(metro, levels=0:4, 
                       labels=c("Indeterminable","Non-metro","Central city",
@@ -130,6 +142,12 @@ table(acs$educd_pop, acs$degree_father, exclude=NULL)
 ##parents foreign born status
 table(acs$bpl_mom, acs$foreign_born_mother, exclude=NULL)
 table(acs$bpl_pop, acs$foreign_born_father, exclude=NULL)
+
+#Speak english at home
+table(acs$speakeng, acs$spk_eng, exclude=NULL)
+table(acs$speakeng_mom, acs$spk_eng_mother, exclude=NULL)
+table(acs$speakeng_pop, acs$spk_eng_father, exclude=NULL)
+
 
 ##parents married
 table(acs$marst_mom, acs$marst_pop, acs$parents_married, exclude=NULL)
@@ -220,7 +238,8 @@ acs <- acs %>%
          race, sex, metro,
          age_birth_mother, age_birth_father, degree_mother, degree_father, 
          parents_married, family_income, own_home,
-         foreign_born_mother, foreign_born_father, foreign_born) %>%
+         foreign_born_mother, foreign_born_father, foreign_born,
+         spk_eng_mother, spk_eng_father, spk_eng) %>%
   filter(!is.na(below_exp_grade))
 
 save(acs, file=here("analysis","output","acs.RData"))
