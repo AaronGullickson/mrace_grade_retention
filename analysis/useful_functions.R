@@ -33,6 +33,18 @@ code_degree <- function(educd) {
   return(degree)
 }
 
+code_speakeng <- function(speakeng) {
+  spk_eng <- case_when(
+    is.na(speakeng) | speakeng==0 | speakeng>=7 ~  NA_character_,
+    speakeng==1 ~ "No",
+    speakeng==6 ~ "Somewhat",
+    TRUE ~ "Yes"
+  )
+  speakeng <- factor(speakeng,
+                     levels=c("No","Somewhat","Yes"))
+  return(spk_eng)
+}
+
 #change contrasts for ordered factors to stairstep style
 ordered_factor <- function(fact_var) {
   ord_fact <- factor(fact_var, ordered=TRUE)

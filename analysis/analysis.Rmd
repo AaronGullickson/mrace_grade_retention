@@ -139,6 +139,9 @@ tbl_summary <- acs %>%
             held_back=round(mean(below_exp_grade), 3)*100,
             mean_age=round(mean(age), 1),
             f_born=round(mean(foreign_born), 3)*100,
+            spk_eng_well=round(mean(spk_eng=="Yes"), 3)*100,
+            spk_eng_par=round(mean(spk_eng_father=="Yes" & 
+                                     spk_eng_mother=="Yes"), 3)*100,
             par_fb=round(mean(foreign_born_father | 
                                        foreign_born_mother), 3)*100,
             fam_inc=round(mean(family_income), 0),
@@ -204,8 +207,12 @@ degree <- model.matrix(~degree_mother+degree_father, acs)[,-1]
 degree <- t(t(degree)-apply(degree, 2, mean))
 degree <- as.data.frame(degree)
 
+spk_eng <- model.matrix(~spk_eng+spk_eng_father+spk_eng_mother, acs)[,-1]
+#mean center
+spk_eng <- t(t(spk_eng)-apply(spk_eng, 2, mean))
+spk_eng <- as.data.frame(spk_eng)
 
-design_matrix <- cbind(states, years, grades, metro, degree)
+design_matrix <- cbind(states, years, grades, metro, degree, spk_eng)
 
 design_matrix$foreign_born <- acs$foreign_born-mean(acs$foreign_born)
 design_matrix$foreign_born_mother <- acs$foreign_born_mother-
@@ -249,7 +256,9 @@ model1 <- update(model0,
                    s33+s34+s35+s36+s37+s38+s39+s40+s41+s42+s43+s44+s45+s46+s47+
                    s48+s49+s50)
 model2 <- update(model1, .~.+foreign_born+foreign_born_mother+
-                   foreign_born_father)
+                   foreign_born_father+spk_engSomewhat+spk_engYes+
+                   spk_eng_motherSomewhat+spk_eng_motherYes+
+                   spk_eng_fatherSomewhat+spk_eng_fatherYes)
 model3 <- update(model2, .~.+degree_motherHS+degree_motherAA+degree_motherBA+
                    degree_motherG+degree_fatherHS+degree_fatherAA+
                    degree_fatherBA+degree_fatherG)
@@ -294,6 +303,8 @@ df_pred <- data.frame(race=levels(acs$race),
                       degree_motherG=0, degree_fatherHS=0, degree_fatherAA=0, 
                       degree_fatherBA=0, degree_fatherG=0,
                       foreign_born=0, foreign_born_father=0, foreign_born_mother=0,
+                      spk_engSomewhat=0, spk_engYes=0, spk_eng_fatherSomewhat=0, 
+                      spk_eng_fatherYes=0, spk_eng_motherSomewhat=0, spk_engYes=0,
                       income_trans=0, own_home=0, parents_married=0)
 ```
 
