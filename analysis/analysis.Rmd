@@ -174,95 +174,16 @@ Here are the model structure that I will use:
 3.  Add mother and father highest degree
 4.  Add family income (square rooted), own your own home, and whether parents are married.
 
-All models are estimated as logit models. In order to calculate conditional means for the plots below, I need to be able to feed back in data to the `predict` command, including fractional values for 1/0 dummy variables. Therefore, rather than use the `acs` data itself, I need to create a purely numeric design matrix where each factor variable is expanded out into a set of 1/0 dummies.
-
-```{r design-matrix}
-
-metro <- model.matrix(~metro, acs)[,-1]
-colnames(metro) <- c("met_non_metro","met_central_city","met_non_central_city",
-                     "met_city_indeter")
-#mean center
-metro <- t(t(metro)-apply(metro, 2, mean))
-metro <- as.data.frame(metro)
-
-years <- model.matrix(~as.factor(year), acs)[,-1]
-colnames(years) <- paste("y", 2011:2019, sep="")
-#mean center
-years <- t(t(years)-apply(years, 2, mean))
-years <- as.data.frame(years)
-
-states <- model.matrix(~as.factor(state), acs)[,-1]
-colnames(states) <- paste("s", 1:50, sep="")
-#mean center
-states <- t(t(states)-apply(states, 2, mean))
-states <- as.data.frame(states)
-
-grades <- model.matrix(~current_grade, acs)[,-1]
-#mean center
-grades <- t(t(grades)-apply(grades, 2, mean))
-grades <- as.data.frame(grades)
-
-degree <- model.matrix(~degree_mother+degree_father, acs)[,-1]
-#mean center
-degree <- t(t(degree)-apply(degree, 2, mean))
-degree <- as.data.frame(degree)
-
-spk_eng <- model.matrix(~spk_eng+spk_eng_father+spk_eng_mother, acs)[,-1]
-#mean center
-spk_eng <- t(t(spk_eng)-apply(spk_eng, 2, mean))
-spk_eng <- as.data.frame(spk_eng)
-
-design_matrix <- cbind(states, years, grades, metro, degree, spk_eng)
-
-design_matrix$foreign_born <- acs$foreign_born-mean(acs$foreign_born)
-design_matrix$foreign_born_mother <- acs$foreign_born_mother-
-  mean(acs$foreign_born_mother)
-design_matrix$foreign_born_father <- acs$foreign_born_father-
-  mean(acs$foreign_born_father)
-
-design_matrix$income_trans <- sqrt(acs$family_income/10000)
-design_matrix$income_trans <- design_matrix$income_trans-
-  mean(design_matrix$income_trans)
-design_matrix$own_home <- acs$own_home-mean(acs$own_home)
-design_matrix$parents_married <- acs$parents_married-
-  mean(acs$parents_married)
-
-design_matrix$race <- acs$race
-design_matrix$below_exp_grade <- acs$below_exp_grade
-
-# add design effects
-design_matrix$cluster <- acs$cluster
-design_matrix$strata <- acs$strata
-design_matrix$perwt <- acs$perwt
-
-design_matrix <- svydesign(ids=~cluster, data=design_matrix)
-```
-
-Now, I can run the models. I am using the `svyglm` command which (given the design set up above) adjusts for clustering and weights observations based on sample weights. I also want to figure out how to adjust for strata, but `svydesign` is throwing up errors when I attemp to do that. Warning, the code chunks below take a bit of time to run!
+All models are estimated as logit models. Warning, the code chunks below take a bit of time to run!
 
 ```{r build-models, results='asis'}
-model0 <- svyglm(below_exp_grade~race, design=design_matrix, family=binomial)
-model1 <- update(model0, 
-                 .~.+y2011+y2012+y2013+y2014+y2015+y2016+y2017+y2018+y2019+
-                   current_grade1st+current_grade2nd+current_grade3rd+
-                   current_grade4th+current_grade5th+current_grade6th+
-                   current_grade7th+current_grade8th+current_grade9th+
-                   current_grade10th+current_grade11th+current_grade10th+
-                   current_grade11th+current_grade12th+
-                   met_non_metro+met_central_city+met_non_central_city+
-                   met_city_indeter+
-                   s1+s2+s3+s4+s5+s6+s7+s8+s9+s10+s11+s12+s13+s14+s15+s16+s17+
-                   s18+s19+s20+s21+s22+s23+s24+s25+s26+s27+s28+s29+s30+s31+s32+
-                   s33+s34+s35+s36+s37+s38+s39+s40+s41+s42+s43+s44+s45+s46+s47+
-                   s48+s49+s50)
-model2 <- update(model1, .~.+foreign_born+foreign_born_mother+
-                   foreign_born_father+spk_engSomewhat+spk_engYes+
-                   spk_eng_motherSomewhat+spk_eng_motherYes+
-                   spk_eng_fatherSomewhat+spk_eng_fatherYes)
-model3 <- update(model2, .~.+degree_motherHS+degree_motherAA+degree_motherBA+
-                   degree_motherG+degree_fatherHS+degree_fatherAA+
-                   degree_fatherBA+degree_fatherG)
-model4 <- update(model3, .~.+income_trans+own_home+parents_married)
+model0 <- glm(below_exp_grade~race, data=acs, family=binomial)
+model1 <- update(model0, as.factor(year)+current_grade+as.factor(state)+metro)
+model2 <- update(model1, 
+                 .~.+foreign_born+foreign_born_mother+foreign_born_father+
+                   spk_eng+spk_eng_mother+spk_eng_father)
+model3 <- update(model2, .~.+degree_mother+degree_father)
+model4 <- update(model3, .~.+sqrt(family_income/10000)+own_home+parents_married)
 
 knitreg(list(model0, model1, model2, model3, model4))
 ```
@@ -272,59 +193,29 @@ The model results themselves are not that useful. I want to compare each multira
 1.  Its two constituent monoracial groups (e.g. Compare Black/White to White and Black)
 2.  The assumption that the biracial group will be halfway between the two constituent monoracial groups.
 
-I can do this by calculating conditional means (or proportions to be more accurate) of the dependent variable across all of the possible race groups. For each conditional mean, I can also calculate standard errors for these estimates by the delta method. This can all be done via the `predict` command.
+I can do this by calculating marginal means (or proportions to be more accurate) of the dependent variable across all of the possible race groups. In order to calculate these marginal means, I use the `marg` command in the `modmargs` library. This gives me results equivalent to average marginal effects but on the level (e.g. mean) rather than the effect (different in mean). Standard errors for these marginal means are calculated by the [delta method](https://cran.r-project.org/web/packages/modmarg/vignettes/delta-method.html). I adjust all SEs for clustering of respondents within households.
 
-To compare the results for each biracial gropu to the halfway assumption, I need to calculate the value midway between the two consituent groups and the standard error of that value. Calculating the midway value is just a straightforward mean calculation. To calculate the standard error, I take:
+To compare the results for each biracial group to the halfway assumption, I need to calculate the value midway between the two consituent groups and the standard error of that value. Calculating the midway value is just a straightforward mean calculation. To calculate the standard error, I take:
 
 $$\frac{\sqrt{s_1^2+s_2^2}}{2}$$ where $s_1$ is the standard error for monoracial group 1 and $s_2$ is the standard error for monoracial group 2. This formula follows from the standard formulas for the variance of the sum of random variables.
 
-There are two additional issues that have to be addressed though. First, I need to decide whether I want to calculate conditional means at the level of the response (proportions) or the linear transformation (log-odds). For ease of interpretability, I think the best option here is the former for the main presentation of results, but I also want to test the sensitivity of these results if I do it the other way.
+In order to calculate all the values that I need, I have created a function that will put this into a nice table for later plotting.
 
-Second, the conditional means only apply at specific values of the independent variables. So I need to hold all of the other variables at some value. Now the relative difference between racial groups wouldn't change if this was a linear model (or if I used log-odds rather than proportions) so those values wouldn't matter much in that case. However, if I am estimating the actual proportions, then I no longer have a linear model and I am now caught up indirectly in the *logit panic*. I don't think it will matter that much because the range of predicted values of grade retention is not going to be that high (like between 2% and 10%). However, I should test the sensitivity of the results to different specifications. As a default, it makes sense to use the mean values for all other variables. Thankfully, because I already mean-centered the design matrix, this means that all other variables should be at zero.
-
-```{r create-predictor-data}
-#dateset for predict
-df_pred <- data.frame(race=levels(acs$race),
-                      y2011=0, y2012=0, y2013=0, y2014=0, y2015=0, y2016=0,
-                      y2017=0, y2018=0, y2019=0,
-                      current_grade1st=0, current_grade2nd=0, current_grade3rd=0,
-                      current_grade4th=0, current_grade5th=0, current_grade6th=0,
-                      current_grade7th=0, current_grade8th=0, current_grade9th=0,
-                      current_grade10th=0, current_grade11th=0, current_grade12th=0,
-                      met_non_metro=0, met_central_city=0, met_non_central_city=0,
-                      met_city_indeter=0,
-                      s1=0, s2=0, s3=0, s4=0, s5=0, s6=0, s7=0, s8=0, s9=0, s10=0,
-                      s11=0, s12=0, s13=0, s14=0, s15=0, s16=0, s17=0, s18=0, s19=0,
-                      s20=0, s21=0, s22=0, s23=0, s24=0, s25=0, s26=0, s27=0, s28=0,
-                      s29=0, s30=0, s31=0, s32=0, s33=0, s34=0, s35=0, s36=0, s37=0,
-                      s38=0, s39=0, s40=0, s41=0, s42=0, s43=0, s44=0, s45=0, s46=0,
-                      s47=0, s48=0, s49=0, s50=0,
-                      degree_motherHS=0, degree_motherAA=0, degree_motherBA=0,
-                      degree_motherG=0, degree_fatherHS=0, degree_fatherAA=0, 
-                      degree_fatherBA=0, degree_fatherG=0,
-                      foreign_born=0, foreign_born_father=0, foreign_born_mother=0,
-                      spk_engSomewhat=0, spk_engYes=0, spk_eng_fatherSomewhat=0, 
-                      spk_eng_fatherYes=0, spk_eng_motherSomewhat=0, spk_engYes=0,
-                      income_trans=0, own_home=0, parents_married=0)
-```
-
-Now in order to calculate all the values that I need, I have created a function that will put this into a nice table for later plotting.
-
-```{r calc-cond-means}
-coef_table <- calculate_cond_means(model0)
+```{r calc-cond-means, warning=FALSE}
+coef_table_mod0 <- calculate_cond_means(model0)
 ```
 
 Now I can use this nice table to plot out the results. I illustrate what this basic plot looks like below for the case of black/white individuals.
 
 ```{r example-plot}
-g <- coef_table %>%
+g <- coef_table_mod0 %>%
   filter(mrace=="Black/White") %>%
   ggplot(aes(x=term, y=estimate, color=multiracial,
              ymin=estimate-1.386*se, ymax=estimate+1.386*se))+
   geom_rect(aes(xmax=Inf, xmin=-Inf, ymin=estimate_mid-1.386*se_mid,
                 ymax=estimate_mid+1.386*se_mid, fill=multiracial), 
             color=NA, alpha=0.2)+
-  geom_linerange(data=subset(coef_table, multiracial & mrace=="Black/White"))+
+  geom_linerange(data=subset(coef_table_mod0, multiracial & mrace=="Black/White"))+
   geom_point()+
   coord_flip()+
   theme_bw()+
@@ -338,29 +229,29 @@ g <- coef_table %>%
        title="Probability of being behind grade for biracial black/white respondents and monoracial\ncomparison groups",
        caption="Non-overlap in confidence bands indicates statistically significant difference at the 5% level")
 
-g+annotate("text", 1, 0.0375, hjust="left",
-             label="Grey bands give 83%\nconfidence interval around\nmonoracial estimates")+
-  annotate("text", 2, 0.048, hjust="left",
-             label="Red band gives 83%\nconfidence interval around\nmidpoint estimate")+
-  annotate("text", 2.5, 0.039, hjust="left",
-             label="Actual biracial estimate\nshown with 83% confidence\ninterval")
+g+annotate("text", 1, 0.035, hjust="left",
+             label="Grey bands give 83.4%\nconfidence interval around\nmonoracial estimates")+
+  annotate("text", 2, 0.045, hjust="left",
+             label="Red band gives 83.4%\nconfidence interval around\nmidpoint estimate")+
+  annotate("text", 2.5, 0.036, hjust="left",
+             label="Actual biracial estimate\nshown with 83.4% confidence\ninterval")
 ```
 
-This result is from the baseline model with no control variables, so this would be identical to the result you would get by just calculating raw proportions and their binomial standard errors. The grey bands for the monoracial groups bookmark the range of results we might expect and the red band gives what would be the midpoint value between the groups, adjusting for statistical uncertainty. I can then see where the actual biracial estimate falls within this range. The results here indicate that biracial black/white students have probabilities of grade retention much closer to the lower values of white than black students. However, their probability is still a bit higher than that for whites.
+This result is from the baseline model with no control variables, so this would be identical to the result you would get by just calculating raw proportions and their binomial standard errors (although the SEs are slightly different because this model accounts for clustering). The grey bands for the monoracial groups bookmark the range of results we might expect and the red band gives what would be the midpoint value between the groups, adjusting for statistical uncertainty. I can then see where the actual biracial estimate falls within this range. The results here indicate that biracial black/white students have probabilities of grade retention much closer to the lower values of white than black students. However, their probability is still a bit higher than that for whites.
 
 Why I am using 83% (technically 83.4%) confidence intervals? This is a nice visual trick. People often incorrectly believe that overlapping 95% confidence intervals on two means indicates that the difference in the means is not statistically significant at $p<.05$. This is not always true and leads in practice to a much lower $\alpha$ for rejection. For that to be true, one needs to use 1.386 rather than 1.96 in estimating the confidence interval which produces an 83.4% confidence interval. It turns out that 1.386 is equal to $1.96/\sqrt{2}$. The intuition behind this technique is given nicely [here](https://chris-said.io/2014/12/01/independent-t-tests-and-the-83-confidence-interval-a-useful-trick-for-eyeballing-your-data/). Because I use this interval, we can know that if intervals (or bands) do not overlap, then the difference in means between the two groups is statistically significant at $p<.05$. In this case, the biracial estimate is statistically significantly different from both monoracial estimates as well as the "halfway" estimate. In short, biracial black/white students are held back at rates much closer but somewhat higher than whites, rather than blacks.
 
 The results here are the same as the raw differences, but I can also fit this graph to any of the models, so I can effectively give conditional probabilities. The plot below does this for model 4, by panelizing each multiracial group.
 
 ```{r cond-means-model4}
-coef_table <- calculate_cond_means(model4)
+coef_table_mod4 <- calculate_cond_means(model4)
 
-ggplot(coef_table, aes(x=term, y=estimate, color=multiracial,
+ggplot(coef_table_mod4, aes(x=term, y=estimate, color=multiracial,
                        ymin=estimate-1.386*se, ymax=estimate+1.386*se))+
   geom_rect(aes(xmax=Inf, xmin=-Inf, ymin=estimate_mid-1.386*se_mid,
                 ymax=estimate_mid+1.386*se_mid, fill=multiracial), 
             color=NA, alpha=0.2)+
-  geom_linerange(data=subset(coef_table, multiracial))+
+  geom_linerange(data=subset(coef_table_mod4, multiracial))+
   geom_point()+
   coord_flip()+
   facet_wrap(~mrace, ncol=3, scales="free_y")+
@@ -381,15 +272,19 @@ As the table here shows, after controlling for other stuff, most multiracial gro
 To compare these results across models, I can try a very large figure that panelizes by model on the column and group on the row.
 
 ```{r cond-means-model-compare, fig.height=12}
-coef_table <- calculate_cond_means(model0) %>%
+#calculate remaining marginal means
+coef_table_mod1 <- calculate_cond_means(model1)
+coef_table_mod2 <- calculate_cond_means(model2)
+
+coef_table <- coef_table_mod0 %>%
   mutate(model="crude")
-coef_table <- calculate_cond_means(model1) %>%
+coef_table <- coef_table_mod1 %>%
   mutate(model="fixed effects") %>%
   bind_rows(coef_table)
-coef_table <- calculate_cond_means(model2) %>%
+coef_table <- coef_table_mod2 %>%
   mutate(model="cultural resources") %>%
   bind_rows(coef_table)
-coef_table <- calculate_cond_means(model4) %>%
+coef_table <- coef_table_mod4 %>%
   mutate(model="parent resources") %>%
   bind_rows(coef_table) %>%
   mutate(model=factor(model, levels=c("crude","fixed effects",
