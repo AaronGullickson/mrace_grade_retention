@@ -178,7 +178,7 @@ All models are estimated as logit models. Warning, the code chunks below take a 
 
 ```{r build-models, results='asis'}
 model0 <- glm(below_exp_grade~race, data=acs, family=binomial)
-model1 <- update(model0, as.factor(year)+current_grade+as.factor(state)+metro)
+model1 <- update(model0, .~.+as.factor(year)+current_grade+as.factor(state)+metro)
 model2 <- update(model1, 
                  .~.+foreign_born+foreign_born_mother+foreign_born_father+
                    spk_eng+spk_eng_mother+spk_eng_father)
@@ -243,7 +243,7 @@ Why I am using 83% (technically 83.4%) confidence intervals? This is a nice visu
 
 The results here are the same as the raw differences, but I can also fit this graph to any of the models, so I can effectively give conditional probabilities. The plot below does this for model 4, by panelizing each multiracial group.
 
-```{r cond-means-model4}
+```{r cond-means-model4, warning=FALSE}
 coef_table_mod4 <- calculate_cond_means(model4)
 
 ggplot(coef_table_mod4, aes(x=term, y=estimate, color=multiracial,
@@ -271,7 +271,7 @@ As the table here shows, after controlling for other stuff, most multiracial gro
 
 To compare these results across models, I can try a very large figure that panelizes by model on the column and group on the row.
 
-```{r cond-means-model-compare, fig.height=12}
+```{r cond-means-model-compare, fig.height=12, warning=FALSE}
 #calculate remaining marginal means
 coef_table_mod1 <- calculate_cond_means(model1)
 coef_table_mod2 <- calculate_cond_means(model2)
@@ -335,3 +335,6 @@ model4c <- update(model4, data=subset(acs, as.numeric(current_grade)>=10))
 
 knitreg(list(model4a, model4b, model4c))
 ```
+
+
+
