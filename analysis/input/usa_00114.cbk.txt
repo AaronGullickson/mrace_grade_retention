@@ -1,4 +1,4 @@
-Description: Second revision of sample for grade retention project, this time getting data on English proficiency and imputation of the race, grade, and age variables.
+Description: Third revision of grade retention data because I stupidly forgot the quality flag for Hispanicity last time
 Samples selected:
       2010 ACS
             Note: 
@@ -89,44 +89,49 @@ Case Selection:               Yes
   GRADEATTD          P 134-135          2     X       X       X       X       X       X       X       X       X       X       
   FTOTINC            P 136-142          7     X       X       X       X       X       X       X       X       X       X       
   QAGE             q P 143              1     X       X       X       X       X       X       X       X       X       X       
-  QRACE            q P 144              1     X       X       X       X       X       X       X       X       X       X       
-  QGRADEAT         q P 145              1     X       X       X       X       X       X       X       X       X       X       
-  RELATED_MOM        P 146-149          4     X       X       X       X       X       X       X       X       X       X       
-  RELATED_POP        P 150-153          4     X       X       X       X       X       X       X       X       X       X       
-  RELATED_MOM2       P 154-157          4     X       X       X       X       X       X       X       X       X       X       
-  RELATED_POP2       P 158-161          4     X       X       X       X       X       X       X       X       X       X       
-  AGE_MOM            P 162-164          3     X       X       X       X       X       X       X       X       X       X       
-  AGE_POP            P 165-167          3     X       X       X       X       X       X       X       X       X       X       
-  AGE_MOM2           P 168-170          3     X       X       X       X       X       X       X       X       X       X       
-  AGE_POP2           P 171-173          3     X       X       X       X       X       X       X       X       X       X       
-  MARST_MOM          P 174              1     X       X       X       X       X       X       X       X       X       X       
-  MARST_POP          P 175              1     X       X       X       X       X       X       X       X       X       X       
-  MARST_MOM2         P 176              1     X       X       X       X       X       X       X       X       X       X       
-  MARST_POP2         P 177              1     X       X       X       X       X       X       X       X       X       X       
-  RACED_MOM          P 178-180          3     X       X       X       X       X       X       X       X       X       X       
-  RACED_POP          P 181-183          3     X       X       X       X       X       X       X       X       X       X       
-  RACED_MOM2         P 184-186          3     X       X       X       X       X       X       X       X       X       X       
-  RACED_POP2         P 187-189          3     X       X       X       X       X       X       X       X       X       X       
-  HISPAND_MOM        P 190-192          3     X       X       X       X       X       X       X       X       X       X       
-  HISPAND_POP        P 193-195          3     X       X       X       X       X       X       X       X       X       X       
-  HISPAND_MOM2       P 196-198          3     X       X       X       X       X       X       X       X       X       X       
-  HISPAND_POP2       P 199-201          3     X       X       X       X       X       X       X       X       X       X       
-  BPL_MOM            P 202-204          3     X       X       X       X       X       X       X       X       X       X       
-  BPL_POP            P 205-207          3     X       X       X       X       X       X       X       X       X       X       
-  BPL_MOM2           P 208-210          3     X       X       X       X       X       X       X       X       X       X       
-  BPL_POP2           P 211-213          3     X       X       X       X       X       X       X       X       X       X       
-  SPEAKENG_MOM       P 214              1     X       X       X       X       X       X       X       X       X       X       
-  SPEAKENG_POP       P 215              1     X       X       X       X       X       X       X       X       X       X       
-  SPEAKENG_MOM2      P 216              1     X       X       X       X       X       X       X       X       X       X       
-  SPEAKENG_POP2      P 217              1     X       X       X       X       X       X       X       X       X       X       
-  EDUCD_MOM          P 218-220          3     X       X       X       X       X       X       X       X       X       X       
-  EDUCD_POP          P 221-223          3     X       X       X       X       X       X       X       X       X       X       
-  EDUCD_MOM2         P 224-226          3     X       X       X       X       X       X       X       X       X       X       
-  EDUCD_POP2         P 227-229          3     X       X       X       X       X       X       X       X       X       X       
-  QRACE_MOM        q P 230              1     X       X       X       X       X       X       X       X       X       X       
-  QRACE_POP        q P 231              1     X       X       X       X       X       X       X       X       X       X       
-  QRACE_MOM2       q P 232              1     X       X       X       X       X       X       X       X       X       X       
-  QRACE_POP2       q P 233              1     X       X       X       X       X       X       X       X       X       X       
+  QHISPAN          q P 144              1     X       X       X       X       X       X       X       X       X       X       
+  QRACE            q P 145              1     X       X       X       X       X       X       X       X       X       X       
+  QGRADEAT         q P 146              1     X       X       X       X       X       X       X       X       X       X       
+  RELATED_MOM        P 147-150          4     X       X       X       X       X       X       X       X       X       X       
+  RELATED_POP        P 151-154          4     X       X       X       X       X       X       X       X       X       X       
+  RELATED_MOM2       P 155-158          4     X       X       X       X       X       X       X       X       X       X       
+  RELATED_POP2       P 159-162          4     X       X       X       X       X       X       X       X       X       X       
+  AGE_MOM            P 163-165          3     X       X       X       X       X       X       X       X       X       X       
+  AGE_POP            P 166-168          3     X       X       X       X       X       X       X       X       X       X       
+  AGE_MOM2           P 169-171          3     X       X       X       X       X       X       X       X       X       X       
+  AGE_POP2           P 172-174          3     X       X       X       X       X       X       X       X       X       X       
+  MARST_MOM          P 175              1     X       X       X       X       X       X       X       X       X       X       
+  MARST_POP          P 176              1     X       X       X       X       X       X       X       X       X       X       
+  MARST_MOM2         P 177              1     X       X       X       X       X       X       X       X       X       X       
+  MARST_POP2         P 178              1     X       X       X       X       X       X       X       X       X       X       
+  RACED_MOM          P 179-181          3     X       X       X       X       X       X       X       X       X       X       
+  RACED_POP          P 182-184          3     X       X       X       X       X       X       X       X       X       X       
+  RACED_MOM2         P 185-187          3     X       X       X       X       X       X       X       X       X       X       
+  RACED_POP2         P 188-190          3     X       X       X       X       X       X       X       X       X       X       
+  HISPAND_MOM        P 191-193          3     X       X       X       X       X       X       X       X       X       X       
+  HISPAND_POP        P 194-196          3     X       X       X       X       X       X       X       X       X       X       
+  HISPAND_MOM2       P 197-199          3     X       X       X       X       X       X       X       X       X       X       
+  HISPAND_POP2       P 200-202          3     X       X       X       X       X       X       X       X       X       X       
+  BPL_MOM            P 203-205          3     X       X       X       X       X       X       X       X       X       X       
+  BPL_POP            P 206-208          3     X       X       X       X       X       X       X       X       X       X       
+  BPL_MOM2           P 209-211          3     X       X       X       X       X       X       X       X       X       X       
+  BPL_POP2           P 212-214          3     X       X       X       X       X       X       X       X       X       X       
+  SPEAKENG_MOM       P 215              1     X       X       X       X       X       X       X       X       X       X       
+  SPEAKENG_POP       P 216              1     X       X       X       X       X       X       X       X       X       X       
+  SPEAKENG_MOM2      P 217              1     X       X       X       X       X       X       X       X       X       X       
+  SPEAKENG_POP2      P 218              1     X       X       X       X       X       X       X       X       X       X       
+  EDUCD_MOM          P 219-221          3     X       X       X       X       X       X       X       X       X       X       
+  EDUCD_POP          P 222-224          3     X       X       X       X       X       X       X       X       X       X       
+  EDUCD_MOM2         P 225-227          3     X       X       X       X       X       X       X       X       X       X       
+  EDUCD_POP2         P 228-230          3     X       X       X       X       X       X       X       X       X       X       
+  QHISPAN_MOM      q P 231              1     X       X       X       X       X       X       X       X       X       X       
+  QHISPAN_POP      q P 232              1     X       X       X       X       X       X       X       X       X       X       
+  QHISPAN_MOM2     q P 233              1     X       X       X       X       X       X       X       X       X       X       
+  QHISPAN_POP2     q P 234              1     X       X       X       X       X       X       X       X       X       X       
+  QRACE_MOM        q P 235              1     X       X       X       X       X       X       X       X       X       X       
+  QRACE_POP        q P 236              1     X       X       X       X       X       X       X       X       X       X       
+  QRACE_MOM2       q P 237              1     X       X       X       X       X       X       X       X       X       X       
+  QRACE_POP2       q P 238              1     X       X       X       X       X       X       X       X       X       X       
 
 Variable Availability Key:
 All Years X - available in this sample
@@ -2004,6 +2009,16 @@ QAGE                Flag for Age
                     COLD DECK ALLOCATION OR MODAL/MEAN VALUE ASSIGNED: (7-8)
 7                   Original entry illegible
 8                   Original entry missing or failed edit
+
+QHISPAN             Flag for Hispan
+                    ORIGINAL ENTRY NOT EDITED OR ALLOCATED: (0)
+0                   Not allocated
+                    LOGICAL EDIT: (1-3)
+1                   Allocated from information for this person or from relative, this household
+2                   Allocated from nonrelative, this household
+                    ALLOCATED: (4-6)
+4                   Allocated
+                    COLD DECK ALLOCATION OR MODAL/MEAN VALUE ASSIGNED: (7-8)
 
 QRACE               Flag for Race, Racamind, Racasian, Racblk, Racpais, Racwht, Racoth, Racnum, Racesing, Probai, Probblk, Proboth, Probwht, Probapi
                     ORIGINAL ENTRY NOT EDITED OR ALLOCATED: (0)
@@ -5263,6 +5278,46 @@ EDUCD_POP2          Educational attainment [of Second father's location in the h
 115                 Professional degree beyond a bachelor's degree
 116                 Doctoral degree
 999                 Missing
+
+QHISPAN_MOM         Flag for Hispan [of Mother's location in the household]
+                    ORIGINAL ENTRY NOT EDITED OR ALLOCATED: (0)
+0                   Not allocated
+                    LOGICAL EDIT: (1-3)
+1                   Allocated from information for this person or from relative, this household
+2                   Allocated from nonrelative, this household
+                    ALLOCATED: (4-6)
+4                   Allocated
+                    COLD DECK ALLOCATION OR MODAL/MEAN VALUE ASSIGNED: (7-8)
+
+QHISPAN_POP         Flag for Hispan [of Father's location in the household]
+                    ORIGINAL ENTRY NOT EDITED OR ALLOCATED: (0)
+0                   Not allocated
+                    LOGICAL EDIT: (1-3)
+1                   Allocated from information for this person or from relative, this household
+2                   Allocated from nonrelative, this household
+                    ALLOCATED: (4-6)
+4                   Allocated
+                    COLD DECK ALLOCATION OR MODAL/MEAN VALUE ASSIGNED: (7-8)
+
+QHISPAN_MOM2        Flag for Hispan [of Second mother's location in the household]
+                    ORIGINAL ENTRY NOT EDITED OR ALLOCATED: (0)
+0                   Not allocated
+                    LOGICAL EDIT: (1-3)
+1                   Allocated from information for this person or from relative, this household
+2                   Allocated from nonrelative, this household
+                    ALLOCATED: (4-6)
+4                   Allocated
+                    COLD DECK ALLOCATION OR MODAL/MEAN VALUE ASSIGNED: (7-8)
+
+QHISPAN_POP2        Flag for Hispan [of Second father's location in the household]
+                    ORIGINAL ENTRY NOT EDITED OR ALLOCATED: (0)
+0                   Not allocated
+                    LOGICAL EDIT: (1-3)
+1                   Allocated from information for this person or from relative, this household
+2                   Allocated from nonrelative, this household
+                    ALLOCATED: (4-6)
+4                   Allocated
+                    COLD DECK ALLOCATION OR MODAL/MEAN VALUE ASSIGNED: (7-8)
 
 QRACE_MOM           Flag for Race, Racamind, Racasian, Racblk, Racpais, Racwht, Racoth, Racnum, Racesing, Probai, Probblk, Proboth, Probwht, Probapi [of Mother's location in the household]
                     ORIGINAL ENTRY NOT EDITED OR ALLOCATED: (0)
