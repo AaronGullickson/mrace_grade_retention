@@ -202,7 +202,7 @@ $$\frac{\sqrt{s_1^2+s_2^2}}{2}$$ where $s_1$ is the standard error for monoracia
 In order to calculate all the values that I need, I have created a function that will put this into a nice table for later plotting.
 
 ```{r calc-cond-means, warning=FALSE}
-coef_table_mod0 <- calculate_cond_means(model0)
+coef_table_mod0 <- calculate_marg_means(model0)
 ```
 
 Now I can use this nice table to plot out the results. I illustrate what this basic plot looks like below for the case of black/white individuals.
@@ -244,7 +244,7 @@ Why I am using 83% (technically 83.4%) confidence intervals? This is a nice visu
 The results here are the same as the raw differences, but I can also fit this graph to any of the models, so I can effectively give conditional probabilities. The plot below does this for model 4, by panelizing each multiracial group.
 
 ```{r cond-means-model4, warning=FALSE}
-coef_table_mod4 <- calculate_cond_means(model4)
+coef_table_mod4 <- calculate_marg_means(model4)
 
 ggplot(coef_table_mod4, aes(x=term, y=estimate, color=multiracial,
                        ymin=estimate-1.386*se, ymax=estimate+1.386*se))+
@@ -273,8 +273,8 @@ To compare these results across models, I can try a very large figure that panel
 
 ```{r cond-means-model-compare, fig.height=12, warning=FALSE}
 #calculate remaining marginal means
-coef_table_mod1 <- calculate_cond_means(model1)
-coef_table_mod2 <- calculate_cond_means(model2)
+coef_table_mod1 <- calculate_marg_means(model1)
+coef_table_mod2 <- calculate_marg_means(model2)
 
 coef_table <- coef_table_mod0 %>%
   mutate(model="crude")
