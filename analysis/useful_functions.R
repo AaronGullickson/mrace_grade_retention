@@ -221,3 +221,15 @@ calculate_marg_means <- function(model, cluster_var=acs$cluster) {
   return(coef_table)
 }
 
+convert_marg <- function(model) {
+  tr <- createTexreg(
+    coef.names = str_remove(model$Label, "race = "), 
+    coef = model$Margin, 
+    se = model$Standard.Error, 
+    pvalues = model$P.Value,
+    gof.names = c("N"), 
+    gof = c(nrow(acs)), 
+    gof.decimal = c(F)
+  )
+}
+

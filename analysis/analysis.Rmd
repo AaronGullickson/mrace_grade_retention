@@ -340,6 +340,39 @@ Things change quite a bit in the parent resources model. The gap between blacks 
 
 ## Black/Asian results
 
+
+## AMEs for single race groups
+
+For the paper, I want a table showing the changes across single race groups. Lets go ahead and build that here based on the AMEs.
+
+```{r monoracial-results}
+results_monoracial <- map(list(model0, model1, model2, model3, model4),
+                          function(x) {
+                            marg(x, "race", type="effects", 
+                                 vcov_mat=vcovCL(model, cluster=acs$cluster),
+                                 at_var_interest=c("White","Black","Indigenous",
+                                                   "Asian","Latino"))[[1]][-1,]
+                          })
+
+knitreg(map(results_monoracial, convert_marg),
+        digits=3, caption="Average marginal differences in probability of being behind grade relative to whites",
+        custom.gof.rows=list("State fixed effects" =  c("No","Yes","Yes","Yes","Yes"),
+                             "Year fixed effects" =   c("No","Yes","Yes","Yes","Yes"),
+                             "Grade fixed effects" =  c("No","Yes","Yes","Yes","Yes"),
+                             "Metro fixed effects" =  c("No","Yes","Yes","Yes","Yes"),
+                             "Nativity and language" = c("No","No","Yes","Yes","Yes"),
+                             "Parent's education" =    c("No","No","No","Yes","Yes"),
+                             "Family resources" =      c("No","No","No","No","Yes")))
+
+
+```
+
+The results indicate that controlling for everything in model 5 reduces the racial disparities substantially. Comparing Model 5 to Model 2, the controls cut the effect in half for the Black and Indigenous groups. It has less effect and slightly increases the gap for Asians because Asians already had lower rates than Whites. The biggest change is for Latinos. In model 2, Latinos had the second highest probabilities and were 2% higher than whites. After controlling for everything, that actually reverse direction, such that Latinos have slightly lower expected probabilities than whites (.3% less). 
+
+The gap is cut in half for Latinos by the nativity and language variables. These variables also increase the advantage of Asians as expected. they have no effect on the Black and Indigenous effects as expected.
+
+So, I have to consider the shrinking (and in the case of Latinos, flipping direction) of these effects with controls when evaluating the placement of biracials.
+
 # Sensitivity tests
 
 ```{r models-by-age, eval=FALSE}
