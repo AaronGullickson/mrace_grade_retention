@@ -194,12 +194,42 @@ Here are the model structure that I will use:
 3.  Add mother and father highest degree
 4.  Add family income (square rooted), own your own home, and whether parents are married.
 
-All models are estimated as logit models. Warning, the code chunks below take a bit of time to run!
+All models are estimated as logit models. 
+
+Before running the full models, I want to test out how I can parsimoniously address differences in the time trends by grade. 
+
+```{r}
+model_add_cat <- glm(below_exp_grade~as.factor(year)+current_grade, 
+                     data=acs, family=binomial)
+model_add_cont <- glm(below_exp_grade~I(year-2010)+current_grade, 
+                     data=acs, family=binomial)
+model_inter_cont <- glm(below_exp_grade~I(year-2010)*current_grade, 
+                     data=acs, family=binomial)
+model_inter_cat <- glm(below_exp_grade~as.factor(year)*current_grade, 
+                     data=acs, family=binomial)
+
+sapply(list("categorical, additive"=model_add_cat,
+            "categorical, interaction"=model_inter_cat, 
+            "continuous, additive"=model_add_cont, 
+            "continuous, interaction"=model_inter_cont), 
+       BIC) %>%
+    enframe("model","BIC") %>%
+  kbl()
+
+# free some memory
+rm(model_add_cat, model_add_cont, model_inter_cat, model_inter_cont)
+```
+
+The preferred model by BIC is clearly the model that fits year as a continuous measure and interacts it with current grade, so that is what I will do. 
+
+Now lets run the full models. Warning, the code chunks below take a bit of time to run!
+
+
 
 ```{r build-models, results='asis'}
 model0 <- glm(below_exp_grade~race, data=acs, family=binomial)
 model1 <- update(model0, 
-                 .~.+as.factor(year)+current_grade+as.factor(state)+metro+sex)
+                 .~.+I(year-2010)*current_grade+as.factor(state)+metro+sex)
 model2 <- update(model1, 
                  .~.+foreign_born+foreign_born_mother+foreign_born_father+
                    spk_eng+spk_eng_mother+spk_eng_father)
