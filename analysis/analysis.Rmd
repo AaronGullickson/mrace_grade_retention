@@ -115,6 +115,7 @@ acs %>%
   ggplot(aes(x=year, y=below_grade))+
   geom_line()+
   geom_point()+
+  geom_smooth()+
   scale_x_continuous(breaks=c(2010,2014,2018))+
   scale_y_continuous(labels=scales::percent)+
   labs(x="current grade", y="percent clearly behind grade level for age")+
