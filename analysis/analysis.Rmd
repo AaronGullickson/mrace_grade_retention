@@ -115,7 +115,7 @@ acs %>%
   ggplot(aes(x=year, y=below_grade))+
   geom_line()+
   geom_point()+
-  geom_smooth()+
+  geom_smooth(se=FALSE)+
   scale_x_continuous(breaks=c(2010,2014,2018))+
   scale_y_continuous(labels=scales::percent)+
   labs(x="current grade", y="percent clearly behind grade level for age")+
@@ -173,7 +173,13 @@ index_biracial <- which(str_detect(tbl_summary$race, "/"))
 
 tbl_summary %>%
   mutate_if(is.numeric, format, big.mark=",") %>%
-  kbl(caption="Descriptive statistics by race. Shading indicates biracial group. Groups ordered by sample size.", align = c("l",rep("r", ncol(tbl_summary)-1))) %>%
+  kbl(caption="Descriptive statistics by race. Shading indicates biracial group. Groups ordered by sample size.",
+      align = c("l",rep("r", ncol(tbl_summary)-1)),
+      col.names=c("race","n","% below expected grade", "mean age",
+                  "% foreign-born","% speak English well",
+                  "% Both parents speak english well","% either parent foreign-born",
+                  "mean family income","% own home","% either parent, HS diploma",
+                  "% Either parent, BA degree","% parents married")) %>%
   kable_paper() %>%
   row_spec(index_biracial, background = "#D3D3D3")
 ```
