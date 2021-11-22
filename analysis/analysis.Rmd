@@ -90,9 +90,15 @@ What do the grade retention probabilities look like by grade:
 ```{r retention-by-grade}
 acs %>%
   group_by(current_grade) %>%
-  summarize(below_grade=mean(below_exp_grade)) %>%
-  ggplot(aes(x=current_grade, y=below_grade))+
-  geom_col()+
+  summarize(below_grade=mean(below_exp_grade),
+            n=n(),
+            se=sqrt((below_grade*(1-below_grade))/n)) %>%
+  ggplot(aes(x=current_grade, y=below_grade, group=1,
+             ymin=below_grade-1.96*se, ymax=below_grade+1.96*se))+
+  geom_smooth(se=FALSE)+
+  geom_line(linetype=2, color="grey30")+
+  geom_point()+
+  geom_linerange()+
   scale_y_continuous(labels=scales::percent)+
   labs(x="current grade", y="percent clearly behind grade level for age")+
   theme_bw()
@@ -128,7 +134,7 @@ acs %>%
   geom_point()+
   scale_x_continuous(breaks=c(2010,2014,2018))+
   scale_y_continuous(labels=scales::percent)+
-  scale_color_viridis_d()+
+  scale_color_manual(values=rainbow(14))+
   labs(x="current grade", y="percent clearly behind grade level for age")+
   theme_bw()
 ```
