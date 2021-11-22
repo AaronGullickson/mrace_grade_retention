@@ -21,8 +21,6 @@ load(here("analysis","output","acs.RData"))
 OK, first lets just confirm that the grade retention variable is working as expected on our sample. I start by looking at the number of kids by age and current grade:
 
 ```{r tab-grade-by-age}
-tbl <- table(acs$age, acs$current_grade) 
-
 acs %>% 
   tabyl(age, current_grade) %>%
   mutate_if(is.numeric, format, big.mark=",") %>%
@@ -73,10 +71,19 @@ Ok, this looks more or less like what I would expect. We observe two modal ages 
 Now lets calculate the percentage of cases TRUE on the dependent variable across this same table, just to confirm its all working correctly.
 
 ```{r check-retention-code}
-tapply(acs$below_exp_grade,acs[,c("age","current_grade")], mean)
+acs %>%
+  group_by(age, current_grade) %>%
+  summarize(below=mean(below_exp_grade)) %>%
+  ggplot(aes(x=current_grade, y=age, fill=below))+
+  geom_tile(color="grey20")+
+  geom_text(aes(label=below))+
+  theme_bw()+
+  scale_fill_viridis_c()+
+  scale_y_continuous(breaks=5:20, minor_breaks = NULL)+
+  labs(x="current grade", y="age", fill="proportion below grade level")
 ```
 
-Ok, that looks good. NAs indicate cells with no cases. The 1 values start with 7 year old Kindergarteners and then move down in a perfect diagonal from there. So this looks good.
+Ok, that looks good. 
 
 What do the grade retention probabilities look like by grade:
 
