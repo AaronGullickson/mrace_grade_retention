@@ -322,6 +322,7 @@ ggplot(coef_table, aes(x=term, y=estimate, color=multiracial,
        caption="Non-overlap in confidence bands indicates statistically significant difference at the 5% level")
 ```
 
+
 Ok, let me try to summarize these results, by group.
 
 ## Black/White results
@@ -345,11 +346,11 @@ Things change quite a bit in the parent resources model. The gap between blacks 
 
 For the paper, I want a table showing the changes across single race groups. Lets go ahead and build that here based on the AMEs.
 
-```{r monoracial-results}
+```{r monoracial-results, warning=FALSE}
 results_monoracial <- map(list(model0, model1, model2, model3, model4),
                           function(x) {
                             marg(x, "race", type="effects", 
-                                 vcov_mat=vcovCL(model, cluster=acs$cluster),
+                                 vcov_mat=vcovCL(x, cluster=acs$cluster),
                                  at_var_interest=c("White","Black","Indigenous",
                                                    "Asian","Latino"))[[1]][-1,]
                           })
@@ -375,14 +376,66 @@ So, I have to consider the shrinking (and in the case of Latinos, flipping direc
 
 # Sensitivity tests
 
-```{r models-by-age, eval=FALSE}
-#run separate models by grade groups
-model4a <- update(model4, data=subset(acs, as.numeric(current_grade)<=6))
-model4b <- update(model4, data=subset(acs, as.numeric(current_grade)>6 &
-                                        as.numeric(current_grade)<=9))
-model4c <- update(model4, data=subset(acs, as.numeric(current_grade)>=10))
+## Models by grade
 
-knitreg(list(model4a, model4b, model4c))
+I want to separate the results by age more or less, but I cannot take age directly because then some kids cannot logically be behind grade at certain grade levels. For example, if I restrict to 11 or younger, then none of the 5th graders will be behind grade, by design. So, I will restrict by current grade level which indirectly gets at age. I am going to split it by elementary, middle school, and high school.
+
+```{r models-by-grade, warning=FALSE}
+#run separate models by grade groups
+model4_elem <- update(model4, data=subset(acs, current_grade<="5th"))
+model4_middle <- update(model4, data=subset(acs, current_grade>"5th" & 
+                                        current_grade<"9th"))
+model4_hs <- update(model4, data=subset(acs, current_grade>="9th"))
+
+
+coef_table_elem <- calculate_marg_means(model4_elem, 
+                                        cluster_var=subset(acs, current_grade<="5th")$cluster)
+coef_table_middle <- calculate_marg_means(model4_middle,
+                                          cluster_var=subset(acs, current_grade>"5th" & 
+                                        current_grade<"9th")$cluster)
+coef_table_hs <- calculate_marg_means(model4_hs,
+                                      cluster_var=subset(acs, current_grade>="9th")$cluster)
+
+coef_table <- coef_table_elem %>%
+  mutate(model="elementary")
+coef_table <- coef_table_middle %>%
+  mutate(model="middle school") %>%
+  bind_rows(coef_table)
+coef_table <- coef_table_hs %>%
+  mutate(model="high school") %>%
+  bind_rows(coef_table) %>%
+  mutate(model=factor(model, levels=c("elementary","middle school",
+                                      "high school")),
+         mrace=factor(mrace, levels=c("Black/White",
+                                      "Black/Latino",
+                                      "Black/Asian",
+                                      "Black/Indigenous",
+                                      "White/Indigenous",
+                                      "White/Latino",
+                                      "White/Asian",
+                                      "Latino/Asian",
+                                      "Indigenous/Latino",
+                                      "Indigenous/Asian")))
+  
+ggplot(coef_table, aes(x=term, y=estimate, color=multiracial,
+                       ymin=estimate-1.386*se, ymax=estimate+1.386*se))+
+  geom_rect(aes(xmax=Inf, xmin=-Inf, ymin=estimate_mid-1.386*se_mid,
+                ymax=estimate_mid+1.386*se_mid, fill=multiracial), 
+            color=NA, alpha=0.2)+
+  geom_linerange(data=subset(coef_table, multiracial))+
+  geom_point()+
+  coord_flip()+
+  facet_grid(mrace~model, scales="free_y")+
+  theme_bw()+
+  theme(legend.position = "none", panel.grid = element_blank())+
+  scale_color_manual(values=c("grey40","red"))+
+  scale_fill_manual(values=c("grey40","red"))+
+  scale_linetype_manual(values=c(3,1))+
+  scale_y_continuous(labels = scales::percent)+
+  labs(x=NULL,
+       y="predicted probability of being behind expected grade",
+       title="Probability of being behind grade for biracial respondents and monoracial comparison groups",
+       caption="Non-overlap in confidence bands indicates statistically significant difference at the 5% level")
 ```
 
 
