@@ -83,7 +83,8 @@ acs <- acs %>%
            gradeattd == 52 ~ "10th",
            gradeattd == 53 ~ "11th",
            gradeattd == 54 ~ "12th"),
-           levels=c("K","1st","2nd","3rd",paste(4:12,"th",sep=""))),
+           levels=c("K","1st","2nd","3rd",paste(4:12,"th",sep="")),
+           ordered=TRUE),
          below_exp_grade=age>=as.numeric(current_grade)+6,
          family_income=ifelse(ftotinc==9999999, NA, 
                               ifelse(ftotinc<0, 0, ftotinc)),
@@ -109,7 +110,7 @@ acs <- acs %>%
   #remove respondents with multiracial parents
   filter(!str_detect(race, "Multiracial"))
 
-#code the contrast matrix for race to adjust for fractions
+#factorize the race variable
 acs$race <- factor(acs$race,
                    levels=c("White","Black","Indigenous","Asian","Latino",
                             "Black/White","Black/Indigenous","Black/Latino",
@@ -123,6 +124,11 @@ acs$race <- factor(acs$race,
                             "White/Indigenous","White/Latino","White/Asian",
                             "Indigenous/Latino","Indigenous/Asian",
                             "Latino/Asian"))
+
+#code the current_grade contrast back to treatment dummies
+x <- contr.treatment(length(levels(acs$current_grade)))
+colnames(x) <- levels(acs$current_grade)[-1]
+contrasts(acs$current_grade) <- x
 
 # Check Yourself Before You Wreck Yourself --------------------------------
 
@@ -147,7 +153,6 @@ table(acs$bpl_pop, acs$foreign_born_father, exclude=NULL)
 table(acs$speakeng, acs$spk_eng, exclude=NULL)
 table(acs$speakeng_mom, acs$spk_eng_mother, exclude=NULL)
 table(acs$speakeng_pop, acs$spk_eng_father, exclude=NULL)
-
 
 ##parents married
 table(acs$marst_mom, acs$marst_pop, acs$parents_married, exclude=NULL)
