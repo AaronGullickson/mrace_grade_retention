@@ -628,6 +628,8 @@ ggplot(coef_table, aes(x=term, y=estimate, color=multiracial,
        caption="Non-overlap in confidence bands indicates statistically significant difference at the 5% level")
 ```
 
+The results here are extraordinarily stable across both specifications. 
+
 
 ```{r time-end}
 timestamp()
