@@ -573,6 +573,13 @@ ggplot(coef_table, aes(x=term, y=estimate, color=multiracial,
        caption="Non-overlap in confidence bands indicates statistically significant difference at the 5% level")
 ```
 
+The results get quite a bit noisier here because we are cutting the sample size substantially in each panel. The general pattern is that the results tend to look pretty similar across grade levels. What variations we do see could easily be the result of statistical noise as they tend to move around the most in cases with high error bands. The two notable cases where something might be going on:
+
+* For White/Black students, grade retention is clearly in the lower-half between Whites and the midway point rather than below whites for high school students. Notably, this is also where the white/black grows the largest. So the advantage that these students have relative to everyone else only holds for elementary and middle school. Nonetheless, their outcomes are still much closer to White students than Black students.
+* For White/Indigenous students, the placement varies across panels. In elementary school, these students are indistinguishable from White students. They are perfectly in the middle in middle school, and then in the lower half in high school. So it seems that their lowest outcomes happen earlier and on average you end up with a "lower half" across all grades. 
+
+In no case do the results here suggest a biasing effect of non-biological kids. We would expect that to be greater in higher grades, but the results are generally consistent across grades. In cases where they are not consistent, you would expect the results to move toward the larger population group with age, but I do not see that.
+
 ### Models with stricter parent linking
 
 ```{r models-parent-link, warning=FALSE, fig.height=12}
