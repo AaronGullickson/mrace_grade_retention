@@ -397,7 +397,7 @@ Things change quite a bit in the parent resources model. The gap between blacks 
 
 For the paper, I want a table showing the changes across single race groups. Lets go ahead and build that here based on the AMEs.
 
-```{r monoracial-results, warning=FALSE}
+```{r monoracial-results, warning=FALSE, results='asis'}
 results_monoracial <- map(list(model0, model1, model2, model3, model4),
                           function(x) {
                             marg(x, "race", type="effects", 
