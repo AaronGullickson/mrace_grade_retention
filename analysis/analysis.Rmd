@@ -198,7 +198,7 @@ All models are estimated as logit models.
 
 Before running the full models, I want to test out how I can parsimoniously address differences in the time trends by grade. 
 
-```{r}
+```{r models-year-grade}
 model_add_cat <- glm(below_exp_grade~as.factor(year)+current_grade, 
                      data=acs, family=binomial)
 model_add_cont <- glm(below_exp_grade~I(year-2010)+current_grade, 
