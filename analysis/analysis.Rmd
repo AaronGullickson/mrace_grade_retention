@@ -431,7 +431,7 @@ So, I have to consider the shrinking (and in the case of Latinos, flipping direc
 
 I want to separate the results by age more or less, but I cannot take age directly because then some kids cannot logically be behind grade at certain grade levels. For example, if I restrict to 11 or younger, then none of the 5th graders will be behind grade, by design. So, I will restrict by current grade level which indirectly gets at age. I am going to split it by elementary, middle school, and high school.
 
-```{r models-by-grade, warning=FALSE}
+```{r models-by-grade, warning=FALSE, fig.height=12}
 #run separate models by grade groups
 model4_elem <- update(model4, data=subset(acs, current_grade<="5th"))
 model4_middle <- update(model4, data=subset(acs, current_grade>"5th" & 
@@ -489,5 +489,50 @@ ggplot(coef_table, aes(x=term, y=estimate, color=multiracial,
        caption="Non-overlap in confidence bands indicates statistically significant difference at the 5% level")
 ```
 
+## Models with stricter parent linking
 
+```{r models-parent-link, warning=FALSE, fig.height=12}
+#run separate models by grade groups
+model4_best_link <- update(model4, data=subset(acs, momrule==11 & poprule==11))
 
+coef_table_best_link <- calculate_marg_means(model4_best_link, 
+                                        cluster_var=subset(acs, momrule==11 &
+                                                             poprule==11)$cluster)
+
+coef_table <- coef_table_best_link %>%
+  mutate(model="only direct links")
+coef_table <- coef_table_mod4 %>%
+  mutate(model="all links") %>%
+  bind_rows(coef_table) %>%
+  mutate(model=factor(model, levels=c("all links","only direct links")),
+         mrace=factor(mrace, levels=c("Black/White",
+                                      "Black/Latino",
+                                      "Black/Asian",
+                                      "Black/Indigenous",
+                                      "White/Indigenous",
+                                      "White/Latino",
+                                      "White/Asian",
+                                      "Latino/Asian",
+                                      "Indigenous/Latino",
+                                      "Indigenous/Asian")))
+  
+ggplot(coef_table, aes(x=term, y=estimate, color=multiracial,
+                       ymin=estimate-1.386*se, ymax=estimate+1.386*se))+
+  geom_rect(aes(xmax=Inf, xmin=-Inf, ymin=estimate_mid-1.386*se_mid,
+                ymax=estimate_mid+1.386*se_mid, fill=multiracial), 
+            color=NA, alpha=0.2)+
+  geom_linerange(data=subset(coef_table, multiracial))+
+  geom_point()+
+  coord_flip()+
+  facet_grid(mrace~model, scales="free_y")+
+  theme_bw()+
+  theme(legend.position = "none", panel.grid = element_blank())+
+  scale_color_manual(values=c("grey40","red"))+
+  scale_fill_manual(values=c("grey40","red"))+
+  scale_linetype_manual(values=c(3,1))+
+  scale_y_continuous(labels = scales::percent)+
+  labs(x=NULL,
+       y="predicted probability of being behind expected grade",
+       title="Probability of being behind grade for biracial respondents and monoracial comparison groups",
+       caption="Non-overlap in confidence bands indicates statistically significant difference at the 5% level")
+```
