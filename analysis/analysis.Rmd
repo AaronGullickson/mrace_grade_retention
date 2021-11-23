@@ -8,6 +8,11 @@ output:
     toc_depth: 4
 ---
 
+
+```{r time-start}
+timestamp()
+```
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(here)
@@ -15,6 +20,7 @@ source(here("analysis","check_packages.R"))
 source(here("analysis","useful_functions.R"))
 load(here("analysis","output","acs.RData"))
 ```
+
 
 # Grade retention summary
 
@@ -535,4 +541,9 @@ ggplot(coef_table, aes(x=term, y=estimate, color=multiracial,
        y="predicted probability of being behind expected grade",
        title="Probability of being behind grade for biracial respondents and monoracial comparison groups",
        caption="Non-overlap in confidence bands indicates statistically significant difference at the 5% level")
+```
+
+
+```{r time-end}
+timestamp()
 ```
