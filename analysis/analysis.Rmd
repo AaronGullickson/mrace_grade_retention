@@ -190,17 +190,9 @@ tbl_summary %>%
   row_spec(index_biracial, background = "#D3D3D3")
 ```
 
-# Model building time
+# Model building
 
-Here are the model structure that I will use:
-
-0.  Raw race differences
-1.  Add fixed effects for state, current grade, year, metro, and sex
-2.  Add kids and parents foreign-born status.
-3.  Add mother and father highest degree
-4.  Add family income (square rooted), own your own home, and whether parents are married.
-
-All models are estimated as logit models. 
+## Functional form of year-grade interactions
 
 Before running the full models, I want to test out how I can parsimoniously address differences in the time trends by grade. 
 
@@ -228,7 +220,17 @@ rm(model_add_cat, model_add_cont, model_inter_cat, model_inter_cont)
 
 The preferred model by BIC is clearly the model that fits year as a continuous measure and interacts it with current grade, so that is what I will do. 
 
-Now lets run the full models. Warning, the code chunks below take a bit of time to run!
+## Running the models
+
+Here are the model structure that I will use:
+
+0.  Raw race differences
+1.  Add fixed effects for state, current grade, year, metro, and sex
+2.  Add kids and parents foreign-born status.
+3.  Add mother and father highest degree
+4.  Add family income (square rooted), own your own home, and whether parents are married.
+
+All models are estimated as logit models. Warning, the code chunks below take a bit of time to run!
 
 ```{r build-models, results='asis'}
 model0 <- glm(below_exp_grade~race, data=acs, family=binomial)
@@ -243,7 +245,39 @@ model4 <- update(model3, .~.+sqrt(family_income/10000)+own_home+parents_married)
 knitreg(list(model0, model1, model2, model3, model4))
 ```
 
-The model results themselves are not that useful directly. I want to compare each multiracial group to:
+## Differences for monoracial groups
+
+The model results here are not very interesting directly because everything is relative to a single reference group. However, before proceeding with a technique for understanding the outcomes for biracial respondents, its worthwhile to look more closely at the differences between monoracial groups. The table below shows these differences using average marginal effects (AME) with whites as the reference.
+
+```{r monoracial-results, warning=FALSE, results='asis'}
+results_monoracial <- map(list(model0, model1, model2, model3, model4),
+                          function(x) {
+                            marg(x, "race", type="effects", 
+                                 vcov_mat=vcovCL(x, cluster=acs$cluster),
+                                 at_var_interest=c("White","Black","Indigenous",
+                                                   "Asian","Latino"))[[1]][-1,]
+                          })
+
+knitreg(map(results_monoracial, convert_marg),
+        digits=3, caption="Average marginal differences in probability of being behind grade relative to whites",
+        custom.gof.rows=list("State fixed effects" =  c("No","Yes","Yes","Yes","Yes"),
+                             "Year fixed effects" =   c("No","Yes","Yes","Yes","Yes"),
+                             "Grade fixed effects" =  c("No","Yes","Yes","Yes","Yes"),
+                             "Metro fixed effects" =  c("No","Yes","Yes","Yes","Yes"),
+                             "Nativity and language" = c("No","No","Yes","Yes","Yes"),
+                             "Parent's education" =    c("No","No","No","Yes","Yes"),
+                             "Family resources" =      c("No","No","No","No","Yes")))
+```
+
+The results indicate that controlling for everything in Model 5 reduces the racial disparities substantially. Comparing Model 5 to Model 2, the controls cut the effect in half for the Black and Indigenous groups. It has less effect and slightly increases the gap for Asians because Asians already had lower rates than Whites. The biggest change is for Latinos. In model 2, Latinos had the second highest probabilities and were 2% higher than whites. After controlling for everything, that actually reverse direction, such that Latinos have slightly lower expected probabilities than whites (.3% less). 
+
+The gap is cut in half for Latinos by the nativity and language variables. These variables also increase the advantage of Asians as expected. they have no effect on the Black and Indigenous effects as expected.
+
+So, I have to consider the shrinking (and in the case of Latinos, flipping direction) of these effects with controls when evaluating the placement of biracials.
+
+## Average adjusted preditions for biracials
+
+I want to compare each multiracial group to:
 
 1.  Its two constituent monoracial groups (e.g. Compare Black/White to White and Black)
 2.  The assumption that the biracial group will be halfway between the two constituent monoracial groups.
@@ -475,39 +509,9 @@ Being a part-black group in no way makes one more likely to suffer from hypodesc
 
 In general, the results show that biracial groups are able to "slip through" the racialized structures that affect their more disadvantaged monoracial groups and this is not just a function of observable differences in class and nativity. 
 
-## AMEs for single race groups
+## Sensitivity tests
 
-For the paper, I want a table showing the changes across single race groups. Lets go ahead and build that here based on the AMEs.
-
-```{r monoracial-results, warning=FALSE, results='asis'}
-results_monoracial <- map(list(model0, model1, model2, model3, model4),
-                          function(x) {
-                            marg(x, "race", type="effects", 
-                                 vcov_mat=vcovCL(x, cluster=acs$cluster),
-                                 at_var_interest=c("White","Black","Indigenous",
-                                                   "Asian","Latino"))[[1]][-1,]
-                          })
-
-knitreg(map(results_monoracial, convert_marg),
-        digits=3, caption="Average marginal differences in probability of being behind grade relative to whites",
-        custom.gof.rows=list("State fixed effects" =  c("No","Yes","Yes","Yes","Yes"),
-                             "Year fixed effects" =   c("No","Yes","Yes","Yes","Yes"),
-                             "Grade fixed effects" =  c("No","Yes","Yes","Yes","Yes"),
-                             "Metro fixed effects" =  c("No","Yes","Yes","Yes","Yes"),
-                             "Nativity and language" = c("No","No","Yes","Yes","Yes"),
-                             "Parent's education" =    c("No","No","No","Yes","Yes"),
-                             "Family resources" =      c("No","No","No","No","Yes")))
-```
-
-The results indicate that controlling for everything in model 5 reduces the racial disparities substantially. Comparing Model 5 to Model 2, the controls cut the effect in half for the Black and Indigenous groups. It has less effect and slightly increases the gap for Asians because Asians already had lower rates than Whites. The biggest change is for Latinos. In model 2, Latinos had the second highest probabilities and were 2% higher than whites. After controlling for everything, that actually reverse direction, such that Latinos have slightly lower expected probabilities than whites (.3% less). 
-
-The gap is cut in half for Latinos by the nativity and language variables. These variables also increase the advantage of Asians as expected. they have no effect on the Black and Indigenous effects as expected.
-
-So, I have to consider the shrinking (and in the case of Latinos, flipping direction) of these effects with controls when evaluating the placement of biracials.
-
-# Sensitivity tests
-
-## Models by grade
+### Models by grade
 
 I want to separate the results by age more or less, but I cannot take age directly because then some kids cannot logically be behind grade at certain grade levels. For example, if I restrict to 11 or younger, then none of the 5th graders will be behind grade, by design. So, I will restrict by current grade level which indirectly gets at age. I am going to split it by elementary, middle school, and high school.
 
@@ -569,7 +573,7 @@ ggplot(coef_table, aes(x=term, y=estimate, color=multiracial,
        caption="Non-overlap in confidence bands indicates statistically significant difference at the 5% level")
 ```
 
-## Models with stricter parent linking
+### Models with stricter parent linking
 
 ```{r models-parent-link, warning=FALSE, fig.height=12}
 #run separate models by grade groups
