@@ -45,6 +45,63 @@ code_speakeng <- function(speakeng) {
   return(spk_eng)
 }
 
+code_state_names <- function(state) {
+  state_name <- case_when(
+    state==1  ~ "Alabama",
+    state==2  ~ "Alaska",
+    state==4  ~ "Arizona",
+    state==5  ~ "Arkansas",
+    state==6  ~ "California",
+    state==8  ~ "Colorado",
+    state==9  ~ "Connecticut",
+    state==10 ~ "Delaware",
+    state==11 ~ "DC",
+    state==12 ~ "Florida",
+    state==13 ~ "Georgia",
+    state==15 ~ "Hawaii",
+    state==16 ~ "Idaho",
+    state==17 ~ "Illinois",
+    state==18 ~ "Indiana",
+    state==19 ~ "Iowa",
+    state==20 ~ "Kansas",
+    state==21 ~ "Kentucky",
+    state==22 ~ "Louisiana",
+    state==23 ~ "Maine",
+    state==24 ~ "Maryland",
+    state==25 ~ "Massachusetts",
+    state==26 ~ "Michigan",
+    state==27 ~ "Minnesota",
+    state==28 ~ "Mississippi",
+    state==29 ~ "Missouri",
+    state==30 ~ "Montana",
+    state==31 ~ "Nebraska",
+    state==32 ~ "Nevada",
+    state==33 ~ "New Hampshire",
+    state==34 ~ "New Jersey",
+    state==35 ~ "New Mexico",
+    state==36 ~ "New York",
+    state==37 ~ "North Carolina",
+    state==38 ~ "North Dakota",
+    state==39 ~ "Ohio",
+    state==40 ~ "Oklahoma",
+    state==41 ~ "Oregon",
+    state==42 ~ "Pennsylvania",
+    state==44 ~ "Rhode Island",
+    state==45 ~ "South Carolina",
+    state==46 ~ "South Dakota",
+    state==47 ~ "Tennessee",
+    state==48 ~ "Texas",
+    state==49 ~ "Utah",
+    state==50 ~ "Vermont",
+    state==51 ~ "Virginia",
+    state==53 ~ "Washington",
+    state==54 ~ "West Virginia",
+    state==55 ~ "Wisconsin",
+    state==56 ~ "Wyoming"
+  )
+  
+}
+
 #change contrasts for ordered factors to stairstep style
 ordered_factor <- function(fact_var) {
   ord_fact <- factor(fact_var, ordered=TRUE)

@@ -29,7 +29,7 @@ acs <- read_fwf(here("analysis","input","usa_00114.dat.gz"),
                               126,135,142,143,144,145,146,150,154,165,168,175,
                               176,181,184,193,196,205,208,215,216,221,224,231,
                               232,235,236),
-                    col_names = c("year","cluster","state","metro","strata",
+                    col_names = c("year","cluster","statefip","metro","strata",
                                   "ownershp","perwt","momrule","poprule",
                                   "related","sex","age","raced","hispand",
                                   "bpl","speakeng","gradeattd","ftotinc",
@@ -106,7 +106,8 @@ acs <- acs %>%
          sex=factor(sex, levels=1:2, labels=c("Male","Female")),
          metro=factor(metro, levels=0:4, 
                       labels=c("Indeterminable","Non-metro","Central city",
-                               "Metro non-central","Metro indeterminable"))) %>%
+                               "Metro non-central","Metro indeterminable")),
+         state=code_state_names(statefip)) %>%
   #remove respondents with multiracial parents
   filter(!str_detect(race, "Multiracial"))
 
@@ -131,6 +132,9 @@ colnames(x) <- levels(acs$current_grade)[-1]
 contrasts(acs$current_grade) <- x
 
 # Check Yourself Before You Wreck Yourself --------------------------------
+
+## state names
+table(acs$state, acs$statefip, exclude=NULL)
 
 ## race variable
 table(acs$raced_mom, acs$race_mother, exclude=NULL)

@@ -229,7 +229,7 @@ Now lets run the full models. Warning, the code chunks below take a bit of time 
 ```{r build-models, results='asis'}
 model0 <- glm(below_exp_grade~race, data=acs, family=binomial)
 model1 <- update(model0, 
-                 .~.+I(year-2010)*current_grade+as.factor(state)+metro+sex)
+                 .~.+I(year-2010)*current_grade+state+metro+sex)
 model2 <- update(model1, 
                  .~.+foreign_born+foreign_born_mother+foreign_born_father+
                    spk_eng+spk_eng_mother+spk_eng_father)
