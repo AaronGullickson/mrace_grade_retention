@@ -243,14 +243,16 @@ model4 <- update(model3, .~.+sqrt(family_income/10000)+own_home+parents_married)
 knitreg(list(model0, model1, model2, model3, model4))
 ```
 
-The model results themselves are not that useful. I want to compare each multiracial group to:
+The model results themselves are not that useful directly. I want to compare each multiracial group to:
 
 1.  Its two constituent monoracial groups (e.g. Compare Black/White to White and Black)
 2.  The assumption that the biracial group will be halfway between the two constituent monoracial groups.
 
-I can do this by calculating marginal means (or proportions to be more accurate) of the dependent variable across all of the possible race groups. In order to calculate these marginal means, I use the `marg` command in the `modmargs` library. This gives me results equivalent to average marginal effects but on the level (e.g. mean) rather than the effect (different in mean). Standard errors for these marginal means are calculated by the [delta method](https://cran.r-project.org/web/packages/modmarg/vignettes/delta-method.html). I adjust all SEs for clustering of respondents within households.
+I can do this by calculating the *average adjusted prediction* of the dependent variable across all of the possible race groups. The average adjusted prediction (this is the stata-ese language - it is also called variously a predictive margin among other things). The adjusted predition in general is just the predicted value of the dependent variable for some set of values on the covariates. In this case, I want to predict on the level of the response to get predicted probabilities of being held back. The average adjusted prediction essentially gets the adjusted prediction for every observation in the data based on their covariates and then takes the average. Essentially, this is equivalent to treating every respondent as if they belonged to group A when calculating the average adjusted prediction for group A. The average adjusted prediction is directly related to the *average marginal effect* (AME) in that the AME for a group difference is simply the difference in the average adjusted prediction across groups.
 
-To compare the results for each biracial group to the halfway assumption, I need to calculate the value midway between the two consituent groups and the standard error of that value. Calculating the midway value is just a straightforward mean calculation. To calculate the standard error, I take:
+Its easy to get a simple adjusted prediction at specific values using the `predict` command, but more complicated for the average adjusted prediction. In order to calculate these average adjusted predictions, I use the `marg` command in the `modmargs` library. This function has a nice `type="levels"` argument that directly gives you the average adjusted prediction. Standard errors for these average adjusted predictions are calculated by the [delta method](https://cran.r-project.org/web/packages/modmarg/vignettes/delta-method.html). I also adjust all SEs for clustering of respondents within households.
+
+To compare the results for each biracial group to the halfway assumption, I need to calculate the value midway between the two constituent groups and the standard error of that value. Calculating the midway value is just a straightforward mean calculation. To calculate the standard error, I take:
 
 $$\frac{\sqrt{s_1^2+s_2^2}}{2}$$ where $s_1$ is the standard error for monoracial group 1 and $s_2$ is the standard error for monoracial group 2. This formula follows from the standard formulas for the variance of the sum of random variables.
 
@@ -294,9 +296,11 @@ g+annotate("text", 1, 0.035, hjust="left",
 
 This result is from the baseline model with no control variables, so this would be identical to the result you would get by just calculating raw proportions and their binomial standard errors (although the SEs are slightly different because this model accounts for clustering). The grey bands for the monoracial groups bookmark the range of results we might expect and the red band gives what would be the midpoint value between the groups, adjusting for statistical uncertainty. I can then see where the actual biracial estimate falls within this range. The results here indicate that biracial black/white students have probabilities of grade retention much closer to the lower values of white than black students. However, their probability is still a bit higher than that for whites.
 
-Why I am using 83% (technically 83.4%) confidence intervals? This is a nice visual trick. People often incorrectly believe that overlapping 95% confidence intervals on two means indicates that the difference in the means is not statistically significant at $p<.05$. This is not always true and leads in practice to a much lower $\alpha$ for rejection. For that to be true, one needs to use 1.386 rather than 1.96 in estimating the confidence interval which produces an 83.4% confidence interval. It turns out that 1.386 is equal to $1.96/\sqrt{2}$. The intuition behind this technique is given nicely [here](https://chris-said.io/2014/12/01/independent-t-tests-and-the-83-confidence-interval-a-useful-trick-for-eyeballing-your-data/). Because I use this interval, we can know that if intervals (or bands) do not overlap, then the difference in means between the two groups is statistically significant at $p<.05$. In this case, the biracial estimate is statistically significantly different from both monoracial estimates as well as the "halfway" estimate. In short, biracial black/white students are held back at rates much closer but somewhat higher than whites, rather than blacks.
+Why I am using 83% (technically 83.4%) confidence intervals? This is a nice visual trick. People often incorrectly believe that overlapping 95% confidence intervals on two means indicates that the difference in the means is not statistically significant at $p<.05$. This is not always true and leads in practice to a much lower $\alpha$ for rejection. A much better approximation is given when one uses1.386 rather than 1.96 in estimating the confidence interval, which produces an 83.4% confidence interval. The intuition behind this technique is given nicely [here](https://chris-said.io/2014/12/01/independent-t-tests-and-the-83-confidence-interval-a-useful-trick-for-eyeballing-your-data/). Because I use this interval, we can know that if intervals (or bands) do not overlap, then the difference in means between the two groups is statistically significant at $p<.05$. In this case, the biracial estimate is statistically significantly different from both monoracial estimates as well as the "halfway" estimate. In short, biracial black/white students are held back at rates much closer but somewhat higher than whites, rather than blacks.
 
-The results here are the same as the raw differences, but I can also fit this graph to any of the models, so I can effectively give conditional probabilities. The plot below does this for model 4, by panelizing each multiracial group.
+Its important to note that this technique is just an approximation because it depends on the assumption that the standard errors for the two means are the same, which is not going to be true here. However, it should give results that are quite close. Correcting for unequal SEs is far more complicated because the interval used will vary for any pairwise comparison which I am not doing here. 
+
+The results here are the same as the raw differences, but I can also fit this graph to any of the models, using the average adjusted predictions. The plot below does this for model 4, by panelizing each multiracial group.
 
 ```{r cond-means-model4, warning=FALSE}
 coef_table_mod4 <- calculate_marg_means(model4)
@@ -317,7 +321,7 @@ ggplot(coef_table_mod4, aes(x=term, y=estimate, color=multiracial,
   scale_linetype_manual(values=c(3,1))+
   scale_y_continuous(labels = scales::percent)+
   labs(x=NULL,
-       y="predicted probability of being behind expected grade",
+       y="average adjusted predicted probability of being behind expected grade",
        title="Probability of being behind grade for biracial respondents and monoracial comparison groups",
        caption="Non-overlap in confidence bands indicates statistically significant difference at the 5% level")
 ```
@@ -372,7 +376,7 @@ ggplot(coef_table, aes(x=term, y=estimate, color=multiracial,
   scale_linetype_manual(values=c(3,1))+
   scale_y_continuous(labels = scales::percent)+
   labs(x=NULL,
-       y="predicted probability of being behind expected grade",
+       y="average adjusted predicted probability of being behind expected grade",
        title="Probability of being behind grade for biracial respondents and monoracial comparison groups",
        caption="Non-overlap in confidence bands indicates statistically significant difference at the 5% level")
 ```
@@ -493,8 +497,6 @@ knitreg(map(results_monoracial, convert_marg),
                              "Nativity and language" = c("No","No","Yes","Yes","Yes"),
                              "Parent's education" =    c("No","No","No","Yes","Yes"),
                              "Family resources" =      c("No","No","No","No","Yes")))
-
-
 ```
 
 The results indicate that controlling for everything in model 5 reduces the racial disparities substantially. Comparing Model 5 to Model 2, the controls cut the effect in half for the Black and Indigenous groups. It has less effect and slightly increases the gap for Asians because Asians already had lower rates than Whites. The biggest change is for Latinos. In model 2, Latinos had the second highest probabilities and were 2% higher than whites. After controlling for everything, that actually reverse direction, such that Latinos have slightly lower expected probabilities than whites (.3% less). 
@@ -562,7 +564,7 @@ ggplot(coef_table, aes(x=term, y=estimate, color=multiracial,
   scale_linetype_manual(values=c(3,1))+
   scale_y_continuous(labels = scales::percent)+
   labs(x=NULL,
-       y="predicted probability of being behind expected grade",
+       y="average adjusted predicted probability of being behind expected grade",
        title="Probability of being behind grade for biracial respondents and monoracial comparison groups",
        caption="Non-overlap in confidence bands indicates statistically significant difference at the 5% level")
 ```
@@ -610,7 +612,7 @@ ggplot(coef_table, aes(x=term, y=estimate, color=multiracial,
   scale_linetype_manual(values=c(3,1))+
   scale_y_continuous(labels = scales::percent)+
   labs(x=NULL,
-       y="predicted probability of being behind expected grade",
+       y="average adjusted predicted probability of being behind expected grade",
        title="Probability of being behind grade for biracial respondents and monoracial comparison groups",
        caption="Non-overlap in confidence bands indicates statistically significant difference at the 5% level")
 ```
