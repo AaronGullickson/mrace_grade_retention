@@ -260,7 +260,6 @@ results_monoracial <- map(list(model0, model1, model2, model3, model4),
                           })
 
 knitreg(map(results_monoracial, convert_marg),
-        caption="Differences in the probability of being behind grade by race based on various statistical models. All estimates are average marginal effects.",
         digits=3, caption="Average marginal differences in probability of being behind grade relative to whites",
         custom.gof.rows=list("State fixed effects" =  c("No","Yes","Yes","Yes","Yes"),
                              "Year fixed effects" =   c("No","Yes","Yes","Yes","Yes"),
