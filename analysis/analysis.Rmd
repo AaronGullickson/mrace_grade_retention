@@ -7,6 +7,7 @@ output:
     fig_height: 6
     fig_width: 9
     code_folding: hide
+    lightbox: TRUE
 ---
 
 
@@ -15,7 +16,7 @@ timestamp()
 ```
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, eval=TRUE)
 library(here)
 source(here("analysis","check_packages.R"))
 source(here("analysis","useful_functions.R"))
@@ -277,7 +278,7 @@ The gap is cut in half for Latinos by the nativity and language variables. These
 
 So, I have to consider the shrinking (and in the case of Latinos, flipping direction) of these effects with controls when evaluating the placement of biracials.
 
-## Average adjusted preditions for biracials
+## Average adjusted predictions for biracials
 
 I want to compare each multiracial group to:
 
