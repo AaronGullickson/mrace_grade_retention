@@ -6,6 +6,7 @@ output:
     toc_depth: 2
     fig_height: 6
     fig_width: 9
+    code_folding: hide
 ---
 
 
