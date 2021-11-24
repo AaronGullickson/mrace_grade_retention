@@ -76,7 +76,7 @@ Ok, this looks more or less like what I would expect. We observe two modal ages 
 
 Now lets calculate the percentage of cases TRUE on the dependent variable across this same table, just to confirm its all working correctly.
 
-```{r check-retention-code, caption="The proportion of students measured at below grade level by age and current grade. This graph is used to ensure that the dependent variable is calculated correctly."}
+```{r check-retention-code, fig.cap="The proportion of students measured at below grade level by age and current grade. This graph is used to ensure that the dependent variable is calculated correctly."}
 acs %>%
   group_by(age, current_grade) %>%
   summarize(below=mean(below_exp_grade)) %>%
@@ -93,7 +93,7 @@ Ok, that looks good.
 
 What do the grade retention probabilities look like by grade:
 
-```{r retention-by-grade, caption="Percent of students clearly behind grade level by current grade. Blue lines fit a smoothed curve to the data."}
+```{r retention-by-grade, fig.cap="Percent of students clearly behind grade level by current grade. Blue lines fit a smoothed curve to the data."}
 acs %>%
   group_by(current_grade) %>%
   summarize(below_grade=mean(below_exp_grade),
@@ -114,7 +114,7 @@ I guess those numbers look pretty reasonable. Its hard to benchmark it off anyth
 
 What about by year?
 
-```{r retention-by-year, caption="Trends over time in the percent of students clearly behind grade level. Blue lines fit a smoothed curve to the data."}
+```{r retention-by-year, fig.cap="Trends over time in the percent of students clearly behind grade level. Blue lines fit a smoothed curve to the data."}
 acs %>%
   group_by(year) %>%
   summarize(below_grade=mean(below_exp_grade)) %>%
@@ -132,7 +132,7 @@ Overall, there has been some decline over time in the prevalence of grade retent
 
 Lets look at this by grade and year
 
-```{r retention-by-year-grade, caption="Trends over time and grade in the percent of students clearly behind grade level. Lines are calculated by smoothing."}
+```{r retention-by-year-grade, fig.cap="Trends over time and grade in the percent of students clearly behind grade level. Lines are calculated by smoothing."}
 acs %>%
   group_by(current_grade, year) %>%
   summarize(below_grade=mean(below_exp_grade)) %>%
@@ -299,7 +299,7 @@ coef_table_mod0 <- calculate_marg_means(model0)
 
 Now I can use this nice table to plot out the results. I illustrate what this basic plot looks like below for the case of black/white individuals.
 
-```{r example-plot, caption="Probability of being behind grade for biracial black/white respondents in comparison to their monoracial comparison groups. 83.4% confidence bands shown around each estimate. Non-overlap in confidence bands roughly indicates statistically significant difference at the 5% level"}
+```{r example-plot, fig.cap="Probability of being behind grade for biracial black/white respondents in comparison to their monoracial comparison groups. 83.4% confidence bands shown around each estimate. Non-overlap in confidence bands roughly indicates statistically significant difference at the 5% level"}
 g <- coef_table_mod0 %>%
   filter(mrace=="Black/White") %>%
   ggplot(aes(x=term, y=estimate, color=multiracial,
@@ -335,7 +335,7 @@ Its important to note that this technique is just an approximation because it de
 
 The results here are the same as the raw differences, but I can also fit this graph to any of the models, using the average adjusted predictions. The plot below does this for model 4, by panelizing each multiracial group.
 
-```{r cond-means-model4, warning=FALSE, caption="Probability of being behind grade for biracial respondents in comparison to their monoracial comparison groups. 83.4% confidence bands shown around each estimate. Non-overlap in confidence bands roughly indicates statistically significant difference at the 5% level. Estimates are based on models that adjust for state, year, current grade, metropolitan status, gender, foreign born status, parent's foreign born status, English proficieny, parent's English proficiency, parent's education, family income, home ownership, and family structure."}
+```{r cond-means-model4, warning=FALSE, fig.cap="Probability of being behind grade for biracial respondents in comparison to their monoracial comparison groups. 83.4% confidence bands shown around each estimate. Non-overlap in confidence bands roughly indicates statistically significant difference at the 5% level. Estimates are based on models that adjust for state, year, current grade, metropolitan status, gender, foreign born status, parent's foreign born status, English proficieny, parent's English proficiency, parent's education, family income, home ownership, and family structure."}
 coef_table_mod4 <- calculate_marg_means(model4)
 
 ggplot(coef_table_mod4, aes(x=term, y=estimate, color=multiracial,
@@ -361,7 +361,7 @@ As the table here shows, after controlling for other stuff, most multiracial gro
 
 To compare these results across models, I can try a very large figure that panelizes by model on the column and group on the row.
 
-```{r cond-means-model-compare, fig.height=12, warning=FALSE, caption="Probability of being behind grade for biracial respondents in comparison to their monoracial comparison groups. 83.4% confidence bands shown around each estimate. Non-overlap in confidence bands roughly indicates statistically significant difference at the 5% level. Each panel is based on a different model that accounts for certain variables. Subsequent panels cumulatively include all prior terms."}
+```{r cond-means-model-compare, fig.height=12, warning=FALSE, fig.cap="Probability of being behind grade for biracial respondents in comparison to their monoracial comparison groups. 83.4% confidence bands shown around each estimate. Non-overlap in confidence bands roughly indicates statistically significant difference at the 5% level. Each panel is based on a different model that accounts for certain variables. Subsequent panels cumulatively include all prior terms."}
 #calculate remaining marginal means
 coef_table_mod1 <- calculate_marg_means(model1)
 coef_table_mod2 <- calculate_marg_means(model2)
@@ -510,7 +510,7 @@ In general, the results show that biracial groups are able to "slip through" the
 
 I want to separate the results by age more or less, but I cannot take age directly because then some kids cannot logically be behind grade at certain grade levels. For example, if I restrict to 11 or younger, then none of the 5th graders will be behind grade, by design. So, I will restrict by current grade level which indirectly gets at age. I am going to split it by elementary, middle school, and high school.
 
-```{r models-by-grade, warning=FALSE, fig.height=12, caption="Probability of being behind grade for biracial respondents in comparison to their monoracial comparison groups. 83.4% confidence bands shown around each estimate. Non-overlap in confidence bands roughly indicates statistically significant difference at the 5% level. Panels compare results when data are restricted to certain grade ranges."}
+```{r models-by-grade, warning=FALSE, fig.height=12, fig.cap="Probability of being behind grade for biracial respondents in comparison to their monoracial comparison groups. 83.4% confidence bands shown around each estimate. Non-overlap in confidence bands roughly indicates statistically significant difference at the 5% level. Panels compare results when data are restricted to certain grade ranges."}
 #run separate models by grade groups
 model4_elem <- update(model4, data=subset(acs, current_grade<="5th"))
 model4_middle <- update(model4, data=subset(acs, current_grade>"5th" & 
@@ -575,7 +575,7 @@ In no case do the results here suggest a biasing effect of non-biological kids. 
 
 ### Models with stricter parent linking
 
-```{r models-parent-link, warning=FALSE, fig.height=12, caption="Probability of being behind grade for biracial respondents in comparison to their monoracial comparison groups. 83.4% confidence bands shown around each estimate. Non-overlap in confidence bands roughly indicates statistically significant difference at the 5% level. Panels compare results depending on whether results are restricted only to children linked to a head of household or not."}
+```{r models-parent-link, warning=FALSE, fig.height=12, fig.cap="Probability of being behind grade for biracial respondents in comparison to their monoracial comparison groups. 83.4% confidence bands shown around each estimate. Non-overlap in confidence bands roughly indicates statistically significant difference at the 5% level. Panels compare results depending on whether results are restricted only to children linked to a head of household or not."}
 #run separate models by grade groups
 model4_best_link <- update(model4, data=subset(acs, momrule==11 & poprule==11))
 
@@ -661,7 +661,7 @@ acs$cult_resources <- scale(scale(as.numeric(!acs$foreign_born))+
                                           levels=c("No","Somewhat","Yes")))))
 ```
 
-```{r cult-resource-model, warning=FALSE, caption="Average cultural resources for biracial respondents in comparison to their monoracial comparison groups. 83.4% confidence bands shown around each estimate. Non-overlap in confidence bands roughly indicates statistically significant difference at the 5% level. Cultural resources are determined by a summated score of standardized native-born status, parents' native-born status, English proficieny, and parents' English proficiency. Parents' native-born status is reverse coded based on model results which show it increases grade retention risk."}
+```{r cult-resource-model, warning=FALSE, fig.cap="Average cultural resources for biracial respondents in comparison to their monoracial comparison groups. 83.4% confidence bands shown around each estimate. Non-overlap in confidence bands roughly indicates statistically significant difference at the 5% level. Cultural resources are determined by a summated score of standardized native-born status, parents' native-born status, English proficieny, and parents' English proficiency. Parents' native-born status is reverse coded based on model results which show it increases grade retention risk."}
 #If I use the glm framework then I should be able to feed this back into
 #the marg command
 model_cultr <- glm(cult_resources~race+I(year-2010)*current_grade+state+metro+sex+
@@ -704,7 +704,7 @@ acs$fam_resources <- scale(scale(acs$family_income)+scale(acs$own_home)+
 ```
 
 
-```{r fam-resource-model, warning=FALSE, caption="Average family resources for biracial respondents in comparison to their monoracial comparison groups. 83.4% confidence bands shown around each estimate. Non-overlap in confidence bands roughly indicates statistically significant difference at the 5% level. Family resources are determined by a summated score of standardized family income, parental education, and home ownership."}
+```{r fam-resource-model, warning=FALSE, fig.cap="Average family resources for biracial respondents in comparison to their monoracial comparison groups. 83.4% confidence bands shown around each estimate. Non-overlap in confidence bands roughly indicates statistically significant difference at the 5% level. Family resources are determined by a summated score of standardized family income, parental education, and home ownership."}
 #If I use the glm framework then I should be able to feed this back into
 #the marg command
 model_famr <- glm(fam_resources~race+I(year-2010)*current_grade+state+metro+sex+
