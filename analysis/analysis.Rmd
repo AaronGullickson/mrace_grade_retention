@@ -1,11 +1,11 @@
 ---
 title: "Analysis for Project"
 output: 
-  html_document: 
+  rmdformats::robobook:
+    highlight: tango
+    toc_depth: 2
     fig_height: 6
     fig_width: 9
-    toc: yes
-    toc_depth: 4
 ---
 
 
@@ -212,7 +212,8 @@ sapply(list("categorical, additive"=model_add_cat,
             "continuous, interaction"=model_inter_cont), 
        BIC) %>%
     enframe("model","BIC") %>%
-  kbl()
+  kbl() %>%
+  kable_styling(full_width=FALSE)
 
 # free some memory
 rm(model_add_cat, model_add_cont, model_inter_cat, model_inter_cont)
