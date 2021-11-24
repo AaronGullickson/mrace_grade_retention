@@ -630,6 +630,125 @@ ggplot(coef_table, aes(x=term, y=estimate, color=multiracial,
 
 The results here are extraordinarily stable across both specifications. 
 
+# Differences in Cultural and Family Resources
+
+I want a parsimonious way to visualize differences in cultural and family resources. I can sort of do it by looking at the big descriptive statistics table, but it can be a little hard to summarize. Doing each possible variable separately would be extremely tedious here, so I am going to create scores across variables for these two measures and then model them as outcomes. I can then plot the results just like I do for my actual outcome measure. 
+
+I will start by just looking at the $\alpha$ score for the correlation matrix of each case. I then create scores scaled to have a mean of zero and a standard deviation of one and fit these with a linear model using the same structure as for the models above.
+
+## Cultural Resources
+
+```{r cult-resource-alpha}
+cult_resources <- cbind(as.numeric(!acs$foreign_born), 
+                        as.numeric(!acs$foreign_born_father), 
+                        as.numeric(!acs$foreign_born_mother),
+                        as.numeric(factor(acs$spk_eng, 
+                                          levels=c("No","Somewhat","Yes"))),
+                        as.numeric(factor(acs$spk_eng_father, 
+                                          levels=c("No","Somewhat","Yes"))),
+                        as.numeric(factor(acs$spk_eng_mother, 
+                                          levels=c("No","Somewhat","Yes"))))
+
+alpha(cor(cult_resources))
+```
+
+That all holds together well. However, I run into a problem when I think about making a score out of this because the foreign-born status of parents actually helps to reduce the likelihood of grade retention while all of the other variables increase it. For now, I am just reverse coding it, but this leads to results that are far from intuitive. I think the simple score approach might not work well in this case.
+
+```{r cult-resource-score}
+#scale them all, add them up, and then scale again
+#one catch though, I want to reverse score foreign born mother and father
+#because these reduce the likelihood of grade retention, other things
+#controlled
+acs$cult_resources <- scale(scale(as.numeric(!acs$foreign_born))+
+                              scale(as.numeric(acs$foreign_born_father))+
+                              scale(as.numeric(acs$foreign_born_mother))+
+                              scale(as.numeric(factor(acs$spk_eng, 
+                                          levels=c("No","Somewhat","Yes"))))+
+                              scale(as.numeric(factor(acs$spk_eng_father, 
+                                          levels=c("No","Somewhat","Yes"))))+
+                              scale(as.numeric(factor(acs$spk_eng_mother, 
+                                          levels=c("No","Somewhat","Yes")))))
+```
+
+```{r cult-resource-model, warning=FALSE}
+#If I use the glm framework then I should be able to feed this back into
+#the marg command
+model_cultr <- glm(cult_resources~race+I(year-2010)*current_grade+state+metro+sex+
+                    +degree_mother+degree_father+sqrt(family_income/10000)+
+                     own_home+parents_married, 
+                  data=acs, family="gaussian")
+coef_table_cultr <- calculate_marg_means(model_cultr)
+
+ggplot(coef_table_cultr, aes(x=term, y=estimate, color=multiracial,
+                       ymin=estimate-1.386*se, ymax=estimate+1.386*se))+
+  geom_rect(aes(xmax=Inf, xmin=-Inf, ymin=estimate_mid-1.386*se_mid,
+                ymax=estimate_mid+1.386*se_mid, fill=multiracial), 
+            color=NA, alpha=0.2)+
+  geom_linerange(data=subset(coef_table_cultr, multiracial))+
+  geom_point()+
+  coord_flip()+
+  facet_wrap(~mrace, scales="free_y")+
+  theme_bw()+
+  theme(legend.position = "none", panel.grid = element_blank())+
+  scale_color_manual(values=c("grey40","red"))+
+  scale_fill_manual(values=c("grey40","red"))+
+  scale_linetype_manual(values=c(3,1))+
+  labs(x=NULL,
+       y="average adjusted cultural resource score (standard deviation units)",
+       title="Average cultural resources for biracial respondents and monoracial comparison groups",
+       caption="Non-overlap in confidence bands indicates statistically significant difference at the 5% level")
+```
+
+Because of the issue with foreign-born parents, these results are not particularly intuitive. It tends to show that part-Asian and part-Latino respondents have high cultural resources, but generally not higher than the highest of their constituent groups. Other groups have results half-way in between.
+
+## Family Resources
+
+```{r fam-resource-score, warning=FALSE}
+fam_resources <- cbind(acs$family_income, as.numeric(acs$degree_father), 
+                       as.numeric(acs$degree_mother), as.numeric(acs$own_home))
+
+alpha(cor(fam_resources))
+
+#scale them all, add them up, and then scale again
+acs$fam_resources <- scale(scale(acs$family_income)+scale(acs$own_home)+
+  scale(as.numeric(acs$degree_father)+scale(as.numeric(acs$degree_mother))))
+```
+
+
+```{r fam-resource-model}
+#If I use the glm framework then I should be able to feed this back into
+#the marg command
+model_famr <- glm(fam_resources~race+I(year-2010)*current_grade+state+metro+sex+
+                    foreign_born+foreign_born_mother+foreign_born_father+
+                    spk_eng+spk_eng_mother+spk_eng_father, 
+                  data=acs, family="gaussian")
+coef_table_famr <- calculate_marg_means(model_famr)
+
+ggplot(coef_table_famr, aes(x=term, y=estimate, color=multiracial,
+                       ymin=estimate-1.386*se, ymax=estimate+1.386*se))+
+  geom_rect(aes(xmax=Inf, xmin=-Inf, ymin=estimate_mid-1.386*se_mid,
+                ymax=estimate_mid+1.386*se_mid, fill=multiracial), 
+            color=NA, alpha=0.2)+
+  geom_linerange(data=subset(coef_table_famr, multiracial))+
+  geom_point()+
+  coord_flip()+
+  facet_wrap(~mrace, scales="free_y")+
+  theme_bw()+
+  theme(legend.position = "none", panel.grid = element_blank())+
+  scale_color_manual(values=c("grey40","red"))+
+  scale_fill_manual(values=c("grey40","red"))+
+  scale_linetype_manual(values=c(3,1))+
+  labs(x=NULL,
+       y="average adjusted family resource score (standard deviation units)",
+       title="Average family resources for biracial respondents and monoracial comparison groups",
+       caption="Non-overlap in confidence bands indicates statistically significant difference at the 5% level")
+```
+
+In most cases, family resources are roughly midway between those of the two monoracial groups. However, there are a couple of notable exceptions:
+
+* The average family resources of Black/White students are only marginally better than those of Black students which are far below those of the average white students.
+* The White/Asian group has family resources higher then either of the two constituent groups which already have the highest resources of any monoracial group. The White/Asian group has the highest family resources of any group here.
+* The Indigenous/Latino and Black/Latino groups have family resources slightly lower than either of hte constituent groups, but in both cases there are hardly any differences between the monoracial groups themselves. So you would not expect controlling for these variables to change much for these groups.
 
 ```{r time-end}
 timestamp()
