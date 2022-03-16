@@ -196,13 +196,13 @@ summary(acs$age_birth_father)
 #clearly some outliers, including some Bill & Ted moms (and dads)!. IPUMS 
 #restricts probable cases to age 15-44 for women and 15-60 for men. That seems
 #pretty reasonable. What percentage are outside those ranges
-mean(acs$age_birth_mother<15 | acs$age_birth_mother>44)
-mean(acs$age_birth_father<15 | acs$age_birth_father>60)
+mean(acs$age_birth_mother<17 | acs$age_birth_mother>44)
+mean(acs$age_birth_father<17 | acs$age_birth_father>60)
 
 #pretty small number of cases, so lets go ahead and apply this restriction
 acs <- acs %>%
-  filter((age_birth_mother>=15 & age_birth_mother<=44) &
-           (age_birth_father>=15 & age_birth_father<=60))
+  filter((age_birth_mother>=17 & age_birth_mother<=44) &
+           (age_birth_father>=17 & age_birth_father<=60))
 
 # A further restriction that I want to apply is that the child's reported race
 # should be consistent with the parents. It could select one or both racial
