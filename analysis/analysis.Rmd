@@ -270,6 +270,8 @@ knitreg(map(results_monoracial, convert_marg),
                              "Nativity and language" = c("No","No","Yes","Yes","Yes"),
                              "Parent's education" =    c("No","No","No","Yes","Yes"),
                              "Family resources" =      c("No","No","No","No","Yes")))
+
+save(results_monoracial, file=here("analysis","output","monoracial_results.RData"))
 ```
 
 The results indicate that controlling for everything in Model 5 reduces the racial disparities substantially. Comparing Model 5 to Model 2, the controls cut the effect in half for the Black and Indigenous groups. It has less effect and slightly increases the gap for Asians because Asians already had lower rates than Whites. The biggest change is for Latinos. In model 2, Latinos had the second highest probabilities and were 2% higher than whites. After controlling for everything, that actually reverse direction, such that Latinos have slightly lower expected probabilities than whites (.3% less). 
@@ -410,6 +412,8 @@ ggplot(coef_table, aes(x=term, y=estimate, color=multiracial,
   scale_y_continuous(labels = scales::percent)+
   labs(x=NULL,
        y="average adjusted predicted probability of being behind expected grade")
+
+save(coef_table, file=here("analysis","output","coef_table.RData"))
 ```
 
 
