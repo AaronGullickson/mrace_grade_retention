@@ -5,4 +5,7 @@
 **/*.ent
 .Rproj.user
 analysis/input/*.dat.gz
-analysis/output/
+*.html
+*.log
+*.RData
+*.pdf
