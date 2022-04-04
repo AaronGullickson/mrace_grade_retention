@@ -48,9 +48,52 @@ The final analytical sample consists of children aged 5-20 who are currently enr
 
 The race of children is calculated by a cross-tabulation of parent's races. A full cross-tabulation of the 17 (CHECK) categories of race in the ACS combined with the 4 (CHECK) categories of Hispanicity would produce far too many combined categories to be analytically useful. Therefore, I collapse each parent's race into the categories of White, Black, Asian, Latino, and Indigenous. These categories form the "ethnoracial pentagon" that is commonly used in popular practice and government tabulation to identify race in the US (CITE Hollinger). Respondents are identified as Latino if they responded with a Latino identitification to the Hispanicity question, regardless of their response to the race question. Respondents are identified as Indigenous if they responded as either American Indian/Alaska Native or as Pacific Islander. Because the goal of my analysis is to examine specifically the outcomes of "first-generation" biracial children, I exclude cases where at least one of the parents identified with multiple races.
 
-the cross-tabulation of parent's races leads to ten distinct biracial categories that respondents may fall into. The total sample size for each of these biracial categories is shown in @fig-sample-size. The sample sizes are quite large for many of the groups, suggesting substantial statistical power in determining the relative outcomes for these groups. Even among the smallest group of Indigenous/Asian, the sample size is substantially greater than one would see in typical survey data ($n=519$).
+the cross-tabulation of parent's races leads to ten distinct biracial categories that respondents may fall into. The total sample size for each of these biracial categories is shown in @tbl-descriptive, along with several descriptive statistics. The sample sizes are quite large for many of the groups, suggesting substantial statistical power in determining the relative outcomes for these groups. Even among the smallest group of Indigenous/Asian, the sample size is substantially greater than one would see in typical survey data.
 
 ```{r}
+#| label: tbl-descriptive
+#| tbl-cap: Descriptive statistics by race. Shading indicates biracial group. Groups ordered by sample size.
+tbl_summary <- acs %>%
+  group_by(race) %>%
+  summarize(n=n(), 
+            held_back=percent(mean(below_exp_grade), accuracy=0.01),
+            mean_age=round(mean(age), 1),
+            f_born=percent(mean(foreign_born),  accuracy=0.1),
+            par_fb=percent(mean(foreign_born_father | 
+                                  foreign_born_mother), accuracy=0.1),
+            fam_inc=dollar(round(mean(family_income), 0)),
+            own_home=percent(mean(own_home), accuracy=0.1),
+            par_ba=percent(mean(degree_father=="BA" | 
+                                  degree_father=="G" | 
+                                  degree_mother=="BA" | 
+                                  degree_mother=="G"), accuracy=0.1)
+  ) %>%
+  arrange(desc(n)) %>%
+  mutate(n=comma(n))
+
+index_biracial <- which(str_detect(tbl_summary$race, "/"))
+
+tbl_summary %>%
+  kbl(booktabs = TRUE,
+      linesep = NULL,
+      align = c("l",rep("r", ncol(tbl_summary)-1)),
+      col.names=c("race",
+                  "n",
+                  "clearly below expected grade", 
+                  "mean age",
+                  "foreign-born",
+                  "either parent foreign-born",
+                  "mean family income",
+                  "own home",
+                  "either parent, college degree"
+      )) %>%
+  column_spec(3:10, width = "1.6cm") %>%
+  row_spec(index_biracial, background = "#D3D3D3") %>%
+  landscape()
+```
+
+```{r}
+#| eval: false
 #| label: fig-sample-size
 #| fig-cap: Sample size of biracial respondents combined across American Community Survey data.
 acs %>%
@@ -93,7 +136,7 @@ acs %>%
   theme_bw()
 ```
 
-To account for this grade-specific decline in the models I include an interaction between a linear year term and current grade. Sensitivity analysis showed that this functional form was preferred by BIC to models with no interaction and a model with interaction terms that treated year as a categorical variable. (SHOULD I BE CONSIDERING THE SAME FOR STATE?)
+To account for this grade-specific decline in the models I include an interaction between a linear year term and current grade. Sensitivity analysis showed that this functional form was preferred by BIC to models with no interaction and a model with interaction terms that treated year as a categorical variable. (==SHOULD I BE CONSIDERING THE SAME FOR STATE?==)
 
 The baseline model also includes the race of the respondent. I then add additional terms measuring material and cultural resources that may account for racial differences in a set of subsequent models. First, I include measures of nativity and English proficiency for both the respondent and each of their parents. Second, I include a categorical measure of highest degree earned for each parent. Finally, I include other measures of family income (square rooted), home ownership, and whether the parents are married. All models account for the clustering of multiple respondents within the same household.
 
