@@ -189,13 +189,14 @@ Additionally, I include a measure of the "halfway" point between the two racial 
 #| tbl-cap: Average marginal differences in the probability of being behind grade by monoracial group, relative to a monoracial white student
 texreg(map(results_monoracial, convert_marg),
        digits=3,
+       caption = "Average marginal differences in the probability of being clearly behind grade by monoracial group, relative to a monoracial white student",
        caption.above=TRUE,
        custom.gof.rows=
          list("State fixed effects" = c("Yes","Yes","Yes","Yes"),
+              "Location fixed effects" = c("Yes","Yes","Yes","Yes"),
               "Grade fixed effects" = c("Yes","Yes","Yes","Yes"),
               "Year linear effects" = c("Yes","Yes","Yes","Yes"),
-              "Year x Grade effects"  = c("Yes","Yes","Yes","Yes"),
-              "Location fixed effects" = c("Yes","Yes","Yes","Yes"),
+              "Year x grade effects"  = c("Yes","Yes","Yes","Yes"),
               "Nativity and language" = c("No","Yes","Yes","Yes"),
               "Parent's education" = c("No","No","Yes","Yes"),
               "Family resources" = c("No","No","No","Yes")))
