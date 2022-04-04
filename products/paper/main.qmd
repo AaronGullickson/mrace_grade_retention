@@ -30,6 +30,13 @@ source(here("analysis","useful_functions.R"))
 load(here("analysis","output","acs.RData"))
 load(here("analysis","output","coef_table.RData"))
 load(here("analysis","output","monoracial_results.RData"))
+# change names of models for display
+coef_table <- coef_table %>%
+  mutate(model=factor(model,
+                      levels=c("crude","fixed effects","cultural resources",
+                               "parent resources"),
+                      labels=c("Raw","Baseline model","Cultural model",
+                               "Full model")))
 ```
 
 # Introduction
@@ -148,14 +155,14 @@ To illustrate via an example, I take the raw percent of students clearly behind 
 #| label: fig-example
 #| fig-cap: Probability of being behind grade for biracial black/white respondents in comparison to their monoracial comparison groups. 83.4% confidence bands shown around each estimate. Non-overlap in confidence bands roughly indicates statistically significant difference at the 5% level.
 g <-  coef_table %>%
-  filter(mrace=="Black/White" & model=="crude") %>%
+  filter(mrace=="Black/White" & model=="Raw") %>%
   ggplot(aes(x=term, y=estimate, color=multiracial,
              ymin=estimate-1.386*se, ymax=estimate+1.386*se))+
   geom_rect(aes(xmax=Inf, xmin=-Inf, ymin=estimate_mid-1.386*se_mid,
                 ymax=estimate_mid+1.386*se_mid, fill=multiracial), 
             color=NA, alpha=0.2)+
   geom_linerange(data=subset(coef_table, multiracial & mrace=="Black/White" &
-                               model=="crude"))+
+                               model=="Raw"))+
   geom_point()+
   coord_flip()+
   theme_bw()+
@@ -204,20 +211,22 @@ texreg(map(results_monoracial, convert_marg),
 
 -   Show panelized figures for each group from fixed effect model to full model.
 
-```{r cond-means-model-compare}
-#| label: fig-full-models
-#| fig-cap: Probability of being behind grade for biracial respondents in comparison to their monoracial comparison groups. 83.4% confidence bands shown around each estimate. Non-overlap in confidence bands roughly indicates statistically significant difference at the 5% level. Each panel is based on a different model that accounts for certain variables. Subsequent panels cumulatively include all prior terms.
-#| fig-height: 9
+```{r fig-black-models}
+#| label: fig-black-models
+#| fig-cap: Probability of being behind grade for biracial respondents with one black parent, in comparison to their monoracial comparison groups. 83.4% confidence bands shown around each estimate. Non-overlap in confidence bands roughly indicates statistically significant difference at the 5% level, Baseline model includes year, grade, location, and state fixed effects. Full models include control variables for nativity, English proficiency, income, education, home ownership, and marital status of parents.
+#| fig-height: 7.5
 coef_table %>%
-  filter(model=="fixed effects" | model=="parent resources") %>%
+  filter(model=="Baseline model" | model=="Full model") %>%
+  filter(str_detect(mrace, "Black")) %>%
   ggplot(aes(x=term, y=estimate, color=multiracial,
              ymin=estimate-1.386*se, ymax=estimate+1.386*se))+
   geom_rect(aes(xmax=Inf, xmin=-Inf, ymin=estimate_mid-1.386*se_mid,
                 ymax=estimate_mid+1.386*se_mid, fill=multiracial), 
             color=NA, alpha=0.2)+
   geom_linerange(data=subset(coef_table, multiracial 
-                             & (model=="fixed effects" | 
-                                  model=="parent resources")))+
+                             & (model=="Baseline model" | 
+                                  model=="Full model") & 
+                               str_detect(mrace, "Black")))+
   geom_point()+
   coord_flip()+
   facet_grid(mrace~model, scales="free_y")+
@@ -228,5 +237,34 @@ coef_table %>%
   scale_linetype_manual(values=c(3,1))+
   scale_y_continuous(labels = scales::percent)+
   labs(x=NULL,
-       y="average adjusted predicted probability of being behind expected grade")
+       y="average predicted probability of being clearly behind expected grade")
+```
+
+```{r fig-other-models}
+#| label: fig-other-models
+#| fig-cap: Probability of being behind grade for non-black biracial respondents, in comparison to their monoracial comparison groups. 83.4% confidence bands shown around each estimate. Non-overlap in confidence bands roughly indicates statistically significant difference at the 5% level, Baseline model includes year, grade, location, and state fixed effects. Full models include control variables for nativity, English proficiency, income, education, home ownership, and marital status of parents.
+#| fig-height: 7.5
+coef_table %>%
+  filter(model=="Baseline model" | model=="Full model") %>%
+  filter(!str_detect(mrace, "Black")) %>%
+  ggplot(aes(x=term, y=estimate, color=multiracial,
+             ymin=estimate-1.386*se, ymax=estimate+1.386*se))+
+  geom_rect(aes(xmax=Inf, xmin=-Inf, ymin=estimate_mid-1.386*se_mid,
+                ymax=estimate_mid+1.386*se_mid, fill=multiracial), 
+            color=NA, alpha=0.2)+
+  geom_linerange(data=subset(coef_table, multiracial 
+                             & (model=="Baseline model" | 
+                                  model=="Full model") & 
+                               !str_detect(mrace, "Black")))+
+  geom_point()+
+  coord_flip()+
+  facet_grid(mrace~model, scales="free_y")+
+  theme_bw()+
+  theme(legend.position = "none", panel.grid = element_blank())+
+  scale_color_manual(values=c("grey40","red"))+
+  scale_fill_manual(values=c("grey40","red"))+
+  scale_linetype_manual(values=c(3,1))+
+  scale_y_continuous(labels = scales::percent)+
+  labs(x=NULL,
+       y="average predicted probability of being clearly behind expected grade")
 ```
