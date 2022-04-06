@@ -199,26 +199,31 @@ tbl_summary %>%
 Before running the full models, I want to test out how I can parsimoniously address differences in the time trends by grade. 
 
 ```{r models-year-grade}
-model_add_cat <- glm(below_exp_grade~as.factor(year)+current_grade, 
+model_add_cat <- glm(below_exp_grade~as.factor(year)+current_grade+state, 
                      data=acs, family=binomial)
-model_add_cont <- glm(below_exp_grade~I(year-2010)+current_grade, 
+model_add_cont <- glm(below_exp_grade~I(year-2010)+current_grade+state, 
                      data=acs, family=binomial)
-model_inter_cont <- glm(below_exp_grade~I(year-2010)*current_grade, 
+model_inter_cont <- glm(below_exp_grade~I(year-2010)*current_grade+state, 
                      data=acs, family=binomial)
-model_inter_cat <- glm(below_exp_grade~as.factor(year)*current_grade, 
+model_inter_cat <- glm(below_exp_grade~as.factor(year)*current_grade+state, 
+                     data=acs, family=binomial)
+model_inter_state <- glm(below_exp_grade~I(year-2010)*current_grade+
+                            I(year-2010)*state, 
                      data=acs, family=binomial)
 
 sapply(list("categorical, additive"=model_add_cat,
             "categorical, interaction"=model_inter_cat, 
             "continuous, additive"=model_add_cont, 
-            "continuous, interaction"=model_inter_cont), 
+            "continuous, interaction"=model_inter_cont,
+            "add state*year continuous interaction"=model_inter_state),
        BIC) %>%
     enframe("model","BIC") %>%
   kbl() %>%
   kable_styling(full_width=FALSE)
 
 # free some memory
-rm(model_add_cat, model_add_cont, model_inter_cat, model_inter_cont)
+rm(model_add_cat, model_add_cont, model_inter_cat, model_inter_cont,
+   model_inter_state)
 ```
 
 The preferred model by BIC is clearly the model that fits year as a continuous measure and interacts it with current grade, so that is what I will do. 
