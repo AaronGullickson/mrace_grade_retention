@@ -8,7 +8,7 @@ format:
     documentclass: scrartcl
     papersize: letter
     fig-height: 4
-    fig-pos: htb
+    fig-pos: t
     keep-tex: false
     #template: resources/aog-latex-ms.tex
 bibliography: ../project.bib
@@ -181,19 +181,19 @@ acs %>%
   theme_bw()
 ```
 
-The baseline model also includes the race of the respondent. I then add additional terms measuring material and cultural resources that may account for racial differences in a set of subsequent models. First, I include measures of nativity and English proficiency for both the respondent and each of their parents. Second, I include a categorical measure of highest degree earned for each parent. Finally, I include measures of family income (square rooted), home ownership, and whether the parents are married that capture other family resources. All standard errors reported here also account for the occassional clustering of multiple respondents within the same household.
+The baseline model also includes the race of the respondent. I then add additional terms measuring material and cultural resources that may account for racial differences in a set of subsequent models. First, I include measures of nativity and English proficiency for both the respondent and each of their parents. Second, I include a categorical measure of highest degree earned for each parent. Finally, I include measures of family income (square rooted), home ownership, and whether the parents are married that capture other family resources. All standard errors reported here also account for the clustering of multiple respondents within the same household.
 
 # Results
 
-I begin by showing the relative risk of grade retention among monoracial respondents across models. @tbl-monoracial reports average marginal effects on the probability of grade retention for each monoracial minority group in comparison to White students. Understanding these differences and how they change across models helps me to understand the potential for how biracial respondents might be positioned.
+I begin by showing the relative risk of being below expected grade among monoracial respondents across models. @tbl-monoracial reports average marginal effects on the probability of grade retention for each monoracial minority group in comparison to White students. Understanding these differences and how they change across models helps me to understand the potential for how biracial respondents might be positioned.
 
-Model 1 only controls for structural factors such as state of residence, urbanicity, grade, and year. Thus, these results provide a good estimate of the differences across monoracial groups without controlling for differences in cultural and material resources across groups. The results show that Black, Indigenous, and Latino students all have substantially higher probability of grade retention than White students. Indigenous students have substantially higher risk than all other students, with a probability of grade retention that is 4.1% percentage points higher than White students. Asian students have the lowest probability of grade retention, and their risk is slightly lower than Whites.
+Model 1 only controls for structural factors such as state of residence, student location, grade, and year. These results provide a baseline estimate of the differences across monoracial groups without controlling for differences in cultural and material resources across groups. The results show that Black, Indigenous, and Latino students all have substantially higher probability of grade retention than White students. Indigenous students have substantially higher risk than all other students, with a probability of grade retention that is 4.1% percentage points higher than White students. Asian students have the lowest probability of grade retention, and their risk is slightly lower than Whites.
 
 The subsequent models control for a variety of additional variables. Model 2 includes controls for whether the student and each of their parents are native-born and speak English well. Model 3 controls for the highest degree received for each parent, and Model 4 controls for family income (square rooted), home ownership, and whether the student's parents are married.
 
-In general Model 2 and Model 3 have substantial effects on the observed inequality across racial groups, while the additional variables from Model 4 have less impact. Controlling for the characteristics related to immigration in Model 2 cuts the gap between White and Latino students in half and increases the gap between Asian and White students. It has no impact on the gap between White and Black or White and Indigenous students because most of these students are not first or second generation.
+In general Model 2 and Model 3 have substantial effects on the observed inequality across racial groups, while the additional variables from Model 4 have less impact. Controlling for the characteristics related to immigration in Model 2 cuts the gap between White and Latino students in half and increases the gap between Asian and White students. It has no impact on the gap between White and Black or White and Indigenous students because most of these students are native-born with native-born parents.
 
-Controlling for education in Model 3 reduces the gap substantially for Black and Indigenous students and removes the gap entirely for Latino students. In fact, the results of both Models 3 and 4, suggest that, when holding constant cultural and family resources, Latino students are slightly less likely than White students to be held back.
+Controlling for education in Model 3 reduces the gap substantially for Black and Indigenous students and removes the gap entirely for Latino students. In fact, the results of both Models 3 and 4 suggest that, when holding constant cultural and family resources, Latino students are slightly less likely than White students to be held back.
 
 SUMMARIZE THIS?
 
@@ -206,7 +206,7 @@ texreg(map(results_monoracial, convert_marg),
        caption = "Average marginal differences in the probability of being clearly behind grade by monoracial group, relative to a monoracial white student",
        caption.above=TRUE,
        label="tbl-monoracial",  #TODO: This does not work
-       float.pos="htb",
+       float.pos="t",
        custom.gof.rows=
          list("State fixed effects" = c("Yes","Yes","Yes","Yes"),
               "Location fixed effects" = c("Yes","Yes","Yes","Yes"),
@@ -218,7 +218,7 @@ texreg(map(results_monoracial, convert_marg),
               "Family resources" = c("No","No","No","Yes")))
 ```
 
-I now turn to the results for biracial respondents. Partially to present results in a more easily digestible way, I split these results into two separate figures. In @fig-black-models, I show the placement of each biracial group involving one black parent in comparison to their two monoracial constituent groups. To allow comparison across models, I compare the results from the baseline model (Model 1 in @tbl-monoracial) and the full model that accounts for all cultural and family resources (Model 4 in @tbl-monoracial).
+I now turn to the results for biracial respondents. Due to the number of comparisons being made, I split these results into two separate figures. In @fig-black-models, I show the placement of each biracial group involving one black parent in comparison to their two monoracial constituent groups. To allow comparison across models, I compare the results from the baseline model (Model 1 in @tbl-monoracial) and the full model that accounts for all cultural and family resources (Model 4 in @tbl-monoracial).
 
 ```{r fig-black-models}
 #| label: fig-black-models
@@ -250,15 +250,17 @@ coef_table %>%
        y="average predicted probability of being clearly behind expected grade")
 ```
 
-I focus first on biracial groups with one Black parent because of a stronger historical expectation that these students will be identified as Black by the "one-drop rule" and as a result will have similar outcomes to Black students. In three cases, this hypothesis can be soundly rejected. For Black/White, Black/Latino, and Black/Asian students, The probability of being clearly behind expected grade level is substantially lower than that for monoracial black students and the difference is statistically distinguishable from zero. The only case where this is not true is for Black/Indigenous students. However this case is also notable for the fact that monoracial Black students have lower risk of grade retention than monoracial Indigenous students. In all four cases, these biracial students have a risk of grade retention that is closer to the lower risk monoracial group.
+I focus first on biracial groups with one Black parent because of a stronger historical expectation that these students will be identified as Black by the "one-drop rule" and as a result will have similar outcomes to Black students. In three cases, this hypothesis can be soundly rejected. For Black/White, Black/Latino, and Black/Asian students, The probability of being clearly below expected grade is substantially lower than that for monoracial black students and the difference is statistically distinguishable from zero. Only in the case of Black/Indigenous students, do I observe outcomes that are indistinguishable from those of Black students. However, in this case,monoracial Black students have lower risk of grade retention than monoracial Indigenous students. Thus, In all four cases, part-Black biracial students have a risk of grade retention that is closer to the lower risk monoracial group.
 
-The results also suggest that each of these biracial groups has a risk of grade retention lower than the halfway point, although this hypothesis cannot be rejected completely for the Black/Asian and Black/Indigenous groups, due to the greater degree of uncertainty in the point estimates for these groups.
+The results also suggest that each of these biracial groups has a risk of grade retention lower than the halfway point, although this hypothesis cannot be rejected completely for the Black/Asian and Black/Indigenous groups, due to a higher degree of uncertainty for these smaller groups.
 
-Controlling for resource variables has some effect on the placement of Black/White and Black/Latino biracial respondents. In the case of Black/White biracial respondents, Black/White students initially have a risk of grade retention slightly higher than and statistically distinguishable from White student. After controlling for cultural and family resources, however, Black/White respondents have a risk of grade retention that is slightly lower and statistically distinguishable from White students. This change reflects the relatively low level of parental education and income among Black/White students, which is much closer to Black students than White students, as shown on @tbl-descriptive.
+Controlling for resource variables has some effect on the placement of Black/White and Black/Latino biracial respondents. In the case of Black/White biracial respondents, Black/White students initially have a risk of grade retention slightly higher than and statistically distinguishable from White students. After controlling for cultural and family resources, however, Black/White respondents have a risk of grade retention that is slightly lower and statistically distinguishable from White students. This change reflects the relatively low level of parental education and income among Black/White students, which is much closer to Black students than White students, as shown on @tbl-descriptive.
 
 An opposite pattern is observed for Black/Latino respondents. Black/Latino respondents initially have a risk of grade retention substantially lower than both Black and Latino students, who have similar risks. However, after controlling for cultural and family resources, Black/Latino students have a risk of grade retention that is indistinguishable from the grade retention risk of Latino students and substantially lower than Black students. The change largely reflects the fact that Black/Latino students have greater cultural resources than Latino students and once this advantage is accounted for, they have a similar risk.
 
-Altogether, the results here strongly suggest that the risk of grade retention faced by these biracial students with one black parent is generally similar to that of their constituent monoracial group with the lower risk of grade retention. This finding is inconsistent both with the expectation of the one-drop rule and the "in-between" hypothesis. I now turn to the experiences of the remaining biracial groups.
+Altogether, the results here strongly suggest that the risk of grade retention faced by these biracial students with one black parent is generally similar to that of their constituent monoracial group with the lower risk of grade retention. This finding is inconsistent both with the expectation of the one-drop rule and the "in-between" hypothesis.
+
+@fig-other-models shows the results for the remaining biracial groups. In general, the results here are consistent with those for part-Black biracial respondents, with some important caveats discussed below. The point estimates indicate that the risk of each biracial group is either quite close to the monoracial group with the lower risk or in-between this group's risk and the halfway point.
 
 ```{r fig-other-models}
 #| label: fig-other-models
@@ -290,12 +292,12 @@ coef_table %>%
        y="average predicted probability of being clearly behind expected grade")
 ```
 
-@fig-other-models shows the results for these remaining biracial groups. In general, the results here are consistent with those for part-Black biracial respondents, with some important caveats discussed below. In general, the point estimates suggest that the risk of each biracial group is either quite close to the monoracial group with the lower risk or in-between this group's risk and the halfway point.
-
-Any results for part-Latino students are complicated by the substantial change in the monoracial Latino risk across models. For example, while Latinos have substantially higher risk of grade retention than Whites in the baseline model, there is only a very small difference favoring Latinos in the full model. Nonetheless, even in this case, we see that White/Latinos have risk closer to those of the lower Latino group, but distinguishable from both groups.
-
-For all groups, the full models generally indicate that each biracial group has a risk of grade retention similar to the risk of the lower monoracial constituent group or has risk higher than this group but less than the halfway point. There are two exceptions to this general pattern. First, for the Indigenous/Latino group, I cannot rule the possibility that this group has risk roughly halfway between the two constituent groups, although the point estimate favors a result closer to the lower Latino group. Second, for Latino/Asian students, I observe the only case where the risk for the biracial group is higher than either monoracial group. However, the confidence bands suggest that the risk for the Latino/Asian group cannot be differentiated from the rates for Latinos, the higher of the two monoracial constituent groups. This result marks the one substantial deviation from the general pattern. It only emerges in the models that control for cultural and family resources because Latino/Asian students come from higher income and more educated households than Latino students, on average.
+For all groups, the full models generally indicate that each biracial group has a risk of grade retention similar to the risk of the lower monoracial constituent group or has risk higher than this group but less than the halfway point. There are two exceptions to this general pattern. First, for the Indigenous/Latino group, I cannot rule out the possibility that this group has risk roughly halfway between the two constituent groups, although the point estimate favors a result closer to the lower Latino group. Second, Latino/Asian students are the only case where the risk for the biracial group is higher than either monoracial group. However, the confidence bands suggest that the risk for the Latino/Asian group cannot be differentiated from the rates for Latinos, the higher of the two monoracial constituent groups. This result marks the one substantial deviation from the general pattern. It only emerges in the models that control for cultural and family resources because Latino/Asian students come from higher income and more educated households than Latino students, on average.
 
 Aside from the effect on Latino/Asian students, controlling for cultural and family resources has moderate effects on the placement of the remaining biracial groups. The only case with a substantial shift is that for White/Asian students who initially appear to have lower risk than either White or Asian students. After controlling for these resources, the risks of White/Asian students are indistinguishable from the lower risk of Asian students. This is due to the fact that White/Asian students come from the most advantaged households of any group in the dataset.
 
+Any results for part-Latino students are complicated by the substantial change in the monoracial Latino risk across models. For example, while Latinos have substantially higher risk of grade retention than Whites in the baseline model, there is only a very small difference favoring Latinos in the full model. Nonetheless, even in this case, we see that White/Latinos have risk closer to those of the lower Latino group, but distinguishable from both groups.
+
 ## Conclusions
+
+## References
