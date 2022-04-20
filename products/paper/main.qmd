@@ -1,6 +1,7 @@
 ---
 title: Grade Retention and Mixed Race
-author: Aaron Gullickson, *University of Oregon*
+author: 
+  - Aaron Gullickson, *University of Oregon*
 abstract: This is a test abstract
 thanks: Thanks to people and stuff
 format:
@@ -10,7 +11,6 @@ format:
     fig-height: 4
     fig-pos: t
     keep-tex: false
-    #template: resources/aog-latex-ms.tex
 bibliography: ../project.bib
 execute: 
   eval: true
@@ -42,7 +42,56 @@ coef_table <- coef_table %>%
 
 # Introduction
 
+* Research on mixed-race individuals in the US has exploded over the last two decades, driven by both the demographic phenomenon of a biracial baby boom and changes to statistical reporting that allow multiple race reporting. 
+* Although, multiraciality in the US is a phenomenon that is in fact older than the country itself (CITATIONS), much of the research has focused particularly on the experiences of first-generation "biracial" individuals whose parents belong to different single race groups. The reasons for this are:
+  * These individuals are coming of age in a post-Civil Rights era in which historical norms of racial identification may be dissolving and/or shifting.
+  * The demographic weight of the biracial baby boom suggests that these individuals will play an outsized role in the future of race in the US.
+* Research has focused on a variety of areas with regard to this group. In particular, studies of how such individuals identify and are classified by others has been extremely active. Significantly less work has been done on the life chances of first-generation biracials relative to their monoracial peers.
+* Such work is critically important because it helps us understand how contemporary biracials are sorted into a pre-existing system of structural racial inequality. 
+* Researchers are well aware of the importance of this question, the relative lack of work on the topic reflects two important limitations in our data sources.
+  * First, simply using self-identification in large scale sources like the Census, ACS, or CPS data is generally seen as problematic. We know that many biracial individuals will not identify as multiracial and some individuals who identify as multiracial will not be first-generation biracials. Thus, any observed differences across groups may be the result of selection biases in who decides to identify as multiracial. 
+  * Second, other data sources that allow identification of biracial respondents by parental race often contain samples of biracial respondents that are too small to facilitate analysis. This is particularly true when researchers want to consider outcomes separately by the specific parental racial groups involved, as they should.
+* One way that researchers have overcome this limitation in prior work is by the identification of biracial children living with both biological parents in large-scale Census and ACS data. This approach has been primarily used to look at how such children are racially classified (citations), but has also been used to look at residential settlement patterns (citations). Its more difficult to look at traditional educational and labor market outcomes, however, precisely because the biracial respondents identified will be minors and thus will not have accumulated much in the way of life outcomes, for good or bad. 
+* One important outcome is available, however, for children. Grade retention (e.g. being held back in school). We know that grade retention is relatively common in the US and that the likelihood of grade retention is not equally distributed for children but is rather related to socioeconomic status, family structure, and race (citations). We also know that grade retention is related to later negative educational and labor market outcomes (citations). Thus, grade retention provides one of the earliest measures of the way systems of stratification sort individuals into a system of structural inequality. 
+* In this study, I analyze the grade retention outcomes of biracial children relative to their monoracial peers using ACS data from 2010-2019. The results provide a window into the placement of biracial children within an existing system of racial inequality in our educational systems. ==TAKING TOO LONG TO GET HERE, MIGHT WANT TO RE-ORDER SOME THINGS==
+
 # Background
+
+* The biracial baby boom - why we should care about outcomes for this particular group. 
+
+* What should we expect about the outcomes for biracials relative to their monoracial peer groups?
+  * In each case, our interest is in the outcomes for the biracial group relative to the two constituent groups that their parents identify with. So for example, how to the outcomes of a Black/White individual compare to monoracial Black and monoracial White individuals?
+  * The most direct pathway for understanding these outcomes is via how such individuals are classified by those in positions of power and control, such as teachers, administrators, employers, etc. To the extent that biracial individuals are classified as more like one of their monoracial constituent groups, they will receive the same treatment by individuals and either reap similar benefits or suffer similar discrimination and penalties.
+  * Specifically, I consider two long-standing norms of *hypodescent* and *hyperdescent* in understanding possible placement of biracial individuals (cite F James Davis). Hypodescent indicates a norm in which individuals of mixed racial ancestry are classified as members of the lower status group within a racial hierarchy. In the US, hypodescent is canonically tied to the "one-drop rule", a norm in which those of part-Black ancestry were simply viewed as Black, irrespective of other ancestry (CITATIONS). More generally, if hypodescent is the common practice, we would expect biracial individual's outcomes to be closest those of the monoracial constituent group with the lower outcomes. 
+  * Hyperdescent refers to the opposite situation in which a mixed race individual is classified as a member of the higher status group. Because hyperdescent blends individuals into the often unmarked dominant group, it is often more difficult to see. Indigenous ancestry (American Indian, Pacific Islander, and Alaska Native) has historically followed a logic of hyperdescent in which a mixing of indigenous ancestry does not disqualify individuals from claiming membership with another group (most notably Whites). In the case of outcomes, a pattern of hyperdescent would be indicated if biracial individual's outcomes are closest to those of the monoracial constituent group with the higher outcomes. 
+  * Discuss work on the contemporary strength of these norms? 
+  * The expectations of hypodescent/hyperdescent are that the biracial respondent will have outcomes close to one of the monoracial constituent groups. Another possibility is that biracial respondents will have outcomes intermediate between their monoracial constituent groups. There could be several reasons for this:
+    * The racial ambiguity of biracial respondents may protect them from the worst stigmatization and discrimination in social settings, but by the same coin it may allow them to benefit less from membership in advantaged groups. Thus, a greater recognition of their "blended" ancestry may place them in a halfway position.
+    * Even in cases where hypodescent and hyperdescent are still norms, physical differentation such as skin tone may provide advantages and disadvantages among members who are classified in the same way. We know that skin tone makes a difference even for monoracial Blacks, so the one-drop rule while providing a single classification does not create uniform experiences for all Blacks. (==CITE MONKS WORK HERE I THINK==).
+    * Successful outcomes within social systems depend on a variety of non-material, symbolic resources (e.g. social and cultural capital) that we rarely completely capture in our measurements. Some of the differences in outcomes across racial groups may reflect differences in those resources (CITATIONS?). Given that biracial children have parents belonging to two different races, they may possess such resources that are roughly half-way between the two constituent groups on average, and thus will place them roughly in between the groups. In effect, the in-between outcomes for biracial children may loosely reflect the "black box" package of differences across racial groups that a racial dummy variables stands in for in our research practices.
+    * Two other possibilities don't suggest the actual placement, but rather may modify it in the face of other prevalent patterns. Hybridity itself may be a boon or a burden on biracial individuals that affects their outcomes in, respectively, positive or negative ways. 
+      * On the positive side of the ledger, hybridity may enabled a larger cultural "toolkit" that allows mixed race individuals to more easily navigate a variety of social situations. On the negative side of the ledger, the longstanding "marginal man" hypothesis suggests that the dissonance of living in two different worlds may lead to negative mental health outcomes for mixed race individuals, which could spill over into other types of outcomes.
+
+* In all of this, its crucially important to understand how other resources affect our understanding of the placement of biracial individuals. Biracial individuals are the products of interracial unions and individuals are not randomly selected into such unions. This can lead to underlying differences in the socioeconomic resources that biracial individuals possess relative to their monoracial peers. However, this selection can be quite complex. (DISCUSS CHENG AND LIVELY HERE?)
+  * Status exchange suggests that members of lower status racial groups will be positively selected into interracial unions, while higher status racial groups will be negatively selected. How this affects the relative resources of biracial individuals will depend then in some part on the relative strength of these phenomena, the gender balance in a given form of interracial unions, and how the gender of parents affects outcomes. Status exchange may also not be present in all forms of interracial unions.
+
+* Review previous studies on outcomes
+  * Campbell
+  * Herman
+  * Holloway/Ellis stuff
+  * Udry? - also related stuff by Cheng? How does Cheng and Powell fit in here?
+  * Do some more bibliographic work, particularly forward searching to see if I am missing something big here.
+  * Limitations of this work
+    * Small sample sizes lead to inconsistent estimates in most of the survey data.
+    * In many cases, impossible to understand outcomes for part-Latino biracials. 
+  
+* Why grade retention as an outcome?
+  * Grade retention is a relatively common practice. Discuss overall trends in grade retention and connection to educational reforms.
+  * Grade retention has negative effect on later outcomes, even controlling for cognitive differences (CITE WORK HERE).
+  * Clear inequalities by race in practices of grade retention as well as by SES (CITE WORK).
+  * In effect, grade retention may be for many individuals the first encounter with the wider stratification system that sorts individuals and helps to perpetuate inequality.
+  
+* What I do  and how it improves our understanding.
 
 # Data and Methods
 
@@ -299,5 +348,7 @@ Aside from the effect on Latino/Asian students, controlling for cultural and fam
 Any results for part-Latino students are complicated by the substantial change in the monoracial Latino risk across models. For example, while Latinos have substantially higher risk of grade retention than Whites in the baseline model, there is only a very small difference favoring Latinos in the full model. Nonetheless, even in this case, we see that White/Latinos have risk closer to those of the lower Latino group, but distinguishable from both groups.
 
 ## Conclusions
+
+* Big claim: The results are consistent with a new "regime of hyperdescent" operating across all racial groups. This contributes to a muddying of racial distinctiveness via hybridity, while at the same time isolating monoracial members of the most stigmatized racial groups, consistent with arguments like Bonilla-Silva's Latin Americanization. 
 
 ## References
