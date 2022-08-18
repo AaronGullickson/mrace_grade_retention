@@ -58,6 +58,8 @@ The results provide a window into the placement of biracial children within an e
 
 # Background
 
+## Where do Biracials Fit?
+
 How might we expect the outcomes for biracial individuals do differ from their monoracial peers? In every case, the relevant comparison is how a biracial person fares relative to the two constituent groups with which their parents identify. For example, in the case of an individual with one Black and one White parent, we would compare the average outcomes for such individuals to the average outcomes for individuals with two White and two Black parents. The outcome for the Black/White group may be  similar to one of the monoracial groups, it may me somewhere in between the outcomes for the two monoracial groups, or it may be higher or lower than either of the monoracial groups. 
 
 The most direct pathway for understanding the placement of this outcome is via how biracial individuals are classified by those in positions of power and control, such as teachers, administrators, and employers. To the extent that biracial individuals are classified as more like one of their monoracial constituent groups. they will receive the same treatment and either reap similar rewards or suffer similar discrimination and penalties. 
@@ -74,14 +76,17 @@ Notably, both of these mechanisms could co-exist with norms of hypo/hyperdescent
 
 Aside from ambiguity in physical appearance, a variety of non-material symbolic resources (e.g. social and cultural capital) may also play a role in producing an in-between status. We know that racial disparities persist across a variety of outcomes even after controlling for a wide variety of socioeconomic variables (==CITATIONS==). The residual effect of race here is a "black box" that we often think of as compromising some combination of (a) discrimination and (b) other forms of social and cultural capital not well captured in our data that are differently distributed by race. Biracial individuals may inherit this black box of unobserved resources in weights related to their parent's races, thus helping to produce results that are in-between the two constituent groups. (==I SHOULD GIVE SOME EXAMPLES AND CITATIONS OF WHAT I AM TALKING ABOUT HERE==)
 
-All of these arguments relate to where we might expect the outcomes of biracial individuals to fall relative to their monoracial peers. However, the experience of hybridity itself may have positive and negative effects that do not tell us the location itself but rather may modify it in the context of other patterns. On the positive side, hybridity may enlarge the cultural "toolkit" (==CITATION==) of biracial individuals. This enlarged toolkit may allow such individuals to more easily navigate a variety of social situations (e.g. code switch). On the negative side, Stonequist's (==CITATION==) "marginal man" hypothesis suggests that the dissonance of an identity that crosses strong and salient racial boundaries will be experienced by biracial individuals as not fitting in anywhere. This may result in negative mental health experiences for biracial individuals that can spill over into other types of outcomes.
+All of these arguments relate to where we might expect the outcomes of biracial individuals to fall relative to their monoracial peers. However, the experience of hybridity itself may have positive and negative effects that do not tell us the location itself but rather may modify it in the context of other patterns. On the positive side, hybridity may enlarge the cultural "toolkit" (==CITATION==) of biracial individuals. This enlarged toolkit may allow such individuals to more easily navigate a variety of social situations (e.g. code switch). On the negative side, Stonequist's (==CITATION==) "marginal man" hypothesis suggests that the dissonance of an identity that crosses strong and salient racial boundaries will be experienced by biracial individuals as not fitting in anywhere. This liminality may result in negative mental health experiences for biracial individuals that may affect other types of outcomes as well.
 
 ==NO FORMAL HYPOTHESIS==
 
+## The Role of Class
 
--   In all of this, its crucially important to understand how other resources affect our understanding of the placement of biracial individuals. Biracial individuals are the products of interracial unions and individuals are not randomly selected into such unions. This can lead to underlying differences in the socioeconomic resources that biracial individuals possess relative to their monoracial peers. However, this selection can be quite complex. (DISCUSS CHENG AND LIVELY HERE?)
+In addition to these specifically racial mechanisms that may drive the placement of biracial individuals, researchers must also pay careful attention to how socioeconomic background may affect the placement of biracial individuals within a racial hierarchy. Socioeconomic background plays a role in racial inequality more generally as we know that accounting for socioeconomic difference often reduces the magnitude of observed racial inequality, suggesting that some of racial inequality we observe operates through class differences (CITATION). This issue is particularly important for biracial individuals because of potential class selection into interracial unions. The likelihood of being an interracial union varies by class background for at least some groups (CITATION), although it varies in complex ways and we know more about interracial marriages than other types of unions that may produce children. For example, black partners tend to be positively selected with regard to education into Black/White marriages while white partners are negatively selected (CITATION). According to status exchange theory (CITATIONS), this pattern may be common to all types of interracial marriages within an unequal status hierarchy, although the evidence of status exchange for other forms of marriages is weaker (CITATION). How this affects the relative resources of biracial individuals will depend then in some part on the relative strength of these phenomena for a given pairing, the gender balance in that pairing, and how the gender of parents affects outcomes. 
 
-    -   Status exchange suggests that members of lower status racial groups will be positively selected into interracial unions, while higher status racial groups will be negatively selected. How this affects the relative resources of biracial individuals will depend then in some part on the relative strength of these phenomena, the gender balance in a given form of interracial unions, and how the gender of parents affects outcomes. Status exchange may also not be present in all forms of interracial unions.
+Regardless of the underlying complexity, delineating the role of this selection process in the prior generation as opposed to other mechanisms is key to understanding the overall process that sorts biracial individuals into a racialized system. Although this approach is sometimes characterized as pitting race vs class and minimizing the importance of race, that is not case here. Instead, what this delineation allows us to do is understanding how race affects the outcomes of biracial individuals in a multigenerational process and allow us to better pinpoint the generational locus of certain mechanisms.
+
+## Prior Work
 
 -   Review previous studies on outcomes
 
@@ -93,6 +98,8 @@ All of these arguments relate to where we might expect the outcomes of biracial 
     -   Limitations of this work
         -   Small sample sizes lead to inconsistent estimates in most of the survey data.
         -   In many cases, impossible to understand outcomes for part-Latino biracials.
+
+## Grade Retention as an Outcome
 
 -   Why grade retention as an outcome?
 
