@@ -90,6 +90,10 @@ Most research on such selection has focused on socioeconomic characteristics. St
 
 Alternatively,
 
+1. its complicated
+2. Rather than sort out a priori predictions, its important to control for most likely selected characteristics. In the case I explore here socioeconomic status and traits measuring assimilation such as foreign-born status and english language proficiency. 
+3. This is not a "race vs. class" argument that diminishes the importance of race. Rather it delineates where generationally and by what mechanisms race might matter for biracial individuals. 
+
 ---
 
 The aforementioned mechanisms all relate to 
