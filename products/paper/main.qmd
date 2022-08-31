@@ -58,9 +58,8 @@ However, one important outcome, grade retention, is measurable and important eve
 
 The results provide a window into the placement of biracial children within an existing system of racial inequality in our educational systems. ==PITHY SUMMARY==
 
-# Background
 
-## Where do Biracials Fit?
+# Where do Biracials Fit?
 
 How might we expect the outcomes for biracial individuals do differ from their monoracial peers? In every case, the relevant comparison is how a biracial person fares relative to the two constituent groups with which their parents identify. For example, in the case of an individual with one Black and one White parent, we would compare the average outcomes for such individuals to the average outcomes for individuals with two White and two Black parents. The outcome for the Black/White group may be similar to one of the monoracial groups, it may me somewhere in between the outcomes for the two monoracial groups, or it may be higher or lower than either of the monoracial groups.
 
@@ -82,7 +81,7 @@ If outcomes for biracial individuals all closer to one of their constituent grou
 
 First, racial ambiguity in appearance may lead to more inconsistent classification into single race categories across observers. Even if the norms consistently indicate a certain type of classification, correct identification by observers is still a probabilistic phenomenon in all social interactions and likely to be more heterogenous for biracial individuals. As a result, biracial individuals will experience a lower sum total of discrimination and bias affecting the lower status group but will also not reap the same rewards as a member of the higher status group.
 
-Second, even when "correctly" classified, greater physical ambiguity may allow biracial individuals to avoid the worst instances of bias and discrimination because they do not conform to the ideal type for the group facing the most discrimination. In other words, the experience of discrimination may be "softened" because their ambigious physical appearance provokes less racial antipathy. The US in fact already has a long history of this process. Because of the one-drop rule, Black individuals vary substantially in skin tone and those individuals with a lighter skin tone have better outcomes. Thus light skin can moderate (but not eliminate) the stigma of Blackness even among monoracial individuals.
+Second, even when "correctly" classified, greater physical ambiguity may allow biracial individuals to avoid the worst instances of bias and discrimination because they do not conform to the ideal type for the group facing the most discrimination. In other words, the experience of discrimination may be "softened" because their ambiguous physical appearance provokes less racial antipathy. The US in fact already has a long history of this process. Because of the one-drop rule, Black individuals vary substantially in skin tone and those individuals with a lighter skin tone have better outcomes. Thus light skin can moderate (but not eliminate) the stigma of Blackness even among monoracial individuals.
 
 Third, it is also possible that biracial individuals may be classified into a distinct "middleman" minority position. This kind of middleman status is common in Latin America (CITATIONS) and Bonilla-Silva (CITE) has argued that this may be a possible future for the US as well. In this case, many biracial groups may occupy a nebulous and ill-defined middleman or buffer class position in-between whites and darker-skinned non-whites, helping to cement a new kind of racial hierarchy. 
 
@@ -149,7 +148,7 @@ In addition to the aforementioned racial mechanisms that may drive the placement
 
 Regardless of the underlying complexity, delineating the role of this selection process in the prior generation as opposed to other mechanisms is key to understanding the overall process that sorts biracial individuals into a racialized system. Although this approach is sometimes characterized as pitting race vs class and minimizing the importance of race, that is not case here. Instead, what this delineation allows us to do is understanding how race affects the outcomes of biracial individuals in a multigenerational process and allow us to better pinpoint the generational locus of certain mechanisms.
 
-## Prior Work
+# Prior Work
 
 -   Review previous studies on outcomes
 
@@ -162,7 +161,7 @@ Regardless of the underlying complexity, delineating the role of this selection 
         -   Small sample sizes lead to inconsistent estimates in most of the survey data.
         -   In many cases, impossible to understand outcomes for part-Latino biracials.
 
-## Grade Retention as an Outcome
+# Grade Retention as an Outcome
 
 -   Why grade retention as an outcome?
 
@@ -183,7 +182,7 @@ Prior work has used a variety of additional restrictions to limit the analysis t
 
 The final analytical sample consists of children aged 5-20 who are currently enrolled in the K-12 school system and live in a household with two parents who are both likely to be biological parents. This necessary sample restriction will bias the family structure of the analytical sample relative to the total population of K-12 schoolchildren, limiting it exclusively to households with two parents present and over-representing the proportion of cases in which those parents are married. The result of this bias is well-known. Children living in two-parent nuclear households have greater educational success than other children as a result of material, social, and cultural resources (CITATIONS). Therefore, this sample restriction will upwardly bias estimates of grade retention. However, this bias is less problematic for the goal of this study, which is to estimate differences between groups. The sample restriction effectively eliminates differences in family structure across racial groups which may account for some observed differences in grade retention. However, the remaining differences observed here are likely to hold for the full population in the absence of strong racial differences in the effect of family structure on grade retention.
 
-The race of children is calculated by a cross-tabulation of parent's races. A full cross-tabulation of the race/Hispanicity of each parent would produce far too many combined categories to be analytically useful. Therefore, I collapse each parent's race into the categories of White, Black, Asian, Latino, and Indigenous. These categories form the "ethnoracial pentagon" that is commonly used in popular practice and government tabulation to identify race in the US [@hollinger_postethnic_1995]. Respondents are identified as Latino base on their response to the Hispanicity question, regardless of their response to the race question. Respondents are identified as Indigenous if they responded as either American Indian/Alaska Native or as Pacific Islander. Because the goal of my analysis is to examine specifically the outcomes of "first-generation" biracial children, I exclude cases where at least one parent identified with multiple races.
+The race of children is calculated by a cross-tabulation of parent's races. A full cross-tabulation of the race/Hispanicity of each parent would produce far too many combined categories to be analytically useful. Therefore, I collapse each parent's race into the categories of White, Black, Asian, Latino, and Indigenous. These categories form the "ethnoracial pentagon" that is commonly used in popular practice and government tabulation to identify race in the US [@hollinger_postethnic_1995]. Parents are identified as Latino based on their response to the Hispanicity question, regardless of their response to the race question. Parents are identified as Indigenous if they responded as either American Indian/Alaska Native or as Pacific Islander. Because the goal of my analysis is to examine specifically the outcomes of "first-generation" biracial children, I exclude cases where at least one parent identified with multiple races.
 
 The cross-tabulation of parent's races leads to ten distinct biracial categories. The total sample size for each of these biracial categories is shown in @tbl-descriptive, along with several descriptive statistics. The sample sizes are quite large for many of the groups, suggesting substantial statistical power in determining the relative outcomes for these groups. Even among the smallest group of Indigenous/Asian, the sample size is substantially greater than one would see in typical survey data.
 
