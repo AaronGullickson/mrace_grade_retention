@@ -191,73 +191,6 @@ tbl_summary %>%
   kable_paper() %>%
   row_spec(index_biracial, background = "#D3D3D3")
 ```
-Lets break down parent resource stuff better. First lets do SES.
-
-```{r desc-stats-ses}
-tbl_summary <- acs %>%
-  group_by(race) %>%
-  summarize(fam_inc=round(mean(family_income), 0),
-            own_home=round(mean(own_home), 3)*100,
-            par_mar=round(mean(parents_married), 3)*100,
-            f_lhs=round(mean(degree_father=="LHS"), 3)*100,
-            f_hs=round(mean(degree_father=="HS"), 3)*100,
-            f_aa=round(mean(degree_father=="AA"), 3)*100,
-            f_ba=round(mean(degree_father=="BA" | degree_father=="G"), 3)*100,
-            m_lhs=round(mean(degree_mother=="LHS"), 3)*100,
-            m_hs=round(mean(degree_mother=="HS"), 3)*100,
-            m_aa=round(mean(degree_mother=="AA"), 3)*100,
-            m_ba=round(mean(degree_mother=="BA" | degree_mother=="G"), 3)*100)
-
-index_biracial <- which(str_detect(tbl_summary$race, "/"))
-
-tbl_summary %>%
-  mutate_if(is.numeric, format, big.mark=",") %>%
-  kbl(caption="Descriptive statistics by race. Shading indicates biracial group. Groups ordered by sample size.",
-      align = c("l",rep("r", ncol(tbl_summary)-1)),
-      col.names=c("race","mean family income","% own home",
-                  "% parents married",
-                  "% father, no HS diploma","% father, HS diploma",
-                  "% father, AA degree",  "% father, BA degree",
-                  "% mother, no HS diploma","% mother, HS diploma", 
-                  "%  mother, AA degree", "% mother, BA degree")) %>%
-  kable_paper() %>%
-  row_spec(index_biracial, background = "#D3D3D3")
-```
-
-```{r desc-stats-cult}
-tbl_summary <- acs %>%
-  group_by(race) %>%
-  summarize(f_born=round(mean(foreign_born), 3)*100,
-            father_fb=round(mean(foreign_born_father), 3)*100,
-            mother_fb=round(mean(foreign_born_mother), 3)*100,
-            spk_eng_no=round(mean(spk_eng=="No"), 3)*100,
-            spk_eng_some=round(mean(spk_eng=="Somewhat"), 3)*100,
-            spk_eng_yes=round(mean(spk_eng=="Yes"), 3)*100,
-            f_spk_eng_no=round(mean(spk_eng_father=="No"), 3)*100,
-            f_spk_eng_some=round(mean(spk_eng_father=="Somewhat"), 3)*100,
-            f_spk_eng_yes=round(mean(spk_eng_father=="Yes"), 3)*100,
-            m_spk_eng_no=round(mean(spk_eng_mother=="No"), 3)*100,
-            m_spk_eng_some=round(mean(spk_eng_mother=="Somewhat"), 3)*100,
-            m_spk_eng_yes=round(mean(spk_eng_mother=="Yes"), 3)*100)
-
-index_biracial <- which(str_detect(tbl_summary$race, "/"))
-
-tbl_summary %>%
-  mutate_if(is.numeric, format, big.mark=",") %>%
-  kbl(caption="Descriptive statistics by race. Shading indicates biracial group. Groups ordered by sample size.",
-      align = c("l",rep("r", ncol(tbl_summary)-1)),
-      col.names=c("race",
-                  "% foreign-born","% father foreign-born",
-                  "% mother foreign-born",
-                  "% speak no English", "% speak some English", 
-                  "% speak English",
-                  "% father speak no English", "% father speak some English", 
-                  "% father speak English",
-                  "% mother speak no English", "% mother speak some English",
-                  "% mother speak English")) %>%
-  kable_paper() %>%
-  row_spec(index_biracial, background = "#D3D3D3")
-```
 
 # Model building
 
@@ -701,7 +634,97 @@ The results here are extraordinarily stable across both specifications.
 
 # Differences in Cultural and Family Resources
 
-A parsimonious way of doing this would be to calculate average predicted probability for each monoracial constituent group and a given biracial group, while holding constant all non-resource variables *including race*. This gives you an effective counterfactual of what the average probability would be for each group if they only differed on the resource variables. Where to set the other variables constant to might have some effect because of the transformation from logits to probs, but should not make a big difference. For convenience, I might just set it to white, but I could also try setting it to the biracial group of interest.
+First, lets compare means of SES and cultural resources across all racial groups.
+
+```{r desc-stats-ses}
+tbl_summary <- acs %>%
+  group_by(race) %>%
+  summarize(fam_inc=round(mean(family_income), 0),
+            own_home=round(mean(own_home), 3)*100,
+            par_mar=round(mean(parents_married), 3)*100,
+            f_lhs=round(mean(degree_father=="LHS"), 3)*100,
+            f_hs=round(mean(degree_father=="HS"), 3)*100,
+            f_aa=round(mean(degree_father=="AA"), 3)*100,
+            f_ba=round(mean(degree_father=="BA" | degree_father=="G"), 3)*100,
+            m_lhs=round(mean(degree_mother=="LHS"), 3)*100,
+            m_hs=round(mean(degree_mother=="HS"), 3)*100,
+            m_aa=round(mean(degree_mother=="AA"), 3)*100,
+            m_ba=round(mean(degree_mother=="BA" | degree_mother=="G"), 3)*100)
+
+index_biracial <- which(str_detect(tbl_summary$race, "/"))
+
+tbl_summary %>%
+  mutate_if(is.numeric, format, big.mark=",") %>%
+  kbl(caption="SES resources by race. Shading indicates biracial group.",
+      align = c("l",rep("r", ncol(tbl_summary)-1)),
+      col.names=c("race","mean family income","% own home",
+                  "% parents married",
+                  "% father, no HS diploma","% father, HS diploma",
+                  "% father, AA degree",  "% father, BA+ degree",
+                  "% mother, no HS diploma","% mother, HS diploma", 
+                  "%  mother, AA degree", "% mother, BA+ degree")) %>%
+  kable_paper() %>%
+  row_spec(index_biracial, background = "#D3D3D3")
+```
+
+There is a lot going on here, but I can summarize a few things:
+
+- Most multiracial groups are more like the more privileged constituent group than the less privileged constituent group across all of these characteristics. For example, White/Latino respondents have family incomes of \$130,981 compared to \$138,489 for Whites and \$64,920 for Latinos. Similarly, 9.6% and 11.6% of Latino fathers and mothers, respectively, have a BA degree, compared to 43.8% and 47.6% for Whites, and 38.6% and 41.5% for White/Latinos. Also White/Latino parents own their home in 86.7% of cases which is similar to the white value of 85.5% and much higher than the 54.3% for Latinos.
+- Black/Whites in contrast, are much more like Blacks in terms of their resources and both groups have fewer resources than Whites.
+- White/Asians are the most privileged group of all, even more so than their two constituent groups. Their family income of \$195,028 is off the charts! but they also have parents with very high educational attainment.
+- Most part-Indigenous groups also buck the modal trend and have outcomes that are about halfway between their two constituent groups. The one part-Indigenous group that does not follow that pattern is the Indigenous/Latino group, which tend to have resources slightly better than both of the monoracial groups (although still very low compared to everyone else).
+
+Now lets look at the cultural characteristics. One thing to keep in mind here is that having foreign-born parents actually *lowers* your risk of grade retention, whereas being foreign-born yourself increases it.
+
+```{r desc-stats-cult}
+tbl_summary <- acs %>%
+  group_by(race) %>%
+  summarize(f_born=round(mean(foreign_born), 3)*100,
+            father_fb=round(mean(foreign_born_father), 3)*100,
+            mother_fb=round(mean(foreign_born_mother), 3)*100,
+            spk_eng_no=round(mean(spk_eng=="No"), 3)*100,
+            spk_eng_some=round(mean(spk_eng=="Somewhat"), 3)*100,
+            spk_eng_yes=round(mean(spk_eng=="Yes"), 3)*100,
+            f_spk_eng_no=round(mean(spk_eng_father=="No"), 3)*100,
+            f_spk_eng_some=round(mean(spk_eng_father=="Somewhat"), 3)*100,
+            f_spk_eng_yes=round(mean(spk_eng_father=="Yes"), 3)*100,
+            m_spk_eng_no=round(mean(spk_eng_mother=="No"), 3)*100,
+            m_spk_eng_some=round(mean(spk_eng_mother=="Somewhat"), 3)*100,
+            m_spk_eng_yes=round(mean(spk_eng_mother=="Yes"), 3)*100)
+
+index_biracial <- which(str_detect(tbl_summary$race, "/"))
+
+tbl_summary %>%
+  mutate_if(is.numeric, format, big.mark=",") %>%
+  kbl(caption="Cultural resources by race. Shading indicates biracial group.",
+      align = c("l",rep("r", ncol(tbl_summary)-1)),
+      col.names=c("race",
+                  "% foreign-born","% father foreign-born",
+                  "% mother foreign-born",
+                  "% speak no English", "% speak some English", 
+                  "% speak English",
+                  "% father speak no English", "% father speak some English", 
+                  "% father speak English",
+                  "% mother speak no English", "% mother speak some English",
+                  "% mother speak English")) %>%
+  kable_paper() %>%
+  row_spec(index_biracial, background = "#D3D3D3")
+```
+* In general, the most notable thing here is that in terms of English proficiency (both respondent and parents), all of the biracial groups involving Latino and Asian have almost universal proficiency (>99%) and more like the non-Latino and non-Asian groups. This is most notable for Latinos where only about two-thirds of fathers and mothers of monoracial Latinos have full English proficiency but all of the part Latino multiracial groups have parents that are 99% or more fluent. So, there is heavy selection on English proficiency into interracial unions, which is not surpising.
+* We also see that part-Latino and part-Asian respondents are much more likely to be native born and to have native-born parents than Latino and Asian respondents. The effects are large although not quite as huge as for language. However, because foreign-born parents actually *reduce* the effect of grade retention, the ultimate effect of this selection is more complex.
+
+One way to boil down the complexity of these tables into something easier to understand would be to calculate average predicted probability for each racial group, while holding constant all non-resource variables *including race*. These probabilities provide a counterfactual estimate of what the average probability would be for each group if they only differed on the resource variables, allowing me to isolate how different distributions of resources across racial groups affect the risk of grade retention.
+
+To do this, the following variables need to be set at some constant value to be held constant:
+
+- current grade
+- state
+- year
+- metro status
+- gender
+- race
+
+One could just plug in some static values (e.g. make everyone White, from Minnesota, in 6th grade, etc.), but this feels pretty ad-hoc. I think the best approach is to set all of these values at their mean. Since most of these variables are categorical variables, this means treating them as 0/1 dummies and then calculating the proportion as the mean. Unfortunately, this approach won't work with the models built above because they made use of factor variables. So, to run these models, I first need to create actual 0/1 dummies for the categorical variables listed above (current grade, state, metro status, gender, race). That is what the code below does.
 
 ```{r create-dummied-data}
 acs_dummied <- acs %>%
@@ -718,6 +741,8 @@ acs_dummied <- acs %>%
   mutate(year=year-2010) %>%
   clean_names()
 ```
+
+Now that I have new "dummied up" dataset, I can rereun the full model using the dummy variables which means a very, very long formula.
 
 ```{r model-dummied}
 model_full <- glm(below_exp_grade~
@@ -755,9 +780,9 @@ model_full <- glm(below_exp_grade~
                     spk_eng+spk_eng_mother+spk_eng_father+
                     foreign_born_mother+foreign_born_father+foreign_born, 
                   data=acs_dummied, family=binomial)
-deviance(model_full)
-# FIXME - its a little higher so I am missing something
 ```
+
+I now have the model in the correct form. The next step is to create the counterfactual dataset by setting all of the non-resource variables to their mean. Thus, in this dataset, the only differences across racial groups are coming from their resource differences.
 
 ```{r create-cf-df}
 # Create the counterfactual dataset where non-resource variables are held
@@ -792,6 +817,8 @@ marg(model_full, "year", data=temp)
 # It works!
 ```
 
+I can then feed subsets (by race) of this counterfactual dataset into the `marg` command to get the predicted probability of grade retention for each racial group as I do below.
+
 ```{r create-cf-marg}
 coefs <- lapply(unique(acs$race), function(x) {
   temp <- subset(cf_df, race==x)
@@ -803,6 +830,8 @@ coefs <- lapply(unique(acs$race), function(x) {
 
 coef_table_cf <- create_coef_table(coefs)
 ```
+
+And now I can plot up the results.
 
 ```{r counterfactual-ses, warning=FALSE, fig.cap="Counterfactual probability of being behind grade for biracial respondents in comparison to their monoracial comparison groups if the only differences between groups were resources (household income, parental education, home ownership, parent and child foreign-born status, parent and child English proficiency, and whether parents are married). 83.4% confidence bands shown around each estimate. Non-overlap in confidence bands roughly indicates statistically significant difference at the 5% level."}
   ggplot(coef_table_cf, aes(x=term, y=estimate, color=multiracial,
@@ -825,7 +854,7 @@ coef_table_cf <- create_coef_table(coefs)
   
 ```
 
-To summarize the results here:
+I summarize the results here:
 
 |                   | Lower than both | Same as lower | Between | Same as higher | Higher than both |
 |-------------------|:---------------:|:-------------:|:-------:|:--------------:|:----------------:|
@@ -848,6 +877,8 @@ Three groups that have the "expected" in-between status based on resources all s
 Finally, the Black/White case stands out in that Black/White kids have the same risk of being held back based on their resources as do Black kids. Thus, they are not getting a resource boost nor does it seem like they are particularly positively selected.
 
 So the effects of controlling for these resources will be complex and different across groups. In general for those that are the same as lower or lower than both, we see that it pulls their relative probability up somewhat. For the Black/White case, it pulls their probability down on the other hand. For the "between" groups its more complex and doesn't seem to do much in total.
+
+Lets see if I can put all of this into a simpler table that summarize the key issues.
 
 ```{r time-end}
 timestamp()
