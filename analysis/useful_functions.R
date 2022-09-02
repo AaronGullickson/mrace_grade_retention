@@ -228,9 +228,20 @@ calculate_marg_means <- function(model, cluster_var=acs$cluster) {
   #annoying
   coefs <- tibble(term=str_remove(means_marginal$Label, "race = "), 
                   estimate=means_marginal$Margin, 
-                  se=means_marginal$Standard.Error) %>%
-    mutate(multiracial=str_detect(term, "/"))
+                  se=means_marginal$Standard.Error) 
   
+  return(create_coef_table(coefs))
+}
+
+# This function will take the conditional mean output by race from marg and 
+# convert it into a tibble that can be used to create the comparison plots
+# used in the analysis. The input should be a tibble with a term (racial group),
+# estimate (conditional mean), and se (standard error of conditional mean)
+create_coef_table <- function(coefs) {
+  
+  # detect multiracial groups
+  coefs <- coefs %>%
+    mutate(multiracial=str_detect(term, "/"))
   
   #ok convert this to have single race groups for each multiracial group
   #panel and get the assumed midpoint value
@@ -252,8 +263,8 @@ calculate_marg_means <- function(model, cluster_var=acs$cluster) {
                                  mean(estimate[!multiracial]),
                                  estimate),
              se_mid=ifelse(multiracial, 
-                                  sqrt(sum(se[!multiracial]^2)/4),
-                                  se))
+                           sqrt(sum(se[!multiracial]^2)/4),
+                           se))
   }) %>%
     bind_rows()
   
