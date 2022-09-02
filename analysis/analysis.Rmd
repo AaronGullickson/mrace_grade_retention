@@ -632,7 +632,9 @@ ggplot(coef_table, aes(x=term, y=estimate, color=multiracial,
 
 The results here are extraordinarily stable across both specifications. 
 
-# Differences in Cultural and Family Resources
+# Differences in Family Resources
+
+## Full tables of SES and cultural resources
 
 First, lets compare means of SES and cultural resources across all racial groups.
 
@@ -712,6 +714,8 @@ tbl_summary %>%
 ```
 * In general, the most notable thing here is that in terms of English proficiency (both respondent and parents), all of the biracial groups involving Latino and Asian have almost universal proficiency (>99%) and more like the non-Latino and non-Asian groups. This is most notable for Latinos where only about two-thirds of fathers and mothers of monoracial Latinos have full English proficiency but all of the part Latino multiracial groups have parents that are 99% or more fluent. So, there is heavy selection on English proficiency into interracial unions, which is not surpising.
 * We also see that part-Latino and part-Asian respondents are much more likely to be native born and to have native-born parents than Latino and Asian respondents. The effects are large although not quite as huge as for language. However, because foreign-born parents actually *reduce* the effect of grade retention, the ultimate effect of this selection is more complex.
+
+## Counterfactual models by resource differentials
 
 One way to boil down the complexity of these tables into something easier to understand would be to calculate average predicted probability for each racial group, while holding constant all non-resource variables *including race*. These probabilities provide a counterfactual estimate of what the average probability would be for each group if they only differed on the resource variables, allowing me to isolate how different distributions of resources across racial groups affect the risk of grade retention.
 
@@ -878,8 +882,9 @@ Finally, the Black/White case stands out in that Black/White kids have the same 
 
 So the effects of controlling for these resources will be complex and different across groups. In general for those that are the same as lower or lower than both, we see that it pulls their relative probability up somewhat. For the Black/White case, it pulls their probability down on the other hand. For the "between" groups its more complex and doesn't seem to do much in total.
 
-Lets see if I can put all of this into a simpler table that summarize the key issues.
+## Summary table of resource differences
 
+Lets see if I can put all of this into a simpler table that summarize the key issues.
 
 ```{r tab-resources}
 temp <- coefs_cf %>%
