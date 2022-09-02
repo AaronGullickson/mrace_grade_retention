@@ -799,58 +799,18 @@ coefs <- lapply(unique(acs$race), function(x) {
   return(tibble(term=x, estimate=means_margin$Margin, 
                 se=means_margin$Standard.Error))
 }) %>%
-  bind_rows() %>%
-  mutate(multiracial=str_detect(term, "/"))
+  bind_rows()
 
-coef_table <- map(as.list(str_subset(coefs$term, "/")), function(x) {
-    coefs %>%
-      filter(term %in% c(x, str_split(x, "/")[[1]])) %>%
-      mutate(mrace=factor(x,
-                          levels=c("Black/White",
-                                   "White/Indigenous",
-                                   "Latino/Asian",
-                                   "Black/Latino",
-                                   "White/Latino",
-                                   "Indigenous/Latino",
-                                   "Black/Asian",
-                                   "White/Asian",
-                                   "Indigenous/Asian",
-                                   "Black/Indigenous")),
-             estimate_mid=ifelse(multiracial, 
-                                 mean(estimate[!multiracial]),
-                                 estimate),
-             se_mid=ifelse(multiracial, 
-                                  sqrt(sum(se[!multiracial]^2)/4),
-                                  se))
-  }) %>%
-    bind_rows()
-
-  #get terms ordered
-  race_names <- levels(reorder(factor(coef_table$term), coef_table$estimate))
-  #pull out single race and multiple race as separate vectors
-  race_single <- str_subset(race_names, "/", negate=TRUE)
-  race_multi <- str_subset(race_names, "/", negate=FALSE)
-  #start with single races
-  race_full <- race_single
-  #now loop through multiple race names and append based on the higher group
-  for(race in race_multi) {
-    temp <- str_split(race, "/")[[1]]
-    idx <- max(which(race_full==temp[1]), which(race_full==temp[2]))
-    race_full <- append(race_full, race, idx-1)
-  }
-  
-  #now use this as the levels of term as a factor
-  coef_table <- coef_table %>%
-    mutate(term=factor(term, levels=race_full))
+coef_table_cf <- create_coef_table(coefs)
 ```
 
 ```{r counterfactual-ses, warning=FALSE, fig.cap="Counterfactual probability of being behind grade for biracial respondents in comparison to their monoracial comparison groups if the only differences between groups were resources (household income, parental education, home ownership, parent and child foreign-born status, parent and child English proficiency, and whether parents are married). 83.4% confidence bands shown around each estimate. Non-overlap in confidence bands roughly indicates statistically significant difference at the 5% level."}
-  ggplot(coef_table, aes(x=term, y=estimate, color=multiracial,
+  ggplot(coef_table_cf, aes(x=term, y=estimate, color=multiracial,
                          ymin=estimate-1.386*se, ymax=estimate+1.386*se))+
     geom_rect(aes(xmax=Inf, xmin=-Inf, ymin=estimate_mid-1.386*se_mid,
                   ymax=estimate_mid+1.386*se_mid, fill=multiracial), 
               color=NA, alpha=0.2)+
-    geom_linerange(data=subset(coef_table, multiracial))+
+    geom_linerange(data=subset(coef_table_cf, multiracial))+
     geom_point()+
     coord_flip()+
     facet_wrap(~mrace, scales="free_y")+
