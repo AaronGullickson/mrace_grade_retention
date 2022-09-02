@@ -701,7 +701,97 @@ The results here are extraordinarily stable across both specifications.
 
 # Differences in Cultural and Family Resources
 
+
+
 A parsimonious way of doing this would be to calculate average predicted probability for each monoracial constituent group and a given biracial group, while holding constant all non-resource variables *including race*. This gives you an effective counterfactual of what the average probability would be for each group if they only differed on the resource variables. Where to set the other variables constant to might have some effect because of the transformation from logits to probs, but should not make a big difference. For convenience, I might just set it to white, but I could also try setting it to the biracial group of interest.
+
+```{r create-dummied-data}
+acs_dummied <- acs %>%
+  # first we need to unorder current grade for dummy_cols to work
+  mutate(current_grade=factor(current_grade, levels=levels(current_grade), 
+                              ordered = FALSE)) %>%
+  
+  dummy_cols(remove_first_dummy = TRUE) %>%
+  select(cluster, strata, perwt, below_exp_grade, year, family_income, 
+         parents_married, own_home, degree_mother, degree_father,
+         foreign_born, foreign_born_mother, foreign_born_father, 
+         spk_eng, spk_eng_father, spk_eng_mother,
+         starts_with(c("state_","current_grade_","race","sex_","metro_"))) %>%
+  mutate(year=year-2010) %>%
+  clean_names()
+```
+
+```{r model-dummied}
+model_full <- glm(below_exp_grade~current_grade_1st*year+current_grade_2nd*year+
+                    current_grade_3rd*year+current_grade_4th*year+
+                    current_grade_5th+current_grade_6th*year+
+                    current_grade_7th*year+current_grade_8th*year+
+                    current_grade_9th*year+current_grade_10th*year+
+                    current_grade_11th*year+current_grade_12th*year+
+                    race_black+race_indigenous+race_asian+race_latino+
+                    race_black_white+race_black_indigenous+race_black_latino+
+                    race_black_asian+race_white_indigenous+race_white_latino+
+                    race_white_asian+race_indigenous_latino+
+                    race_indigenous_asian+race_latino_asian+
+                    sex_female+
+                    metro_non_metro+metro_central_city+metro_metro_non_central+
+                    metro_metro_indeterminable+state_arizona+state_arkansas+
+                    state_california+state_colorado+state_connecticut+state_dc+
+                    state_delaware+state_florida+state_georgia+state_hawaii+
+                    state_idaho+state_illinois+state_indiana+state_iowa+
+                    state_kansas+state_kentucky+state_louisiana+state_maine+
+                    state_maryland+state_massachusetts+state_michigan+
+                    state_minnesota+state_mississippi+state_missouri+
+                    state_montana+state_nebraska+state_nevada+
+                    state_new_hampshire+state_new_jersey+state_new_mexico+
+                    state_new_york+state_north_carolina+state_north_dakota+
+                    state_ohio+state_oklahoma+state_oregon+state_pennsylvania+
+                    state_rhode_island+state_south_carolina+state_south_dakota+
+                    state_tennessee+state_texas+state_utah+state_vermont+
+                    state_virginia+state_washington+state_west_virginia+
+                    state_wisconsin+state_wyoming+
+                    +sqrt(family_income/10000)+parents_married+own_home+
+                    degree_mother+degree_father+
+                    spk_eng+spk_eng_mother+spk_eng_father+
+                    foreign_born_mother+foreign_born_father+foreign_born, 
+                  data=acs_dummied, family=binomial)
+deviance(model_full)
+# FIXME - its a little higher so I am missing something
+```
+
+```{r}
+# what needs to get set at mean?
+# - current_grade
+# - sex
+# - race
+# - state
+# - metro
+# I will not do this for year because I want to use that to grab the modal
+# year of 2014
+means <- acs_dummied %>%
+  select(year, starts_with(c("state_","current_grade_","race_","sex_","metro_")))
+means <- lapply(means, function(x) {
+  rep(mean(x), length(x))
+}) %>%
+  bind_rows()
+
+cf_df <- acs_dummied %>%
+  select(below_exp_grade, race,family_income, parents_married, own_home, 
+         degree_mother, degree_father, foreign_born, foreign_born_mother, 
+         foreign_born_father, spk_eng, spk_eng_father, spk_eng_mother) %>%
+  bind_cols(means)
+```
+
+```{r}
+# I think I can use year in marg to get the results for the modal year
+temp <- subset(cf_df, race=="Black/White")
+#temp$year <- 4
+lor <- predict(model_full, newdata=temp)
+mean(exp(lor)/(1+exp(lor)))
+marg(model_full, "year", data=subset(cf_df, race=="Black/White"))
+marg(model_full, "year", data=subset(cf_df, race=="White"))
+marg(model_full, "year", data=subset(cf_df, race=="Black"))
+```
 
 ```{r counterfactual-ses, warning=FALSE, fig.height=12, fig.cap="Counterfactual probability of being behind grade for biracial respondents in comparison to their monoracial comparison groups if there was no difference by race and the only compositional differences between groups were resources (household income, parental education, home ownership, parent and child foreign-born status, parent and child English proficiency, and whether parents are married). 83.4% confidence bands shown around each estimate. Non-overlap in confidence bands roughly indicates statistically significant difference at the 5% level."}
 # set up the initial counterfactual dataset
