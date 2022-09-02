@@ -1005,6 +1005,8 @@ tbl_resources %>%
                   "% held back, counterfactual")) %>%
   kable_paper() %>%
   row_spec(index_biracial, background = "#D3D3D3")
+
+save(tbl_resources, file=here("analysis","output","tbl_resources.RData"))
 ```
 
 The table sorts groups by their counterfactual probability of being held back. I think it does a nice job of summarizing the issues. 
