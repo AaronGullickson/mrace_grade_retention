@@ -820,7 +820,7 @@ marg(model_full, "year", data=temp)
 I can then feed subsets (by race) of this counterfactual dataset into the `marg` command to get the predicted probability of grade retention for each racial group as I do below.
 
 ```{r create-cf-marg}
-coefs <- lapply(unique(acs$race), function(x) {
+coefs_cf <- lapply(unique(acs$race), function(x) {
   temp <- subset(cf_df, race==x)
   means_margin <- marg(model_full, "year", data=temp)[[1]]
   return(tibble(term=x, estimate=means_margin$Margin, 
@@ -828,7 +828,7 @@ coefs <- lapply(unique(acs$race), function(x) {
 }) %>%
   bind_rows()
 
-coef_table_cf <- create_coef_table(coefs)
+coef_table_cf <- create_coef_table(coefs_cf)
 ```
 
 And now I can plot up the results.
@@ -879,6 +879,47 @@ Finally, the Black/White case stands out in that Black/White kids have the same 
 So the effects of controlling for these resources will be complex and different across groups. In general for those that are the same as lower or lower than both, we see that it pulls their relative probability up somewhat. For the Black/White case, it pulls their probability down on the other hand. For the "between" groups its more complex and doesn't seem to do much in total.
 
 Lets see if I can put all of this into a simpler table that summarize the key issues.
+
+
+```{r tab-resources}
+temp <- coefs_cf %>%
+  select(term, estimate) %>%
+  mutate(estimate=round(estimate,3)*100,
+         term=as.character(term)) %>%
+  rename(race=term, held_back_cf=estimate)
+
+tbl_resources <- acs %>%
+  group_by(race) %>%
+  summarize(fam_inc=round(mean(family_income), 0),
+            own_home=round(mean(own_home), 3)*100,
+            m_ba=round(mean(degree_mother=="BA" | degree_mother=="G"), 3)*100,
+            f_ba=round(mean(degree_father=="BA" | degree_father=="G"), 3)*100,
+            f_born=round(mean(foreign_born), 3)*100,
+            par_fb=round(mean(foreign_born_father | 
+                                       foreign_born_mother), 3)*100,
+            spk_eng_well=round(mean(spk_eng=="Yes"), 3)*100,
+            spk_eng_par=round(mean(spk_eng_father=="Yes" & 
+                                     spk_eng_mother=="Yes"), 3)*100) %>%
+  mutate(race=as.character(race)) %>%
+  left_join(temp) %>%
+  arrange(held_back_cf)
+            
+index_biracial <- which(str_detect(tbl_resources$race, "/"))
+
+tbl_resources %>%
+  mutate_if(is.numeric, format, big.mark=",") %>%
+  kbl(caption="Resource differences by race. Shading indicates biracial group.",
+      align = c("l",rep("r", ncol(tbl_summary)-1)),
+      col.names=c("race","mean family income","% own home",
+                  "% mother, BA degree","% father, BA degree",
+                  "% foreign-born","% either parent foreign-born",
+                  "% speak English well", "% Both parents speak english well",
+                  "% held back, counterfactual")) %>%
+  kable_paper() %>%
+  row_spec(index_biracial, background = "#D3D3D3")
+```
+
+The table sorts groups by their counterfactual probability of being held back. I think it does a nice job of summarizing the issues. 
 
 ```{r time-end}
 timestamp()
