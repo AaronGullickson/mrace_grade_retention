@@ -838,23 +838,23 @@ coef_table_cf <- create_coef_table(coefs_cf)
 And now I can plot up the results.
 
 ```{r counterfactual-ses, warning=FALSE, fig.cap="Counterfactual probability of being behind grade for biracial respondents in comparison to their monoracial comparison groups if the only differences between groups were resources (household income, parental education, home ownership, parent and child foreign-born status, parent and child English proficiency, and whether parents are married). 83.4% confidence bands shown around each estimate. Non-overlap in confidence bands roughly indicates statistically significant difference at the 5% level."}
-  ggplot(coef_table_cf, aes(x=term, y=estimate, color=multiracial,
-                         ymin=estimate-1.386*se, ymax=estimate+1.386*se))+
-    geom_rect(aes(xmax=Inf, xmin=-Inf, ymin=estimate_mid-1.386*se_mid,
-                  ymax=estimate_mid+1.386*se_mid, fill=multiracial), 
-              color=NA, alpha=0.2)+
-    geom_linerange(data=subset(coef_table_cf, multiracial))+
-    geom_point()+
-    coord_flip()+
-    facet_wrap(~mrace, scales="free_y")+
-    theme_bw()+
-    theme(legend.position = "none", panel.grid = element_blank())+
-    scale_color_manual(values=c("grey40","red"))+
-    scale_fill_manual(values=c("grey40","red"))+
-    scale_linetype_manual(values=c(3,1))+
-    scale_y_continuous(labels = scales::percent)+
-    labs(x=NULL,
-         y="average adjusted predicted probability of being behind expected grade")
+ggplot(coef_table_cf, aes(x=term, y=estimate, color=multiracial,
+                          ymin=estimate-1.386*se, ymax=estimate+1.386*se))+
+  geom_rect(aes(xmax=Inf, xmin=-Inf, ymin=estimate_mid-1.386*se_mid,
+                ymax=estimate_mid+1.386*se_mid, fill=multiracial), 
+            color=NA, alpha=0.2)+
+  geom_linerange(data=subset(coef_table_cf, multiracial))+
+  geom_point()+
+  coord_flip()+
+  facet_wrap(~mrace, scales="free_y")+
+  theme_bw()+
+  theme(legend.position = "none", panel.grid = element_blank())+
+  scale_color_manual(values=c("grey40","red"))+
+  scale_fill_manual(values=c("grey40","red"))+
+  scale_linetype_manual(values=c(3,1))+
+  scale_y_continuous(labels = scales::percent)+
+  labs(x=NULL,
+       y="average adjusted predicted probability of being behind expected grade")
   
 ```
 
@@ -881,6 +881,89 @@ Three groups that have the "expected" in-between status based on resources all s
 Finally, the Black/White case stands out in that Black/White kids have the same risk of being held back based on their resources as do Black kids. Thus, they are not getting a resource boost nor does it seem like they are particularly positively selected.
 
 So the effects of controlling for these resources will be complex and different across groups. In general for those that are the same as lower or lower than both, we see that it pulls their relative probability up somewhat. For the Black/White case, it pulls their probability down on the other hand. For the "between" groups its more complex and doesn't seem to do much in total.
+
+### Senstivity tests separating SES and cultural differences
+
+Lets do the same procedure but I want to isolate the role of SES vs cultural (foreign-born and language).
+
+For ease of use, I am just going to plug in values here for the other resources rather than dummy everything up.
+
+```{r cf-ses-isolate, warning=FALSE, fig.cap="Counterfactual probability of being behind grade for biracial respondents in comparison to their monoracial comparison groups if the only differences between groups were SES resources (household income, parental education, home ownership, and whether parents are married). 83.4% confidence bands shown around each estimate. Non-overlap in confidence bands roughly indicates statistically significant difference at the 5% level."}
+cf_df_ses <- cf_df
+cf_df_ses$foreign_born <- FALSE
+cf_df_ses$foreign_born_father <- FALSE
+cf_df_ses$foreign_born_mother <- FALSE
+cf_df_ses$spk_eng <- "Yes"
+cf_df_ses$spk_eng_father <- "Yes"
+cf_df_ses$spk_eng_mother <- "Yes"
+
+coefs_cf_ses <- lapply(unique(acs$race), function(x) {
+  temp <- subset(cf_df_ses, race==x)
+  means_margin <- marg(model_full, "year", data=temp)[[1]]
+  return(tibble(term=x, estimate=means_margin$Margin, 
+                se=means_margin$Standard.Error))
+}) %>%
+  bind_rows()
+
+coef_table_cf_ses <- create_coef_table(coefs_cf_ses)
+
+ggplot(coef_table_cf_ses, aes(x=term, y=estimate, color=multiracial,
+                          ymin=estimate-1.386*se, ymax=estimate+1.386*se))+
+  geom_rect(aes(xmax=Inf, xmin=-Inf, ymin=estimate_mid-1.386*se_mid,
+                ymax=estimate_mid+1.386*se_mid, fill=multiracial), 
+            color=NA, alpha=0.2)+
+  geom_linerange(data=subset(coef_table_cf_ses, multiracial))+
+  geom_point()+
+  coord_flip()+
+  facet_wrap(~mrace, scales="free_y")+
+  theme_bw()+
+  theme(legend.position = "none", panel.grid = element_blank())+
+  scale_color_manual(values=c("grey40","red"))+
+  scale_fill_manual(values=c("grey40","red"))+
+  scale_linetype_manual(values=c(3,1))+
+  scale_y_continuous(labels = scales::percent)+
+  labs(x=NULL,
+       y="average adjusted predicted probability of being behind expected grade")
+```
+
+```{r cf-culture-isolate, warning=FALSE, fig.cap="Counterfactual probability of being behind grade for biracial respondents in comparison to their monoracial comparison groups if the only differences between groups were cultural resources (foreign-born status and English proficiency). 83.4% confidence bands shown around each estimate. Non-overlap in confidence bands roughly indicates statistically significant difference at the 5% level."}
+cf_df_culture <- cf_df
+cf_df_culture$family_income <- mean(cf_df_culture$family_income)
+cf_df_culture$own_home <- TRUE
+cf_df_culture$degree_father <- "BA"
+cf_df_culture$degree_mother <- "BA"
+cf_df_culture$parents_married <- TRUE
+
+coefs_cf_culture <- lapply(unique(acs$race), function(x) {
+  temp <- subset(cf_df_culture, race==x)
+  means_margin <- marg(model_full, "year", data=temp)[[1]]
+  return(tibble(term=x, estimate=means_margin$Margin, 
+                se=means_margin$Standard.Error))
+}) %>%
+  bind_rows()
+
+coef_table_cf_culture <- create_coef_table(coefs_cf_culture)
+
+ggplot(coef_table_cf_culture, aes(x=term, y=estimate, color=multiracial,
+                          ymin=estimate-1.386*se, ymax=estimate+1.386*se))+
+  geom_rect(aes(xmax=Inf, xmin=-Inf, ymin=estimate_mid-1.386*se_mid,
+                ymax=estimate_mid+1.386*se_mid, fill=multiracial), 
+            color=NA, alpha=0.2)+
+  geom_linerange(data=subset(coef_table_cf_culture, multiracial))+
+  geom_point()+
+  coord_flip()+
+  facet_wrap(~mrace, scales="free_y")+
+  theme_bw()+
+  theme(legend.position = "none", panel.grid = element_blank())+
+  scale_color_manual(values=c("grey40","red"))+
+  scale_fill_manual(values=c("grey40","red"))+
+  scale_linetype_manual(values=c(3,1))+
+  scale_y_continuous(labels = scales::percent)+
+  labs(x=NULL,
+       y="average adjusted predicted probability of being behind expected grade")
+```
+
+The results are a lot messier for cultural differences, partly because of the opposite effect of foreign-born parents. In most cases, differences point to an in-between status when there is any daylight between the constituent groups. So, its the SES effects that are really pulling this toward the lower group.
 
 ## Summary table of resource differences
 
