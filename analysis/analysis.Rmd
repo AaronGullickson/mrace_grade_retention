@@ -701,8 +701,6 @@ The results here are extraordinarily stable across both specifications.
 
 # Differences in Cultural and Family Resources
 
-
-
 A parsimonious way of doing this would be to calculate average predicted probability for each monoracial constituent group and a given biracial group, while holding constant all non-resource variables *including race*. This gives you an effective counterfactual of what the average probability would be for each group if they only differed on the resource variables. Where to set the other variables constant to might have some effect because of the transformation from logits to probs, but should not make a big difference. For convenience, I might just set it to white, but I could also try setting it to the biracial group of interest.
 
 ```{r create-dummied-data}
@@ -722,12 +720,13 @@ acs_dummied <- acs %>%
 ```
 
 ```{r model-dummied}
-model_full <- glm(below_exp_grade~current_grade_1st*year+current_grade_2nd*year+
-                    current_grade_3rd*year+current_grade_4th*year+
-                    current_grade_5th+current_grade_6th*year+
-                    current_grade_7th*year+current_grade_8th*year+
-                    current_grade_9th*year+current_grade_10th*year+
-                    current_grade_11th*year+current_grade_12th*year+
+model_full <- glm(below_exp_grade~
+                    year*(current_grade_1st+current_grade_2nd+current_grade_3rd+
+                            current_grade_4th+current_grade_5th+
+                            current_grade_6th+current_grade_7th+
+                            current_grade_8th+current_grade_9th+
+                            current_grade_10th+current_grade_11th+
+                            current_grade_12th)+
                     race_black+race_indigenous+race_asian+race_latino+
                     race_black_white+race_black_indigenous+race_black_latino+
                     race_black_asian+race_white_indigenous+race_white_latino+
@@ -735,17 +734,18 @@ model_full <- glm(below_exp_grade~current_grade_1st*year+current_grade_2nd*year+
                     race_indigenous_asian+race_latino_asian+
                     sex_female+
                     metro_non_metro+metro_central_city+metro_metro_non_central+
-                    metro_metro_indeterminable+state_arizona+state_arkansas+
-                    state_california+state_colorado+state_connecticut+state_dc+
-                    state_delaware+state_florida+state_georgia+state_hawaii+
-                    state_idaho+state_illinois+state_indiana+state_iowa+
-                    state_kansas+state_kentucky+state_louisiana+state_maine+
-                    state_maryland+state_massachusetts+state_michigan+
-                    state_minnesota+state_mississippi+state_missouri+
-                    state_montana+state_nebraska+state_nevada+
-                    state_new_hampshire+state_new_jersey+state_new_mexico+
-                    state_new_york+state_north_carolina+state_north_dakota+
-                    state_ohio+state_oklahoma+state_oregon+state_pennsylvania+
+                    metro_metro_indeterminable+
+                    state_alaska+state_arizona+state_arkansas+state_california+
+                    state_colorado+state_connecticut+state_dc+state_delaware+
+                    state_florida+state_georgia+state_hawaii+state_idaho+
+                    state_illinois+state_indiana+state_iowa+state_kansas+
+                    state_kentucky+state_louisiana+state_maine+state_maryland+
+                    state_massachusetts+state_michigan+state_minnesota+
+                    state_mississippi+state_missouri+state_montana+
+                    state_nebraska+state_nevada+state_new_hampshire+
+                    state_new_jersey+state_new_mexico+state_new_york+
+                    state_north_carolina+state_north_dakota+state_ohio+
+                    state_oklahoma+state_oregon+state_pennsylvania+
                     state_rhode_island+state_south_carolina+state_south_dakota+
                     state_tennessee+state_texas+state_utah+state_vermont+
                     state_virginia+state_washington+state_west_virginia+
@@ -759,53 +759,43 @@ deviance(model_full)
 # FIXME - its a little higher so I am missing something
 ```
 
-```{r}
-# what needs to get set at mean?
+```{r create-cf-df}
+# Create the counterfactual dataset where non-resource variables are held
+# at their mean. What needs to be set at tis mean?
 # - current_grade
 # - sex
 # - race
 # - state
 # - metro
-# I will not do this for year because I want to use that to grab the modal
-# year of 2014
+# - year
 means <- acs_dummied %>%
-  select(year, starts_with(c("state_","current_grade_","race_","sex_","metro_")))
-means <- lapply(means, function(x) {
-  rep(mean(x), length(x))
-}) %>%
+  select(year, starts_with(c("state_","current_grade_","race_","sex_",
+                             "metro_"))) %>%
+  lapply(function(x) {rep(mean(x), length(x))}) %>%
   bind_rows()
 
 cf_df <- acs_dummied %>%
-  select(below_exp_grade, race,family_income, parents_married, own_home, 
-         degree_mother, degree_father, foreign_born, foreign_born_mother, 
-         foreign_born_father, spk_eng, spk_eng_father, spk_eng_mother) %>%
+  select(cluster, strata, perwt, below_exp_grade, race,family_income, 
+         parents_married, own_home, degree_mother, degree_father, foreign_born, 
+         foreign_born_mother, foreign_born_father, spk_eng, spk_eng_father, 
+         spk_eng_mother) %>%
   bind_cols(means)
 ```
 
-```{r}
-# I think I can use year in marg to get the results for the modal year
+```{r test-marg, eval=FALSE}
+# This code chunk just tests to make sure I get the same value by hand as I get 
+# when I do it through the marg command.
 temp <- subset(cf_df, race=="Black/White")
-#temp$year <- 4
 lor <- predict(model_full, newdata=temp)
 mean(exp(lor)/(1+exp(lor)))
-marg(model_full, "year", data=subset(cf_df, race=="Black/White"))
-marg(model_full, "year", data=subset(cf_df, race=="White"))
-marg(model_full, "year", data=subset(cf_df, race=="Black"))
+marg(model_full, "year", data=temp)
+# It works!
 ```
 
-```{r counterfactual-ses, warning=FALSE, fig.height=12, fig.cap="Counterfactual probability of being behind grade for biracial respondents in comparison to their monoracial comparison groups if there was no difference by race and the only compositional differences between groups were resources (household income, parental education, home ownership, parent and child foreign-born status, parent and child English proficiency, and whether parents are married). 83.4% confidence bands shown around each estimate. Non-overlap in confidence bands roughly indicates statistically significant difference at the 5% level."}
-# set up the initial counterfactual dataset
-counter_df <- acs %>%
-  mutate(year=2014.5, # rough midpoint
-         current_grade="6th", # rough midpoint from cumulative probability (55%)
-         state="Minnesota", # median state effect in model 4 (Minnesota)
-         metro="Metro non-central",
-         sex="Male",
-         race_real=race,
-         race="Black")
-
+```{r create-cf-marg}
 coefs <- lapply(unique(acs$race), function(x) {
-  means_margin <- marg(model4, "race", data=subset(counter_df, race_real==x))[[1]]
+  temp <- subset(cf_df, race==x)
+  means_margin <- marg(model_full, "year", data=temp)[[1]]
   return(tibble(term=x, estimate=means_margin$Margin, 
                 se=means_margin$Standard.Error))
 }) %>%
@@ -852,24 +842,26 @@ coef_table <- map(as.list(str_subset(coefs$term, "/")), function(x) {
   #now use this as the levels of term as a factor
   coef_table <- coef_table %>%
     mutate(term=factor(term, levels=race_full))
+```
 
-ggplot(coef_table, aes(x=term, y=estimate, color=multiracial,
-                       ymin=estimate-1.386*se, ymax=estimate+1.386*se))+
-  geom_rect(aes(xmax=Inf, xmin=-Inf, ymin=estimate_mid-1.386*se_mid,
-                ymax=estimate_mid+1.386*se_mid, fill=multiracial), 
-            color=NA, alpha=0.2)+
-  geom_linerange(data=subset(coef_table, multiracial))+
-  geom_point()+
-  coord_flip()+
-  facet_wrap(~mrace, scales="free_y")+
-  theme_bw()+
-  theme(legend.position = "none", panel.grid = element_blank())+
-  scale_color_manual(values=c("grey40","red"))+
-  scale_fill_manual(values=c("grey40","red"))+
-  scale_linetype_manual(values=c(3,1))+
-  scale_y_continuous(labels = scales::percent)+
-  labs(x=NULL,
-       y="average adjusted predicted probability of being behind expected grade")
+```{r counterfactual-ses, warning=FALSE, fig.cap="Counterfactual probability of being behind grade for biracial respondents in comparison to their monoracial comparison groups if the only differences between groups were resources (household income, parental education, home ownership, parent and child foreign-born status, parent and child English proficiency, and whether parents are married). 83.4% confidence bands shown around each estimate. Non-overlap in confidence bands roughly indicates statistically significant difference at the 5% level."}
+  ggplot(coef_table, aes(x=term, y=estimate, color=multiracial,
+                         ymin=estimate-1.386*se, ymax=estimate+1.386*se))+
+    geom_rect(aes(xmax=Inf, xmin=-Inf, ymin=estimate_mid-1.386*se_mid,
+                  ymax=estimate_mid+1.386*se_mid, fill=multiracial), 
+              color=NA, alpha=0.2)+
+    geom_linerange(data=subset(coef_table, multiracial))+
+    geom_point()+
+    coord_flip()+
+    facet_wrap(~mrace, scales="free_y")+
+    theme_bw()+
+    theme(legend.position = "none", panel.grid = element_blank())+
+    scale_color_manual(values=c("grey40","red"))+
+    scale_fill_manual(values=c("grey40","red"))+
+    scale_linetype_manual(values=c(3,1))+
+    scale_y_continuous(labels = scales::percent)+
+    labs(x=NULL,
+         y="average adjusted predicted probability of being behind expected grade")
   
 ```
 
@@ -878,15 +870,15 @@ To summarize the results here:
 |                   | Lower than both | Same as lower | Between | Same as higher | Higher than both |
 |-------------------|:---------------:|:-------------:|:-------:|:--------------:|:----------------:|
 | White/Asian       |       X         |               |         |                |                  |
-| Black/Asian       |                 |  X            |         |                |                  |
-| Black/Latino      |                 |  X            |         |                |                  |
-| White/Latino      |                 |  X            |         |                |                  |
-| Indigenous/Latino |                 |  X            |         |                |                  |
-| Latino/Asian      |                 |  X            |         |                |                  |
+| Black/Asian       |                 |  X  (Asian)   |         |                |                  |
+| Black/Latino      |                 |  X  (Black)   |         |                |                  |
+| White/Latino      |                 |  X  (White)   |         |                |                  |
+| Indigenous/Latino |                 |X  (Indigenous)|         |                |                  |
+| Latino/Asian      |                 |  X (Asian)    |         |                |                  |
 | White/Indigenous  |                 |               |    X    |                |                  |
 | Indigenous/Asian  |                 |               |    X    |                |                  |
 | Black/Indigenous  |                 |               |    X    |                |                  |
-| Black/White       |                 |               |         |         X      |                  |
+| Black/White       |                 |               |         |   X (Black)    |                  |
 
 
 In half the cases, the biracial group would have outcomes similar to the group with better resources suggesting that the parents in these matches are being positively selected. The White/Asian case is even more dramatic with a resource advantage over both single race groups. You can see this particularly for the White/Asian case in terms of family income where they have the highest of *any* group by a considerable amount. White/Asians are on average a very privileged group.
