@@ -215,7 +215,7 @@ sapply(list("categorical, additive"=model_add_cat,
             "categorical, interaction"=model_inter_cat, 
             "continuous, additive"=model_add_cont, 
             "continuous, interaction"=model_inter_cont,
-            "add state*year continuous interaction"=model_inter_state),
+            "continous, interaction + state*year continuous interaction"=model_inter_state),
        BIC) %>%
     enframe("model","BIC") %>%
   kbl() %>%
