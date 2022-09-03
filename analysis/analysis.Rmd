@@ -817,9 +817,9 @@ cf_df <- acs_dummied %>%
 # when I do it through the marg command.
 temp <- subset(cf_df, race=="Black/White")
 lor <- predict(model_full, newdata=temp)
-mean(exp(lor)/(1+exp(lor)))
-marg(model_full, "year", data=temp)
-# It works!
+weighted.mean(exp(lor)/(1+exp(lor)), w=temp$perwt)
+marg(model_full, "year", data=temp, weights=temp$perwt)
+# It works
 ```
 
 I can then feed subsets (by race) of this counterfactual dataset into the `marg` command to get the predicted probability of grade retention for each racial group as I do below.
@@ -827,7 +827,7 @@ I can then feed subsets (by race) of this counterfactual dataset into the `marg`
 ```{r create-cf-marg}
 coefs_cf <- lapply(unique(acs$race), function(x) {
   temp <- subset(cf_df, race==x)
-  means_margin <- marg(model_full, "year", data=temp)[[1]]
+  means_margin <- marg(model_full, "year", data=temp, weights=temp$perwt)[[1]]
   return(tibble(term=x, estimate=means_margin$Margin, 
                 se=means_margin$Standard.Error))
 }) %>%
@@ -838,7 +838,7 @@ coef_table_cf <- create_coef_table(coefs_cf)
 
 And now I can plot up the results.
 
-```{r counterfactual-ses, warning=FALSE, fig.height=12, fig.cap="Counterfactual probability of being behind grade for biracial respondents in comparison to their monoracial comparison groups if the only differences between groups were resources (household income, parental education, home ownership, parent and child foreign-born status, parent and child English proficiency, and whether parents are married). 83.4% confidence bands shown around each estimate. Non-overlap in confidence bands roughly indicates statistically significant difference at the 5% level."}
+```{r counterfactual-ses, warning=FALSE, fig.cap="Counterfactual probability of being behind grade for biracial respondents in comparison to their monoracial comparison groups if the only differences between groups were resources (household income, parental education, home ownership, parent and child foreign-born status, parent and child English proficiency, and whether parents are married). 83.4% confidence bands shown around each estimate. Non-overlap in confidence bands roughly indicates statistically significant difference at the 5% level."}
 ggplot(coef_table_cf, aes(x=term, y=estimate, color=multiracial,
                           ymin=estimate-1.386*se, ymax=estimate+1.386*se))+
   geom_rect(aes(xmax=Inf, xmin=-Inf, ymin=estimate_mid-1.386*se_mid,
@@ -889,7 +889,7 @@ Lets do the same procedure but I want to isolate the role of SES vs cultural (fo
 
 For ease of use, I am just going to plug in values here for the other resources rather than dummy everything up.
 
-```{r cf-ses-isolate, warning=FALSE, fig.height=12, fig.cap="Counterfactual probability of being behind grade for biracial respondents in comparison to their monoracial comparison groups if the only differences between groups were SES resources (household income, parental education, home ownership, and whether parents are married). 83.4% confidence bands shown around each estimate. Non-overlap in confidence bands roughly indicates statistically significant difference at the 5% level."}
+```{r cf-ses-isolate, warning=FALSE, fig.cap="Counterfactual probability of being behind grade for biracial respondents in comparison to their monoracial comparison groups if the only differences between groups were SES resources (household income, parental education, home ownership, and whether parents are married). 83.4% confidence bands shown around each estimate. Non-overlap in confidence bands roughly indicates statistically significant difference at the 5% level."}
 cf_df_ses <- cf_df
 cf_df_ses$foreign_born <- FALSE
 cf_df_ses$foreign_born_father <- FALSE
@@ -927,7 +927,7 @@ ggplot(coef_table_cf_ses, aes(x=term, y=estimate, color=multiracial,
        y="average adjusted predicted probability of being behind expected grade")
 ```
 
-```{r cf-culture-isolate, warning=FALSE, fig.height=12, fig.cap="Counterfactual probability of being behind grade for biracial respondents in comparison to their monoracial comparison groups if the only differences between groups were cultural resources (foreign-born status and English proficiency). 83.4% confidence bands shown around each estimate. Non-overlap in confidence bands roughly indicates statistically significant difference at the 5% level."}
+```{r cf-culture-isolate, warning=FALSE, fig.cap="Counterfactual probability of being behind grade for biracial respondents in comparison to their monoracial comparison groups if the only differences between groups were cultural resources (foreign-born status and English proficiency). 83.4% confidence bands shown around each estimate. Non-overlap in confidence bands roughly indicates statistically significant difference at the 5% level."}
 cf_df_culture <- cf_df
 cf_df_culture$family_income <- mean(cf_df_culture$family_income)
 cf_df_culture$own_home <- TRUE
