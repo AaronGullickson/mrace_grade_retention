@@ -899,7 +899,7 @@ cf_df_ses$spk_eng_mother <- "Yes"
 
 coefs_cf_ses <- lapply(unique(acs$race), function(x) {
   temp <- subset(cf_df_ses, race==x)
-  means_margin <- marg(model_full, "year", data=temp)[[1]]
+  means_margin <- marg(model_full, "year", data=temp, weights=temp$perwt)[[1]]
   return(tibble(term=x, estimate=means_margin$Margin, 
                 se=means_margin$Standard.Error))
 }) %>%
@@ -936,7 +936,7 @@ cf_df_culture$parents_married <- TRUE
 
 coefs_cf_culture <- lapply(unique(acs$race), function(x) {
   temp <- subset(cf_df_culture, race==x)
-  means_margin <- marg(model_full, "year", data=temp)[[1]]
+  means_margin <- marg(model_full, "year", data=temp, weights=temp$perwt)[[1]]
   return(tibble(term=x, estimate=means_margin$Margin, 
                 se=means_margin$Standard.Error))
 }) %>%
