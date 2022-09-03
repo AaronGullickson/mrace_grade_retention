@@ -240,8 +240,14 @@ Here are the model structure that I will use:
 
 All models are estimated as logit models. Warning, the code chunks below take a bit of time to run!
 
+```{r create-design}
+# strata make the models take forever, but do not seem to change anything
+# so I will leave them out
+acs_design <- svydesign(ids=~cluster, weights=~perwt, data=acs)
+```
+
 ```{r build-models, results='asis'}
-model0 <- glm(below_exp_grade~race, data=acs, family=binomial)
+model0 <- svyglm(below_exp_grade~race, design=acs_design, family=binomial)
 model1 <- update(model0, 
                  .~.+I(year-2010)*current_grade+state+metro+sex)
 model2 <- update(model1, 
@@ -261,7 +267,6 @@ The model results here are not very interesting directly because everything is r
 results_monoracial <- map(list(model0, model1, model2, model3, model4),
                           function(x) {
                             marg(x, "race", type="effects", 
-                                 vcov_mat=vcovCL(x, cluster=acs$cluster),
                                  at_var_interest=c("White","Black","Indigenous",
                                                    "Asian","Latino"))[[1]][-1,]
                           })
@@ -523,19 +528,15 @@ I want to separate the results by age more or less, but I cannot take age direct
 
 ```{r models-by-grade, warning=FALSE, fig.height=12, fig.cap="Probability of being behind grade for biracial respondents in comparison to their monoracial comparison groups. 83.4% confidence bands shown around each estimate. Non-overlap in confidence bands roughly indicates statistically significant difference at the 5% level. Panels compare results when data are restricted to certain grade ranges."}
 #run separate models by grade groups
-model4_elem <- update(model4, data=subset(acs, current_grade<="5th"))
-model4_middle <- update(model4, data=subset(acs, current_grade>"5th" & 
+model4_elem <- update(model4, design=subset(acs_design, current_grade<="5th"))
+model4_middle <- update(model4, design=subset(acs_design, current_grade>"5th" & 
                                         current_grade<"9th"))
-model4_hs <- update(model4, data=subset(acs, current_grade>="9th"))
+model4_hs <- update(model4, design=subset(acs_design, current_grade>="9th"))
 
 
-coef_table_elem <- calculate_marg_means(model4_elem, 
-                                        cluster_var=subset(acs, current_grade<="5th")$cluster)
-coef_table_middle <- calculate_marg_means(model4_middle,
-                                          cluster_var=subset(acs, current_grade>"5th" & 
-                                        current_grade<"9th")$cluster)
-coef_table_hs <- calculate_marg_means(model4_hs,
-                                      cluster_var=subset(acs, current_grade>="9th")$cluster)
+coef_table_elem <- calculate_marg_means(model4_elem)
+coef_table_middle <- calculate_marg_means(model4_middle)
+coef_table_hs <- calculate_marg_means(model4_hs)
 
 coef_table <- coef_table_elem %>%
   mutate(model="elementary")
@@ -588,11 +589,9 @@ In no case do the results here suggest a biasing effect of non-biological kids. 
 
 ```{r models-parent-link, warning=FALSE, fig.height=12, fig.cap="Probability of being behind grade for biracial respondents in comparison to their monoracial comparison groups. 83.4% confidence bands shown around each estimate. Non-overlap in confidence bands roughly indicates statistically significant difference at the 5% level. Panels compare results depending on whether results are restricted only to children linked to a head of household or not."}
 #run separate models by grade groups
-model4_best_link <- update(model4, data=subset(acs, momrule==11 & poprule==11))
+model4_best_link <- update(model4, design=subset(acs_design, momrule==11 & poprule==11))
 
-coef_table_best_link <- calculate_marg_means(model4_best_link, 
-                                        cluster_var=subset(acs, momrule==11 &
-                                                             poprule==11)$cluster)
+coef_table_best_link <- calculate_marg_means(model4_best_link)
 
 coef_table <- coef_table_best_link %>%
   mutate(model="only direct links")
@@ -749,41 +748,43 @@ acs_dummied <- acs %>%
 Now that I have new "dummied up" dataset, I can rereun the full model using the dummy variables which means a very, very long formula.
 
 ```{r model-dummied}
-model_full <- glm(below_exp_grade~
-                    year*(current_grade_1st+current_grade_2nd+current_grade_3rd+
-                            current_grade_4th+current_grade_5th+
-                            current_grade_6th+current_grade_7th+
-                            current_grade_8th+current_grade_9th+
-                            current_grade_10th+current_grade_11th+
-                            current_grade_12th)+
-                    race_black+race_indigenous+race_asian+race_latino+
-                    race_black_white+race_black_indigenous+race_black_latino+
-                    race_black_asian+race_white_indigenous+race_white_latino+
-                    race_white_asian+race_indigenous_latino+
-                    race_indigenous_asian+race_latino_asian+
-                    sex_female+
-                    metro_non_metro+metro_central_city+metro_metro_non_central+
-                    metro_metro_indeterminable+
-                    state_alaska+state_arizona+state_arkansas+state_california+
-                    state_colorado+state_connecticut+state_dc+state_delaware+
-                    state_florida+state_georgia+state_hawaii+state_idaho+
-                    state_illinois+state_indiana+state_iowa+state_kansas+
-                    state_kentucky+state_louisiana+state_maine+state_maryland+
-                    state_massachusetts+state_michigan+state_minnesota+
-                    state_mississippi+state_missouri+state_montana+
-                    state_nebraska+state_nevada+state_new_hampshire+
-                    state_new_jersey+state_new_mexico+state_new_york+
-                    state_north_carolina+state_north_dakota+state_ohio+
-                    state_oklahoma+state_oregon+state_pennsylvania+
-                    state_rhode_island+state_south_carolina+state_south_dakota+
-                    state_tennessee+state_texas+state_utah+state_vermont+
-                    state_virginia+state_washington+state_west_virginia+
-                    state_wisconsin+state_wyoming+
-                    +sqrt(family_income/10000)+parents_married+own_home+
-                    degree_mother+degree_father+
-                    spk_eng+spk_eng_mother+spk_eng_father+
-                    foreign_born_mother+foreign_born_father+foreign_born, 
-                  data=acs_dummied, family=binomial)
+acs_dummied_design <- svydesign(ids=~cluster, weights=~perwt, data=acs_dummied)
+
+model_full <- svyglm(below_exp_grade~
+                       year*(current_grade_1st+current_grade_2nd+current_grade_3rd+
+                               current_grade_4th+current_grade_5th+
+                               current_grade_6th+current_grade_7th+
+                               current_grade_8th+current_grade_9th+
+                               current_grade_10th+current_grade_11th+
+                               current_grade_12th)+
+                       race_black+race_indigenous+race_asian+race_latino+
+                       race_black_white+race_black_indigenous+race_black_latino+
+                       race_black_asian+race_white_indigenous+race_white_latino+
+                       race_white_asian+race_indigenous_latino+
+                       race_indigenous_asian+race_latino_asian+
+                       sex_female+
+                       metro_non_metro+metro_central_city+metro_metro_non_central+
+                       metro_metro_indeterminable+
+                       state_alaska+state_arizona+state_arkansas+state_california+
+                       state_colorado+state_connecticut+state_dc+state_delaware+
+                       state_florida+state_georgia+state_hawaii+state_idaho+
+                       state_illinois+state_indiana+state_iowa+state_kansas+
+                       state_kentucky+state_louisiana+state_maine+state_maryland+
+                       state_massachusetts+state_michigan+state_minnesota+
+                       state_mississippi+state_missouri+state_montana+
+                       state_nebraska+state_nevada+state_new_hampshire+
+                       state_new_jersey+state_new_mexico+state_new_york+
+                       state_north_carolina+state_north_dakota+state_ohio+
+                       state_oklahoma+state_oregon+state_pennsylvania+
+                       state_rhode_island+state_south_carolina+state_south_dakota+
+                       state_tennessee+state_texas+state_utah+state_vermont+
+                       state_virginia+state_washington+state_west_virginia+
+                       state_wisconsin+state_wyoming+
+                       +sqrt(family_income/10000)+parents_married+own_home+
+                       degree_mother+degree_father+
+                       spk_eng+spk_eng_mother+spk_eng_father+
+                       foreign_born_mother+foreign_born_father+foreign_born, 
+                     design=acs_dummied_design, family=binomial)
 ```
 
 I now have the model in the correct form. The next step is to create the counterfactual dataset by setting all of the non-resource variables to their mean. Thus, in this dataset, the only differences across racial groups are coming from their resource differences.
