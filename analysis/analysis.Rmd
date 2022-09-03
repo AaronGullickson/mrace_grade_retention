@@ -23,6 +23,13 @@ source(here("analysis","useful_functions.R"))
 load(here("analysis","output","acs.RData"))
 ```
 
+```{r create-design}
+# strata make the models take forever, but do not seem to change anything
+# so I will leave them out
+acs_design <- acs %>%
+  as_survey_design(ids = cluster, weights = perwt)
+```
+
 
 # Grade retention summary
 
@@ -152,42 +159,23 @@ The evidence here suggests that the decline is driven by the higher grades where
 
 # Descriptive statistics
 
-Lets looks at sample characteristics by race.
+Lets looks at sample size and grade retention by race.
 
 ```{r desc-stats}
-tbl_summary <- acs %>%
+tbl_summary <- acs_design %>%
   group_by(race) %>%
   summarize(n=n(), 
-            held_back=round(mean(below_exp_grade), 3)*100,
-            mean_age=round(mean(age), 1),
-            f_born=round(mean(foreign_born), 3)*100,
-            spk_eng_well=round(mean(spk_eng=="Yes"), 3)*100,
-            spk_eng_par=round(mean(spk_eng_father=="Yes" & 
-                                     spk_eng_mother=="Yes"), 3)*100,
-            par_fb=round(mean(foreign_born_father | 
-                                       foreign_born_mother), 3)*100,
-            fam_inc=round(mean(family_income), 0),
-            own_home=round(mean(own_home), 3)*100,
-            par_hs=round(mean(degree_father!="LHS" | 
-                                degree_mother!="LHS"), 3)*100,
-            par_ba=round(mean(degree_father=="BA" | 
-                                degree_father=="G" | 
-                                degree_mother=="BA" | 
-                                degree_mother=="G"), 3)*100,
-            par_mar=round(mean(parents_married), 3)*100) %>%
+            held_back=round(survey_mean(below_exp_grade, vartype=NULL), 3)*100,
+            mean_age=round(survey_mean(age, vartype=NULL), 1)) %>%
   arrange(desc(n))
 
 index_biracial <- which(str_detect(tbl_summary$race, "/"))
 
 tbl_summary %>%
   mutate_if(is.numeric, format, big.mark=",") %>%
-  kbl(caption="Descriptive statistics by race. Shading indicates biracial group. Groups ordered by sample size.",
+  kbl(caption="Descriptive statistics by race. Shading indicates biracial group. Groups ordered by sample size. Survey weights applied.",
       align = c("l",rep("r", ncol(tbl_summary)-1)),
-      col.names=c("race","n","% below expected grade", "mean age",
-                  "% foreign-born","% speak English well",
-                  "% Both parents speak english well","% either parent foreign-born",
-                  "mean family income","% own home","% either parent, HS diploma",
-                  "% Either parent, BA degree","% parents married")) %>%
+      col.names=c("race","n","% below expected grade", "mean age")) %>%
   kable_paper() %>%
   row_spec(index_biracial, background = "#D3D3D3")
 ```
@@ -238,13 +226,8 @@ Here are the model structure that I will use:
 3.  Add mother and father highest degree
 4.  Add family income (square rooted), own your own home, and whether parents are married.
 
-All models are estimated as logit models. Warning, the code chunks below take a bit of time to run!
+All models are estimated as logit models. I use the `survey` library to adjust for variable sample weights and clustering of respondents in the same household. Warning, the code chunks below take a bit of time to run!
 
-```{r create-design}
-# strata make the models take forever, but do not seem to change anything
-# so I will leave them out
-acs_design <- svydesign(ids=~cluster, weights=~perwt, data=acs)
-```
 
 ```{r build-models, results='asis'}
 model0 <- svyglm(below_exp_grade~race, design=acs_design, family=binomial)
@@ -299,7 +282,7 @@ I want to compare each multiracial group to:
 
 I can do this by calculating the *average adjusted prediction* of the dependent variable across all of the possible race groups. The average adjusted prediction (this is the stata-ese language - it is also called variously a predictive margin among other things). The adjusted predition in general is just the predicted value of the dependent variable for some set of values on the covariates. In this case, I want to predict on the level of the response to get predicted probabilities of being held back. The average adjusted prediction essentially gets the adjusted prediction for every observation in the data based on their covariates and then takes the average. Essentially, this is equivalent to treating every respondent as if they belonged to group A when calculating the average adjusted prediction for group A. The average adjusted prediction is directly related to the *average marginal effect* (AME) in that the AME for a group difference is simply the difference in the average adjusted prediction across groups.
 
-Its easy to get a simple adjusted prediction at specific values using the `predict` command, but more complicated for the average adjusted prediction. In order to calculate these average adjusted predictions, I use the `marg` command in the `modmargs` library. This function has a nice `type="levels"` argument that directly gives you the average adjusted prediction. Standard errors for these average adjusted predictions are calculated by the [delta method](https://cran.r-project.org/web/packages/modmarg/vignettes/delta-method.html). I also adjust all SEs for clustering of respondents within households.
+Its easy to get a simple adjusted prediction at specific values using the `predict` command, but more complicated for the average adjusted prediction. In order to calculate these average adjusted predictions, I use the `marg` command in the `modmargs` library. This function has a nice `type="levels"` argument that directly gives you the average adjusted prediction. Standard errors for these average adjusted predictions are calculated by the [delta method](https://cran.r-project.org/web/packages/modmarg/vignettes/delta-method.html). I also adjust all SEs for clustering of respondents within households and variance in person weights.
 
 To compare the results for each biracial group to the halfway assumption, I need to calculate the value midway between the two constituent groups and the standard error of that value. Calculating the midway value is just a straightforward mean calculation. To calculate the standard error, I take:
 
@@ -638,19 +621,26 @@ The results here are extraordinarily stable across both specifications.
 First, lets compare means of SES and cultural resources across all racial groups.
 
 ```{r desc-stats-ses}
-tbl_summary <- acs %>%
+tbl_summary <- acs_design %>%
   group_by(race) %>%
-  summarize(fam_inc=round(mean(family_income), 0),
-            own_home=round(mean(own_home), 3)*100,
-            par_mar=round(mean(parents_married), 3)*100,
-            f_lhs=round(mean(degree_father=="LHS"), 3)*100,
-            f_hs=round(mean(degree_father=="HS"), 3)*100,
-            f_aa=round(mean(degree_father=="AA"), 3)*100,
-            f_ba=round(mean(degree_father=="BA" | degree_father=="G"), 3)*100,
-            m_lhs=round(mean(degree_mother=="LHS"), 3)*100,
-            m_hs=round(mean(degree_mother=="HS"), 3)*100,
-            m_aa=round(mean(degree_mother=="AA"), 3)*100,
-            m_ba=round(mean(degree_mother=="BA" | degree_mother=="G"), 3)*100)
+  summarize(fam_inc=survey_mean(family_income, vartype = NULL))
+
+tbl_summary <- acs_design %>%
+  group_by(race) %>%
+  summarize(fam_inc=round(survey_mean(family_income, vartype = NULL), 0),
+            own_home=round(survey_mean(own_home, vartype = NULL), 3)*100,
+            par_mar=round(survey_mean(parents_married, vartype = NULL), 3)*100,
+            f_lhs=round(survey_mean(degree_father=="LHS", vartype = NULL), 
+                        3)*100,
+            f_hs=round(survey_mean(degree_father=="HS", vartype = NULL), 3)*100,
+            f_aa=round(survey_mean(degree_father=="AA", vartype = NULL), 3)*100,
+            f_ba=round(survey_mean(degree_father=="BA" | degree_father=="G", 
+                                   vartype = NULL), 3)*100,
+            m_lhs=round(survey_mean(degree_mother=="LHS", vartype = NULL), 3)*100,
+            m_hs=round(survey_mean(degree_mother=="HS", vartype = NULL), 3)*100,
+            m_aa=round(survey_mean(degree_mother=="AA", vartype = NULL), 3)*100,
+            m_ba=round(survey_mean(degree_mother=="BA" | degree_mother=="G", 
+                                   vartype = NULL), 3)*100)
 
 index_biracial <- which(str_detect(tbl_summary$race, "/"))
 
@@ -678,20 +668,29 @@ There is a lot going on here, but I can summarize a few things:
 Now lets look at the cultural characteristics. One thing to keep in mind here is that having foreign-born parents actually *lowers* your risk of grade retention, whereas being foreign-born yourself increases it.
 
 ```{r desc-stats-cult}
-tbl_summary <- acs %>%
+tbl_summary <- acs_design %>%
   group_by(race) %>%
-  summarize(f_born=round(mean(foreign_born), 3)*100,
-            father_fb=round(mean(foreign_born_father), 3)*100,
-            mother_fb=round(mean(foreign_born_mother), 3)*100,
-            spk_eng_no=round(mean(spk_eng=="No"), 3)*100,
-            spk_eng_some=round(mean(spk_eng=="Somewhat"), 3)*100,
-            spk_eng_yes=round(mean(spk_eng=="Yes"), 3)*100,
-            f_spk_eng_no=round(mean(spk_eng_father=="No"), 3)*100,
-            f_spk_eng_some=round(mean(spk_eng_father=="Somewhat"), 3)*100,
-            f_spk_eng_yes=round(mean(spk_eng_father=="Yes"), 3)*100,
-            m_spk_eng_no=round(mean(spk_eng_mother=="No"), 3)*100,
-            m_spk_eng_some=round(mean(spk_eng_mother=="Somewhat"), 3)*100,
-            m_spk_eng_yes=round(mean(spk_eng_mother=="Yes"), 3)*100)
+  summarize(f_born=round(survey_mean(foreign_born, vartype = NULL), 3)*100,
+            father_fb=round(survey_mean(foreign_born_father, 
+                                        vartype = NULL), 3)*100,
+            mother_fb=round(survey_mean(foreign_born_mother, 
+                                        vartype = NULL), 3)*100,
+            spk_eng_no=round(survey_mean(spk_eng=="No", vartype = NULL), 3)*100,
+            spk_eng_some=round(survey_mean(spk_eng=="Somewhat", 
+                                           vartype = NULL), 3)*100,
+            spk_eng_yes=round(survey_mean(spk_eng=="Yes", vartype = NULL), 3)*100,
+            f_spk_eng_no=round(survey_mean(spk_eng_father=="No", 
+                                           vartype = NULL), 3)*100,
+            f_spk_eng_some=round(survey_mean(spk_eng_father=="Somewhat", 
+                                             vartype = NULL), 3)*100,
+            f_spk_eng_yes=round(survey_mean(spk_eng_father=="Yes", 
+                                            vartype = NULL), 3)*100,
+            m_spk_eng_no=round(survey_mean(spk_eng_mother=="No", 
+                                           vartype = NULL), 3)*100,
+            m_spk_eng_some=round(survey_mean(spk_eng_mother=="Somewhat", 
+                                             vartype = NULL), 3)*100,
+            m_spk_eng_yes=round(survey_mean(spk_eng_mother=="Yes", 
+                                            vartype = NULL), 3)*100)
 
 index_biracial <- which(str_detect(tbl_summary$race, "/"))
 
@@ -977,18 +976,22 @@ temp <- coefs_cf %>%
          term=as.character(term)) %>%
   rename(race=term, held_back_cf=estimate)
 
-tbl_resources <- acs %>%
+tbl_resources <- acs_design %>%
   group_by(race) %>%
-  summarize(fam_inc=round(mean(family_income), 0),
-            own_home=round(mean(own_home), 3)*100,
-            m_ba=round(mean(degree_mother=="BA" | degree_mother=="G"), 3)*100,
-            f_ba=round(mean(degree_father=="BA" | degree_father=="G"), 3)*100,
-            f_born=round(mean(foreign_born), 3)*100,
-            par_fb=round(mean(foreign_born_father | 
-                                       foreign_born_mother), 3)*100,
-            spk_eng_well=round(mean(spk_eng=="Yes"), 3)*100,
-            spk_eng_par=round(mean(spk_eng_father=="Yes" & 
-                                     spk_eng_mother=="Yes"), 3)*100) %>%
+  summarize(fam_inc=round(survey_mean(family_income, vartype=NULL), 0),
+            own_home=round(survey_mean(own_home, vartype=NULL), 3)*100,
+            m_ba=round(survey_mean(degree_mother=="BA" | degree_mother=="G", 
+                                   vartype=NULL), 3)*100,
+            f_ba=round(survey_mean(degree_father=="BA" | degree_father=="G", 
+                                   vartype=NULL), 3)*100,
+            f_born=round(survey_mean(foreign_born, vartype=NULL), 3)*100,
+            par_fb=round(survey_mean(foreign_born_father | foreign_born_mother, 
+                                     vartype=NULL), 3)*100,
+            spk_eng_well=round(survey_mean(spk_eng=="Yes",
+                                           vartype=NULL), 3)*100,
+            spk_eng_par=round(survey_mean(spk_eng_father=="Yes" & 
+                                     spk_eng_mother=="Yes", vartype=NULL), 
+                              3)*100) %>%
   mutate(race=as.character(race)) %>%
   left_join(temp) %>%
   arrange(held_back_cf)
@@ -997,8 +1000,8 @@ index_biracial <- which(str_detect(tbl_resources$race, "/"))
 
 tbl_resources %>%
   mutate_if(is.numeric, format, big.mark=",") %>%
-  kbl(caption="Resource differences by race. Shading indicates biracial group.",
-      align = c("l",rep("r", ncol(tbl_summary)-1)),
+  kbl(caption="Resource differences by race. Shading indicates biracial group. All results are survey weighted.",
+      align = c("l",rep("r", ncol(tbl_resources)-1)),
       col.names=c("race","mean family income","% own home",
                   "% mother, BA degree","% father, BA degree",
                   "% foreign-born","% either parent foreign-born",
