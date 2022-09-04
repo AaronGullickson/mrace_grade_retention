@@ -21,5 +21,7 @@ Rscript check_packages.R
 # send output to log directory as HTML
 Rscript -e "rmarkdown::render('organize_data.R',output_file='organize_data.html',output_dir='logs')"
 
-# Run the main analysis
-Rscript -e "rmarkdown::render('analysis.Rmd')"
+# Run the analysis
+Rscript -e "rmarkdown::render('analysis_spec_tests.Rmd')"
+Rscript -e "rmarkdown::render('analysis_main.Rmd')"
+Rscript -e "rmarkdown::render('analysis_resources.Rmd')"

@@ -1,0 +1,194 @@
+---
+title: "Testing specification of baseline models"
+output: 
+  rmdformats::robobook:
+    highlight: tango
+    toc_depth: 2
+    fig_height: 6
+    fig_width: 9
+    code_folding: hide
+    lightbox: TRUE
+---
+
+```{r time-start}
+timestamp()
+```
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval=TRUE)
+library(here)
+source(here("analysis","check_packages.R"))
+source(here("analysis","useful_functions.R"))
+load(here("analysis","output","acs.RData"))
+```
+
+I need to determine the best specification to address how current grade, state, and year affect grade retention probabilities so that I can determine the best and most parsimionious mix of variables for the baseline model. I am doing this in a separate script because of the length of time it takes to consider some of these models.
+
+# Grade retention summary
+
+OK, first lets just confirm that the grade retention variable is working as expected on our sample. I start by looking at the number of kids by age and current grade:
+
+```{r tab-grade-by-age}
+acs %>% 
+  tabyl(age, current_grade) %>%
+  mutate_if(is.numeric, format, big.mark=",") %>%
+  kbl(caption="Cross-tabulation of age and current grade of student",
+      align=c("l",rep("r",13))) %>%
+  kable_paper() %>%
+  column_spec(2, background=c(rep("#D3D3D3",2), rep("white", 14))) %>%
+  column_spec(3, background=c("white", 
+                              rep("#D3D3D3",2), 
+                              rep("white", 13))) %>%
+  column_spec(4, background=c(rep("white", 2), 
+                              rep("#D3D3D3",2), 
+                              rep("white", 12))) %>%
+  column_spec(5, background=c(rep("white", 3), 
+                              rep("#D3D3D3",2), 
+                              rep("white", 11))) %>%
+  column_spec(6, background=c(rep("white", 4), 
+                              rep("#D3D3D3",2), 
+                              rep("white", 10))) %>%
+  column_spec(7, background=c(rep("white", 5), 
+                              rep("#D3D3D3",2), 
+                              rep("white", 9))) %>%
+  column_spec(8, background=c(rep("white", 6), 
+                              rep("#D3D3D3",2), 
+                              rep("white", 8))) %>%
+  column_spec(9, background=c(rep("white", 7), 
+                              rep("#D3D3D3",2), 
+                              rep("white", 7))) %>%
+  column_spec(10, background=c(rep("white", 8), 
+                               rep("#D3D3D3",2), 
+                               rep("white", 6))) %>%
+  column_spec(11, background=c(rep("white", 9), 
+                               rep("#D3D3D3",2), 
+                               rep("white", 5))) %>%
+  column_spec(12, background=c(rep("white", 10), 
+                               rep("#D3D3D3",2), 
+                               rep("white", 4))) %>%
+  column_spec(13, background=c(rep("white", 11), 
+                               rep("#D3D3D3",2), 
+                               rep("white", 3))) %>%
+  column_spec(14, background=c(rep("white", 12), 
+                               rep("#D3D3D3",2), 
+                               rep("white", 2)))
+```
+
+Ok, this looks more or less like what I would expect. We observe two modal ages for each grade. Some of the more extreme age values for older grades seem a little strange given that these are only supposed to be currently enrolled students. 20-year old sixth graders? I mean there are relatively few of these cases but still seems a bit odd. Its also interesting how this really starts expanding past 5th - did the Census Bureau "correct" values below 6th or something?
+
+Now lets calculate the percentage of cases TRUE on the dependent variable across this same table, just to confirm its all working correctly.
+
+```{r check-retention-code, fig.cap="The proportion of students measured at below grade level by age and current grade. This graph is used to ensure that the dependent variable is calculated correctly."}
+acs %>%
+  group_by(age, current_grade) %>%
+  summarize(below=mean(below_exp_grade)) %>%
+  ggplot(aes(x=current_grade, y=age, fill=below))+
+  geom_tile(color="grey20")+
+  geom_text(aes(label=below))+
+  theme_bw()+
+  scale_fill_viridis_c()+
+  scale_y_continuous(breaks=5:20, minor_breaks = NULL)+
+  labs(x="current grade", y="age", fill="proportion below grade level")
+```
+
+Ok, that looks good. 
+
+What do the grade retention probabilities look like by grade:
+
+```{r retention-by-grade, fig.cap="Percent of students clearly behind grade level by current grade. Blue lines fit a smoothed curve to the data."}
+acs %>%
+  group_by(current_grade) %>%
+  summarize(below_grade=mean(below_exp_grade),
+            n=n(),
+            se=sqrt((below_grade*(1-below_grade))/n)) %>%
+  ggplot(aes(x=current_grade, y=below_grade, group=1,
+             ymin=below_grade-1.96*se, ymax=below_grade+1.96*se))+
+  geom_smooth(se=FALSE)+
+  geom_line(linetype=2, color="grey30")+
+  geom_point()+
+  geom_linerange()+
+  scale_y_continuous(labels=scales::percent)+
+  labs(x="current grade", y="percent clearly behind grade level for age")+
+  theme_bw()
+```
+
+I guess those numbers look pretty reasonable. Its hard to benchmark it off anything. Warren et. al. estimate annual retention rates by grade but that is different than what I am measuring here because this is cumulative (but can also reflect students being caught up). In general, these must be underestimates because they do not capture kids who were held back but are still within the modal age.
+
+What about by year?
+
+```{r retention-by-year, fig.cap="Trends over time in the percent of students clearly behind grade level. Blue lines fit a smoothed curve to the data."}
+acs %>%
+  group_by(year) %>%
+  summarize(below_grade=mean(below_exp_grade)) %>%
+  ggplot(aes(x=year, y=below_grade))+
+  geom_line()+
+  geom_point()+
+  geom_smooth(se=FALSE)+
+  scale_x_continuous(breaks=c(2010,2014,2018))+
+  scale_y_continuous(labels=scales::percent)+
+  labs(x="current grade", y="percent clearly behind grade level for age")+
+  theme_bw()
+```
+
+Overall, there has been some decline over time in the prevalence of grade retention.
+
+Lets look at this by grade and year
+
+```{r retention-by-year-grade, fig.cap="Trends over time and grade in the percent of students clearly behind grade level. Lines are calculated by smoothing."}
+acs %>%
+  group_by(current_grade, year) %>%
+  summarize(below_grade=mean(below_exp_grade)) %>%
+  ggplot(aes(x=year, y=below_grade, group=current_grade, color=current_grade))+
+  #geom_line()+
+  geom_smooth(se=FALSE)+
+  geom_point()+
+  scale_x_continuous(breaks=c(2010,2014,2018))+
+  scale_y_continuous(labels=scales::percent)+
+  labs(x="current grade", y="percent clearly behind grade level for age")+
+  theme_bw()
+```
+
+The evidence here suggests that the decline is driven by the higher grades where grade retention was higher overall.
+
+## Functional form of year-grade interactions
+
+So I want to consider the following baseline models.
+
+- Model 1: additive terms for current grade, state, and year, where year is modeled using annual dummy variables.
+- Model 2: additive terms for current grade, state, and year, where year is modeled as a continuous variable.
+- Model 3: same as model 1, but add in an interaction between current grade and year.
+- Model 4: same as model 2, but add in an interaction between current grade and year.
+- Model 5: same as model 4, but add in an interaction between state and year.
+
+I will judge model fit by the BIC statistic. I wil not consider survey design effects here for speed of computation.
+
+```{r models-year-grade}
+model_add_cat <- glm(below_exp_grade~as.factor(year)+current_grade+state, 
+                     data=acs, family=binomial)
+model_add_cont <- glm(below_exp_grade~I(year-2010)+current_grade+state, 
+                     data=acs, family=binomial)
+model_inter_cat <- glm(below_exp_grade~as.factor(year)*current_grade+state, 
+                     data=acs, family=binomial)
+model_inter_cont <- glm(below_exp_grade~I(year-2010)*current_grade+state, 
+                     data=acs, family=binomial)
+model_inter_state <- glm(below_exp_grade~I(year-2010)*current_grade+
+                            I(year-2010)*state, 
+                     data=acs, family=binomial)
+
+bic_scores <- sapply(list("categorical, additive"=model_add_cat,
+                          "categorical, interaction"=model_inter_cat, 
+                          "continuous, additive"=model_add_cont, 
+                          "continuous, interaction"=model_inter_cont,
+                          "continous, interaction + state*year continuous interaction"=model_inter_state),
+                     BIC) %>%
+    enframe("model","BIC")
+
+bic_scores %>%
+  kbl() %>%
+  kable_styling(full_width=FALSE)
+
+save(bic_scores, save=here("analysis","output","bic_spec_tests.RData"))
+```
+
+The clearly preferred model is a continuous year term interacted with current grade.
