@@ -326,6 +326,22 @@ tbl_resources %>%
   landscape()
 ```
 
+
+|                   | Lower than both | Same as lower | Between | Same as higher | Higher than both |
+|-------------------|:---------------:|:-------------:|:-------:|:--------------:|:----------------:|
+| White/Asian       |       X         |               |         |                |                  |
+| Black/Asian       |                 |  X  (Asian)   |         |                |                  |
+| Black/Latino      |                 |  X  (Black)   |         |                |                  |
+| White/Latino      |                 |  X  (White)   |         |                |                  |
+| Indigenous/Latino |                 |  X  (Indig.)  |         |                |                  |
+| Latino/Asian      |                 |  X  (Asian)   |         |                |                  |
+| White/Indigenous  |                 |               |    X    |                |                  |
+| Indigenous/Asian  |                 |               |    X    |                |                  |
+| Black/Indigenous  |                 |               |    X    |                |                  |
+| Black/White       |                 |               |         |   X (Black)    |                  |
+
+: Relative placement for biracial groups in comparison to monoracial constituent groups of counterfactual predicted probability of being held back based due to resources.
+
 ## Biracial Placement
 
 I now turn to the results for biracial respondents. Due to the number of comparisons being made, I split these results into two separate figures. In @fig-black-models, I show the placement of each biracial group involving one black parent in comparison to their two monoracial constituent groups. To allow comparison across models, I compare the results from the baseline model (Model 1 in @tbl-monoracial) and the full model that accounts for all cultural and family resources (Model 4 in @tbl-monoracial).
