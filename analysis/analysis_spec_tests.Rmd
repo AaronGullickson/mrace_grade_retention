@@ -192,3 +192,8 @@ save(bic_scores, file=here("analysis","output","bic_spec_tests.RData"))
 ```
 
 The clearly preferred model is a continuous year term interacted with current grade.
+
+
+```{r time-end}
+timestamp()
+```
