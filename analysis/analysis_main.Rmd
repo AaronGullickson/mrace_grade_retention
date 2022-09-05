@@ -16,7 +16,7 @@ timestamp()
 ```
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, eval=TRUE)
+knitr::opts_chunk$set(echo = TRUE, warning=FALSE)
 library(here)
 source(here("analysis","check_packages.R"))
 source(here("analysis","useful_functions.R"))
@@ -53,6 +53,10 @@ tbl_summary %>%
   row_spec(index_biracial, background = "#D3D3D3")
 ```
 
+The results clearly show substantial differences in the grade retention of single race groups. Indigenous students have the highest grade retention at 7.9%, while Asian students have the lowest at 2.6%. Whites are also relatively low at 3.5%, while Latinos and Asians have similar and higher grade retention probabilities of 5.1% and 5.5%, respectively. Biracial groups also vary substantially, but I will develop better ways of understanding their placement graphically below. These numbers also make no adjustment for important covariates.
+
+The biracial groups are generally a little bit younger than the monoracial groups, although the monoracial groups also vary in age a bit. Its possible this may bias the grade retention percentages down a bit, but the differences seem quite minor.
+
 # Model building 
 
 ## Running the models
@@ -79,6 +83,16 @@ model3 <- update(model2, .~.+degree_mother+degree_father)
 model4 <- update(model3, .~.+sqrt(family_income/10000)+own_home+parents_married)
 
 knitreg(list(model0, model1, model2, model3, model4))
+```
+
+```{r save-models}
+model0_summary <- summary(model0)
+model1_summary <- summary(model1)
+model2_summary <- summary(model2)
+model3_summary <- summary(model3)
+model4_summary <- summary(model4)
+save(model0_summary, model1_summary, model2_summary, model3_summary,
+     model4_summary, file=here("analysis","output","model_summaries.RData"))
 ```
 
 ## Differences for monoracial groups
