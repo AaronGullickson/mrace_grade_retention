@@ -33,6 +33,7 @@ source(here("analysis","useful_functions.R"))
 load(here("analysis","output","acs.RData"))
 load(here("analysis","output","coef_table.RData"))
 load(here("analysis","output","monoracial_results.RData"))
+load(here("analysis","output","tbl_resources.RData"))
 # change names of models for display
 coef_table <- coef_table %>%
   mutate(model=factor(model,
@@ -40,6 +41,9 @@ coef_table <- coef_table %>%
                                "parent resources"),
                       labels=c("Raw","Baseline model","Cultural model",
                                "Full model")))
+# create design object
+acs_design <- acs %>%
+  as_survey_design(ids = cluster, weights = perwt)
 ```
 
 # Introduction
@@ -144,22 +148,14 @@ The cross-tabulation of parent's races leads to ten distinct biracial categories
 
 ```{r}
 #| label: tbl-descriptive
-#| tbl-cap: Descriptive statistics by race. Shading indicates biracial group. Groups ordered by sample size.
-tbl_summary <- acs %>%
+#| tbl-cap: Descriptive survey-weighted statistics by race. Shading indicates biracial group. Groups ordered by sample size.
+tbl_summary <- acs_design %>%
   group_by(race) %>%
   summarize(n=n(), 
-            held_back=percent(mean(below_exp_grade), accuracy=0.01),
-            mean_age=round(mean(age), 1),
-            f_born=percent(mean(foreign_born),  accuracy=0.1),
-            par_fb=percent(mean(foreign_born_father | 
-                                  foreign_born_mother), accuracy=0.1),
-            fam_inc=dollar(round(mean(family_income), 0)),
-            own_home=percent(mean(own_home), accuracy=0.1),
-            par_ba=percent(mean(degree_father=="BA" | 
-                                  degree_father=="G" | 
-                                  degree_mother=="BA" | 
-                                  degree_mother=="G"), accuracy=0.1)
-  ) %>%
+            held_back=percent(as.numeric(survey_mean(below_exp_grade, 
+                                                     vartype=NULL)), 
+                              accuracy=0.01),
+            mean_age=round(survey_mean(age, vartype=NULL), 1)) %>%
   arrange(desc(n)) %>%
   mutate(n=comma(n))
 
@@ -172,17 +168,9 @@ tbl_summary %>%
       col.names=c("race",
                   "n",
                   "clearly below expected grade", 
-                  "mean age",
-                  "foreign-born",
-                  "either parent foreign-born",
-                  "mean family income",
-                  "own home",
-                  "either parent, college degree"
-      )) %>%
-  kable_styling(font_size=8) %>%
-  column_spec(3:10, width = "1.2cm") %>%
+                  "mean age" )) %>%
+  kable_styling() %>%
   row_spec(index_biracial, background = "#D3D3D3")
-#%>% landscape()
 ```
 
 To measure grade retention, I compare the age of respondents to their current grade in school. Because the ACS lacks data on the exact birthday of respondents, it is not possible to exactly identify students who are below the expected grade level. A student of any given age in years can always be expected in two different grades. For example, a first grader is expected to be either six or seven years of age, while a second grader is expected to be either seven or eight years of age. Therefore, with information only on current grade and age in years, it is impossible to determine whether a seven year old in first grade is behind the expected grade level.
@@ -223,12 +211,12 @@ g <-  coef_table %>%
   labs(x=NULL,
        y="predicted probability of being behind expected grade")
 
-g+annotate("text", 1, 0.035, hjust="left",
-             label="Grey bands give 83.4%\nconfidence interval around\nmonoracial estimates")+
-  annotate("text", 2, 0.045, hjust="left",
-             label="Red band gives 83.4%\nconfidence interval around\nmidpoint estimate")+
-  annotate("text", 2.5, 0.036, hjust="left",
-             label="Actual biracial estimate\nshown with 83.4% confidence\ninterval")
+g+annotate("text", 1, 0.036, hjust="left",
+             label="Grey bands indicate 83.4%\nconfidence interval around\nmonoracial estimates")+
+  annotate("text", 2, 0.0445, hjust="left",
+             label="Red band indicate 83.4%\nconfidence interval around\nmidpoint estimate")+
+  annotate("text", 2.5, 0.0365, hjust="left",
+             label="Actual biracial estimate\nshown with 83.4%\nconfidence interval")
 ```
 
 Additionally, I include a measure of the "halfway" point between the two racial groups.[^3] This halfway point allows me to determine where the biracial group falls relative to the expectation of being halfway between the two constituent monoracial groups. In this case, Black/White students are much closer to White students in their risk of grade retention, and have probabilities much lower than both Black students and the halfway expectation.
@@ -269,6 +257,8 @@ The baseline model also includes the race of the respondent. I then add addition
 
 # Results
 
+## Monoracial Differences
+
 I begin by showing the relative risk of being below expected grade among monoracial respondents across models. @tbl-monoracial reports average marginal effects on the probability of grade retention for each monoracial minority group in comparison to White students. Understanding these differences and how they change across models helps me to understand the potential for how biracial respondents might be positioned.
 
 Model 1 only controls for structural factors such as state of residence, student location, grade, and year. These results provide a baseline estimate of the differences across monoracial groups without controlling for differences in cultural and material resources across groups. The results show that Black, Indigenous, and Latino students all have substantially higher probability of grade retention than White students. Indigenous students have substantially higher risk than all other students, with a probability of grade retention that is 4.1% percentage points higher than White students. Asian students have the lowest probability of grade retention, and their risk is slightly lower than Whites.
@@ -285,7 +275,7 @@ SUMMARIZE THIS?
 #| results: asis
 #| label: tbl-monoracial
 #| tbl-cap: Average marginal differences in the probability of being behind grade by monoracial group, relative to a monoracial white student
-texreg(map(results_monoracial, convert_marg),
+texreg(map(results_monoracial[-1], convert_marg),
        digits=3,
        caption = "Average marginal differences in the probability of being clearly behind grade by monoracial group, relative to a monoracial white student",
        caption.above=TRUE,
@@ -301,6 +291,42 @@ texreg(map(results_monoracial, convert_marg),
               "Parent's education" = c("No","No","Yes","Yes"),
               "Family resources" = c("No","No","No","Yes")))
 ```
+
+## Resource Differences by Race
+
+```{r}
+#| label: tbl-resources
+#| tbl-cap: Mean resources by racial group. All results are survey weighted. Results sorted by counterfactual probability of grade retention. Shading indicates biracial group.
+index_biracial <- which(str_detect(tbl_resources$race, "/"))
+
+tbl_resources %>%
+  select(race, held_back_cf, fam_inc, own_home, m_ba, f_ba, f_born, par_fb,
+         spk_eng_well, spk_eng_par) %>%
+  mutate(held_back_cf=percent(held_back_cf/100, accuracy=0.1),
+         own_home=percent(own_home/100, accuracy=0.1),
+         m_ba=percent(m_ba/100, accuracy=0.1),
+         f_ba=percent(f_ba/100, accuracy=0.1),
+         f_born=percent(f_born/100, accuracy=0.1),
+         par_fb=percent(par_fb/100, accuracy=0.1),
+         spk_eng_well=percent(spk_eng_well/100, accuracy=0.1),
+         spk_eng_par=percent(spk_eng_par/100, accuracy=0.1),
+         fam_inc=dollar(fam_inc)) %>%
+  kbl(booktabs = TRUE,
+      linesep = NULL,
+      align = c("l",rep("r", ncol(tbl_resources)-1)),
+      col.names=c("race","held back, counterfactual","family income",
+                  "own home","mother, 4-year college degree",
+                  "father, 4-year college degree",
+                  "foreign-born","either parent foreign-born",
+                  "speak English well", 
+                  "Both parents speak english well")) %>%
+  kable_styling() %>%
+  row_spec(index_biracial, background = "#D3D3D3") %>%
+  column_spec(2:10, width = "1.5cm") %>%
+  landscape()
+```
+
+## Biracial Placement
 
 I now turn to the results for biracial respondents. Due to the number of comparisons being made, I split these results into two separate figures. In @fig-black-models, I show the placement of each biracial group involving one black parent in comparison to their two monoracial constituent groups. To allow comparison across models, I compare the results from the baseline model (Model 1 in @tbl-monoracial) and the full model that accounts for all cultural and family resources (Model 4 in @tbl-monoracial).
 
