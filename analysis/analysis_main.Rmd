@@ -453,3 +453,6 @@ ggplot(coef_table, aes(x=term, y=estimate, color=multiracial,
 
 The results here are extraordinarily stable across both specifications. 
 
+```{r time-end}
+timestamp()
+```
