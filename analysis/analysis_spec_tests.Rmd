@@ -188,7 +188,7 @@ bic_scores %>%
   kbl() %>%
   kable_styling(full_width=FALSE)
 
-save(bic_scores, save=here("analysis","output","bic_spec_tests.RData"))
+save(bic_scores, file=here("analysis","output","bic_spec_tests.RData"))
 ```
 
 The clearly preferred model is a continuous year term interacted with current grade.
