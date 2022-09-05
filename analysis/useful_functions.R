@@ -219,10 +219,9 @@ is_race_consistent <- function(race_child, hispan_child, race_mom, hispan_mom,
 
 # Functions for plotting effects ------------------------------------------
 
-calculate_marg_means <- function(model, cluster_var=acs$cluster) {
+calculate_marg_means <- function(model) {
   
-  means_marginal <- marg(model, "race", type="levels", 
-                         vcov_mat=vcovCL(model, cluster=cluster_var))[[1]]
+  means_marginal <- marg(model, "race", type="levels")[[1]]
   
   #figuring out how to pull things out of this object is really 
   #annoying

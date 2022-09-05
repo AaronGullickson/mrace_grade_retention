@@ -33,6 +33,7 @@ source(here("analysis","useful_functions.R"))
 load(here("analysis","output","acs.RData"))
 load(here("analysis","output","coef_table.RData"))
 load(here("analysis","output","monoracial_results.RData"))
+load(here("analysis","output","tbl_resources.RData"))
 # change names of models for display
 coef_table <- coef_table %>%
   mutate(model=factor(model,
@@ -40,80 +41,82 @@ coef_table <- coef_table %>%
                                "parent resources"),
                       labels=c("Raw","Baseline model","Cultural model",
                                "Full model")))
+# create design object
+acs_design <- acs %>%
+  as_survey_design(ids = cluster, weights = perwt)
 ```
 
 # Introduction
 
-The experiences of mixed race individuals will play an important role in the future of race in the US. A rise in interracial marriage and coupling since the 1960s has resulted in a "biracial baby boom" of individuals whose parents cross racial lines (==CITE==). This demographic phenomenon may have a potentially transformative effect on racial boundaries. Although race mixing has always been a feature of US history (==CITE==), this biracial boom is notable for its demographic size and for occurring in a post-Civil Rights era in which historical norms governing how to handle racial mixture may be shifting. Understanding the transformative potential of this biracial baby boom is contingent on developing a better understanding of how these biracial individuals identify their own race and how they are sorted into a prevailing racial hierarchy that reinforces a system of racial inequality.
+The experiences of mixed race individuals will play an important role in the future of race in the US. A rise in interracial marriage and coupling since the 1960s has resulted in a "biracial baby boom" of individuals whose parents cross racial lines [@root_racially_1992]. This demographic phenomenon may have a potentially transformative effect on racial boundaries [@hochschild_creating_2012; @alba_great_2020]. Although race mixing has always been a feature of US history [@morning_who_2000; @gullickson_choosing_2011], this biracial boom is notable for its demographic size and for occurring in a post-Civil Rights era in which historical norms governing how to handle racial mixture may be shifting. Understanding the transformative potential of this biracial baby boom is contingent on developing a better understanding of how these biracial individuals identify their own race and how they are sorted into a prevailing racial hierarchy that reinforces a system of racial inequality.
 
-Extensive scholarship documents the identification and classification decisions of multiracial individuals (==CITE==). ==SUMMARIZE BRIEFLY==. On the other hand, only a smattering of research has documented how the life chances of biracial individuals compare to their monoracial peers. (==CITATION==) The lack of work on this topic, despite its acknowledged relevance, results from two important limitations in most available data sources.
+Extensive scholarship documents the identification and classification decisions of multiracial individuals [@xie_racial_1997; @roth_end_2005a; @brunsma_interracial_2005; @herman_forced_2004; @holloway_place_2009] <!-- TODO MORE HERE -->. This research has generally identified a surprising degree of fluidity and choice in classification decisions, in the context of historical norms of racial classification <!-- TODO CHECK -->. On the other hand, only a smattering of research has documented how the life chances of biracial individuals compare to their monoracial peers [@kao_racial_1999; @campbell_multiracial_2009; @herman_blackwhiteother_2009]. The lack of work on this topic, despite its acknowledged relevance, results from two important limitations in most available data sources.
 
-First, using direct identification of biracial respondents on data sources such as the Census or large scale surveys is problematic. Research on the identification and classification of biracial individuals indicates that individuals whose parents belong to different races will not always or consistently identify with both races [@liebler_america_2017] (==OTHER CITE?==). Furthermore, social status and social mobility has been shown to predict racial identification (==CITE==) and this process of reverse causation is likely to be strongest for more ambiguous groups such as biracials. Thus, differences in outcome may in some part produce differences in identification rather than the other way around when examining biracial individuals identified by self-identification.
+First, using direct identification of biracial respondents on data sources such as the Census or large scale surveys is problematic. Research on the identification and classification of biracial individuals indicates that individuals whose parents belong to different races will not always or consistently identify with both races [@doyle_are_2007; @liebler_america_2017; @gullickson_racial_2019]. Furthermore, social status and social mobility has been shown to predict racial identification generally [@saperstein_racial_2012; @saperstein_mulatto_2013] and social status has been shown to be related to the identification choices of biracial individuals in particular [@roth_end_2005a; @davenport_role_2016]. Thus, differences in outcome may in some part produce differences in identification rather than the other way around when examining self-identified biracial individuals.
 
 This problem of reverse causation can be largely addressed when researchers have access to the racial identification of a respondent's biological parents. While such information is available on some large scale longitudinal surveys, researchers then run into a second problem of sample size. The samples of biracial respondents in such cases are generally far too small to make reliable statistical inferences. This limitation is particularly severe for biracial individuals with two non-white parents.
 
-When children reside with both biological parents, biracial individuals can be identified in large scale data sources such as the Census. Researchers have long utilized the ability to identify such biracial children to examine the classification choices made on behalf of these children (==CITATIONS==). Because of their age, it is more difficult to analyze the outcomes of such children due to the simple fact that they haven't had many measurable life outcomes yet.
+When children reside with both biological parents, biracial individuals can be identified in large scale data sources such as the Census. Researchers have long utilized the ability to identify such biracial children to examine the classification choices made on behalf of these children [@xie_racial_1997; @roth_end_2005a]. Because of their age, it is more difficult to analyze the outcomes of such children due to the simple fact that they haven't had many measurable life outcomes yet.
 
-However, one important outcome, grade retention, is measurable and important even for young children. Being held back in school is a relatively common occurrence that has consequences for later educational transitions and is disproportionately applied by race (==CITATIONS==). Grade retention is arguably one of the earliest stratifiers of life chances that an individual will experience and within it we can clearly see the imprint of the racial hierarchy. In this article, I use data from the American Community Survey to examine the likelihood of being held back in school for biracial children in comparison to their monoracial peers. Pooling data from 2010 to 2019, I am able to draw a large enough sample to make reliable statistical inferences for most biracial groups, including those with two non-white parents.
+However, one important outcome, grade retention, is measurable and important even for young children. Being held back in school is a relatively common occurrence that has consequences for later educational transitions and is disproportionately applied by race <!-- TODO CITATIONS -->. Grade retention is arguably one of the earliest stratifiers of life chances that an individual will experience and within it we can clearly see the imprint of the racial hierarchy. In this article, I use data from the American Community Survey to examine the likelihood of being held back in school for biracial children in comparison to their monoracial peers. Pooling data from 2010 to 2019, I am able to draw a large enough sample to make reliable statistical inferences for most biracial groups, including those with two non-white parents.
 
-The results provide a window into the placement of biracial children within an existing system of racial inequality in our educational systems. ==PITHY SUMMARY==
-
+The results provide a window into the placement of biracial children within an existing system of racial inequality in our educational systems. <!-- TODO  PITHY SUMMARY -->
 
 # Where do Biracials Fit?
 
-How might we expect the outcomes for biracial individuals do differ from their monoracial peers? In every case, the relevant comparison is how a biracial person fares relative to the two constituent groups with which their parents identify. For example, in the case of an individual with one Black and one White parent, we would compare the average outcomes for such individuals to the average outcomes for individuals with two White and two Black parents. The outcome for the Black/White group may be similar to one of the monoracial groups, it may me somewhere in between the outcomes for the two monoracial groups, or it may be higher or lower than either of the monoracial groups.
+How might we expect the outcomes for biracial individuals do differ from their monoracial peers? In every case, the relevant comparison is how a biracial person fares relative to the two constituent groups with which their parents identify. For example, in the case of an individual with one Black and one White parent, we would compare the average outcomes for such individuals to the average outcomes for individuals with two White and two Black parents. The outcome for the Black/White group may be similar to one of the monoracial groups, it may be somewhere in between the outcomes for the two monoracial groups, or it may be higher or lower than either of the monoracial groups.
 
-To better understand where biracial individuals might fit, it is necessary to understand what is producing a contemporary system of racial inequality overall. Here, I distinguish three mechanisms that may help us understand the biracial position within this racial hierarchy. First, I consider arguments for the racial hierarchy that focus on the effects of racial discrimination at both an individual and systemic level. Second, I consider arguments regarding different distributions of resources across racial groups that produce different average outcomes. Third, I consider arguments regarding how the nature of hybridity itself may affect outcomes. 
+To better understand where biracial individuals might fit, it is necessary to understand what is producing a contemporary system of racial inequality overall. Here, I distinguish three mechanisms that may help us understand the biracial position within this racial hierarchy. First, I consider arguments for the racial hierarchy that focus on the effects of racial discrimination at both an individual and systemic level. Second, I consider arguments regarding different distributions of resources across racial groups that produce different average outcomes. Third, I consider arguments regarding how the nature of hybridity itself may affect outcomes.
 
 ## Discrimination and Classification
 
-Discrimination and bias by race play an important role in overall levels of racial inequality. Discrimination need not be consciously recognized by actors, but may instead reflect cognitive biases and schema that individuals unkwnowningly rely upon and reinforce in social interactions.  Such discrimination will be most consequential when performed by important gatekeepers of opportunity such as teachers, health care workers, and employers. 
-
-Discrimination need not just occur on an individual basis, but can also be systemic in nature when biases are built into institutional systems. Such systemic racism has two effects. First, it provides norms and ideologies that create, support, and reinforce the cognitive schemas that individuals use in everyday practice. Second, norms, laws, and organizational practices can have built in biases that channel rewards to certain racial groups. In our current "colorblind" regime, such systems may be formally race neutral but produce disparate impacts by race. 
+Discrimination and bias by race play an important role in overall levels of racial inequality. Discrimination need not be consciously recognized by actors, but may instead reflect cognitive biases and schema that individuals unknowningly rely upon and reinforce in social interactions <!-- TODO citations, may be Pager, Brubaker? -->. Such discrimination will be most consequential when performed by important gatekeepers of opportunity such as teachers, health care workers, and employers. Discrimination need not just occur on an individual basis, but can also be systemic in nature when biases are built into organizations and institutional systems <!-- TODO citations, Tilly? Bonilla-Silva, Pager again? -->. In our current "colorblind" regime, such systems may be formally race neutral but produce disparate impacts by race <!-- TODO CITE Bonilla-Silva? -->.
 
 The experiences of biracial individuals within such a system of discrimination depend almost entirely on how they are classified by others. To the extent that biracial individuals are classified as more like one of their monoracial constituent groups than the other, they will receive the same treatment and reap similar rewards or suffer similar penalties.
 
-The strongest historical precedent for understanding such classification in the US is the "one drop rule" norm concering Black ancestry. According to the one-drop rule, individuals of known Black ancestry are considered exclusively Black, regardless of other ancestries. Davis (==CITE==) generalizes this practice to the idea of *hypodescent* in which individuals with mixed racial ancestry will be classified as members of the lower status group. A symmetric, but opposite, pattern of *hyperdescent* has governed the experiences of individuals with American Indian ancestry (==CITE==).
+The strongest historical precedent for understanding such classification in the US is the "one drop rule" norm concerning Black ancestry. According to the one-drop rule, individuals of known Black ancestry are considered exclusively Black, regardless of other ancestries[@davis_who_1991]. @davis_who_1991 generalizes this practice into the concept of *hypodescent* in which individuals with mixed racial ancestry will be classified as members of the lower status group. By comparison a pattern of *hyperdescent* implies that individuals of mixed racial ancestry will be classified as members of the higher status group. This pattern of hyperdescent has historically governed the experiences of individuals with American Indian ancestry <!-- TODO CITE -->.
 
-Although the hypodescent/hyperdescent paradigm is often used to theoretically frame the possible contemporary experiences of multiracial individuals, there are reasons to be cautious about the usefulness of this paradigm to both the current and historical situations. Although often couched in generalizable term, hypodescent and hyperdescent are actually only observed in two specific historical cases involving Black ancestry and American Indian ancestry. As CITE note, these two cases could just as parsimoniously be explained by a "dominance" model which ranks ancestries by their tendencies to be supercessive or recessive in determining identification and classification. In this framework, among the historical "racial triangle" of American colonialism, Black ancestry is supercessive, Indigenous ancestry is recessive, and White ancestry falls somewhere in between.
+Although the hypodescent/hyperdescent paradigm is often used to theoretically frame the possible contemporary experiences of multiracial individuals <!-- TODO citations -->, there are reasons to be cautious about the generalizability of this paradigm to both the contemporary and historical situation. Hypodescent and hyperdescent are observed in two specific historical cases involving Black ancestry and American Indian ancestry, respectively. As @iverson_regimes_2022 note, these two cases could just as parsimoniously be explained by a "dominance" model which ranks ancestries by their tendencies to be supercessive or recessive in determining identification and classification. In this framework, within the historical "racial triangle" of American colonialism, Black ancestry is supercessive, Indigenous ancestry is recessive, and White ancestry falls somewhere in between.
 
-The development of these particular norms may also reflect the historical regime in which they were developed (CITE). In this case, neither the hypodescent/hyperdescent or dominance paradigm may help us completely to understand the experiences of racialized groups such as Latinos and Asians. Second, the historical norms for all groups may also be breaking up or transforming in the post-Civil Rights era (CITE).
+The development of these particular norms may also reflect the historical regime in which they were developed [@gullickson_choosing_2011; @iverson_regimes_2022]. In this case, neither the hypodescent/hyperdescent or dominance paradigm may help us to fully understand the experiences of those of Latino and Asian ancestry due to more recent processes of racialization. Second, the historical norms for all groups may also be breaking up or transforming in the post-Civil Rights era <!-- TODO CITE -->.
 
 If outcomes for biracial individuals all closer to one of their constituent groups, then we may have stronger evidence about such norms of classification. However, what if those outcomes fall in-between the two groups? How might classification and discrimination produce such an in-between status? There are several possibilities here.
 
-First, racial ambiguity in appearance may lead to more inconsistent classification into single race categories across observers. Even if the norms consistently indicate a certain type of classification, correct identification by observers is still a probabilistic phenomenon in all social interactions and likely to be more heterogenous for biracial individuals. As a result, biracial individuals will experience a lower sum total of discrimination and bias affecting the lower status group but will also not reap the same rewards as a member of the higher status group.
+First, racial ambiguity in appearance may lead to more inconsistent classification into single race categories across observers. Even if norms consistently indicate a certain type of classification, correct identification by observers is still a probabilistic phenomenon in all social interactions and likely to be more heterogeneous for biracial individuals. As a result, biracial individuals will experience a lower sum total of discrimination and bias affecting the lower status group in the case of hypodescent and will not reap the same rewards as a member of the higher status group in the case of hyperdescent.
 
-Second, even when "correctly" classified, greater physical ambiguity may allow biracial individuals to avoid the worst instances of bias and discrimination because they do not conform to the ideal type for the group facing the most discrimination. In other words, the experience of discrimination may be "softened" because their ambiguous physical appearance provokes less racial antipathy. The US in fact already has a long history of this process. Because of the one-drop rule, Black individuals vary substantially in skin tone and those individuals with a lighter skin tone have better outcomes. Thus light skin can moderate (but not eliminate) the stigma of Blackness even among monoracial individuals.
+Second, even when "correctly" classified, greater physical ambiguity may allow biracial individuals to avoid the worst instances of bias and discrimination because they do not conform to the ideal type for the group facing the most discrimination. In other words, biracial people's experience of discrimination may be "softened" because their ambiguous physical appearance provokes less racial antipathy. The US in fact already has a long history of this kind of "softening." Because of the one-drop rule, Black individuals vary substantially in skin tone and those individuals with a lighter skin tone have better outcomes [@keith_skin_1991; @hughes_significance_1990; @monk_skin_2014] and are viewed more favorably by both Blacks and Whites [@maddox_cognitive_2002a]. Thus, light skin moderates the stigma of Blackness even among monoracial individuals.
 
-Third, it is also possible that biracial individuals may be classified into a distinct "middleman" minority position. This kind of middleman status is common in Latin America (CITATIONS) and Bonilla-Silva (CITE) has argued that this may be a possible future for the US as well. In this case, many biracial groups may occupy a nebulous and ill-defined middleman or buffer class position in-between whites and darker-skinned non-whites, helping to cement a new kind of racial hierarchy. 
+Third, it is also possible that biracial individuals may be classified into an ambiguous "middleman" minority position. This kind of middle tier status for individuals of mixed race is common in Latin America [@telles_race_2009] and @bonilla-silva_biracial_2004 has argued that such a system may be emerging in the contemporary US as well. In this case, many biracial groups may occupy a nebulous and ill-defined middleman or buffer class position in-between whites and darker-skinned non-whites, helping to cement a new kind of racial hierarchy.
 
 ## Differential Resources
 
-Racial inequality may also be at least partly explained by different distributions of material, cultural, and social resources across racial groups. On average, non-whites come from a lower socioeconomic background (e.g. parental income, wealth, and education) than whites and such socioeconomic background is consequential for outcomes. Other less materially defined resources also vary across groups such as cultural styles, social networks, and neighborhood quality. When such characteristics are held constant or "controlled", the remaining differences between racial groups tend to be smaller, although such differences rarely disappear. These differences in background resources reflect the accumulation of historical processes of discrimination. Thus, observed racial inequality reflects both contemporary processes of discrimination and bias and the intergenerational accumulation of disadvantage.
+Racial inequality is also at least partly explained by different distributions of material, cultural, and social resources across racial groups <!-- TODO CITATIONS HERE? -->. On average, socioeconomic background (e.g. parental income, wealth, and education) differs by race and such socioeconomic background is consequential for outcomes. Other less materially defined resources also vary across groups such as cultural styles, social networks, and neighborhood quality. When such characteristics are held constant or "controlled", the remaining differences between racial groups tend to be smaller, although such differences rarely disappear <!-- TODO WHAT CAN I CITE HERE -->. These differences in background resources reflect the accumulation of historical processes of discrimination <!-- CITE PAGER? -->. Thus, observed racial inequality reflects both contemporary processes of discrimination and bias and the intergenerational accumulation of disadvantage.
 
-How do these differential distributions of resources affect biracials? A naive argument would be that because biracial have parents from two different racial groups, they will on average inherit parental resources roughly halfway in-between their two constituent groups (CITE CHEW ET. AL.). Prior research looking at biracial children in the Census data has found some evidence to support this argument (CITE CHEW ET. AL.). If such were the case, then the resources of biracial individuals would predict outcomes in-between the two constituent groups, barring other mechanisms.
+How do these differential distributions of resources affect biracial individuals? A naive argument would be that because biracial individuals have parents from two different racial groups, they will on average inherit parental resources roughly halfway in-between their two constituent groups [@chew_american_1989]. Prior research looking at biracial children in the Census data has found some evidence to support this argument [@chew_american_1989]. In such a case, the resources of biracial individuals would predict outcomes in-between the two constituent groups, barring other mechanisms.
 
-However, the actual resource position of biracial individuals is likely far more complicated because individuals are not randomly selected into interracial unions. How this selection will affect a biracial child's outcomes for a given type of pairing are complex because it depends on the strength and direction of that selection on each partner, its consistency across different types of unions, and how strongly the selected characteristic predicts outcomes in the next generation. 
+However, the actual resource position of biracial individuals is likely far more complicated because individuals are not randomly selected into interracial unions. How this selection will affect a biracial child's outcomes for a given type of pairing are complex because it depends on the strength and direction of that selection on each partner, its consistency across different types of unions, and how strongly the selected characteristic predicts outcomes in the next generation.
 
-Status exchange theory predicts that given an unequal racial hierarchy, individuals from a lower status racial group will be positively selected on socioeconomic characteristics into intermarriage with a higher status group, while individuals from a higher status racial group will be similarly negatively selected into the same marriage (CITATION). Using education as the socioeconomic parameter, prior research has shown strong evidence of this pattern in the case of Black/White marriages in the US (CITATION). Evidence of this pattern for other forms of intermarriage is less clear (CITATION), as is research on other forms of interracial unions such as cohabitations (CITATIONS). In any case, because status exchange positively selects one parent and negatively selects the other partner, the two effects may somewhat cancel each other out in terms of the overall distribution of resources.
+Status exchange theory predicts that given an unequal racial hierarchy, individuals from a lower status racial group will be positively selected on socioeconomic characteristics into intermarriage with a higher status group, while individuals from a higher status racial group will be similarly negatively selected into the same marriage [@davis_intermarriage_1941; @merton_intermarriage_1941; @fu_racial_2001]. Using education as the socioeconomic parameter, prior research has shown strong evidence of this pattern in the case of Black male/White female marriages in the US, but weaker evidence for other types of unions [@gullickson_education_2006; @fu_racial_2001; @kalmijn_educational_2010; @hou_interracial_2011]. Less research has explored these patterns outside of marriage <!-- TODO cites? -->. In any case, because status exchange positively selects one parent and negatively selects the other partner, the two effects may somewhat cancel each other out in terms of the overall distribution of resources.
 
 Regardless of the underlying complexity of this selection process, delineating its role as opposed to other mechanisms is key to understanding the overall process that sorts biracial individuals within the racial hierarchy. Although this approach is sometimes characterized as pitting race versus class and minimizing the importance of race, that is not case here. Instead, what this delineation allows us to do is understand how race affects the outcomes of biracial individuals in a multigenerational process to better pinpoint the generational locus of specific mechanisms.
 
+<!-- TODO how can I integrate Cheng and Powell? -->
+
 ## Hybridity
 
-The experience of hybridity itself may also positively and/or negatively affect outcomes for biracial individuals. The "marginal man" theory argues that biracial individuals will find it difficult to fit in because of the dissonance of an identity that crosses strong and salient racial boundaries (CITE PARK AND STONEQUIST). This liminal identity conflict will then result in negative mental health experiences that can feed into other negative outcomes as well (CITE CHENG AND LIVELY?).
+The experience of hybridity itself may also positively and/or negatively affect outcomes for biracial individuals. The "marginal man" theory argues that biracial individuals will find it difficult to fit in because of the dissonance of an identity that crosses strong and salient racial boundaries [@park_human_1928; @stonequist_problem_1935]. This liminal identity conflict will then result in negative mental health experiences that could feed into other negative outcomes as well. Evidence for such negative mental health experiences, however, has been mixed [@udry_health_2003; @campbell_what_2006; @cheng_multiracial_2009; @bratter_does_2011].
 
-Marginal man theory, developed in the first half of the Twentieth century, saw cultures as monolithic and static and thus to be trapped in-between could be a difficult experience. Contemporary notions of culture emphasis its "toolkit" nature, asserting a more flexible and fluid notion of culture (CITATION). In this case, biracial individuals may benefit from an enlarged cultural toolkit that allows them to navigate a variety of diverse social contexts (i.e. code switch).
+Marginal man theory, developed in the first half of the Twentieth century, viewed culture in monolithic terms and thus to be trapped in between two static and monolithic cultures was seen as a difficult experience. Contemporary notions of culture emphasize its "toolkit" nature, arguing for a more flexible and fluid notion of culture <!-- TODO who to cite here? Swidler obviously, but also Dimaggio. Look at Dimaggio and Markus article -->. In this case, biracial individuals may benefit from an enlarged cultural toolkit that allows them to navigate a variety of diverse social contexts (i.e. code switch) <!-- TODO There are citations for this -->.
 
-The complexity of the underlying mechanisms described above prevents simple an straightforward hypothesis regarding the position of biracial individuals. In part, this is difficult because similar mechanisms can produce the same outcome. The weight of different mechanisms may also vary by groups as these groups may governed by different regimes of classification (CITATION). However, comparing outcomes across biracial groups may help us better understand the likely mechanisms that drive biracial classification and to disregard others as implausible. Accounting for the effect of parental resources on outcomes to the best of our ability is also key to reaching any conclusions about the placement of biracials within the racial hierarchy.
+The complexity of the underlying mechanisms described above prevents simple and straightforward hypotheses regarding the position of biracial individuals. Different mechanisms may produce the same observed outcome and the weight of different mechanisms may also vary by groups as these groups may governed by different regimes of classification. However, comparing outcomes across biracial groups may help us better understand the likely mechanisms that drive biracial classification and to disregard others as implausible. Accounting for the effect of parental resources on outcomes to the best of our ability is also key to reaching any conclusions about the placement of biracial individuals within the racial hierarchy.
 
 # Prior Work
 
-Prior work on the outcomes for biracial individuals has been hampered by several methodological issues. With good reason, researchers have been reluctant to use data in which multiracial or biracial status is determined solely by the self-identification of respondents. We know that far fewer people identify as biracial than could feasibly do so based on their parents' races (CITATION) and that various selection effects operate on the decision to identify as biracial among hose who could (CITE DAVENPORT, ROTH, OTHERS). Furthermore, data on changes in racial reporting over time suggests that other status markers like education and income may influence how people identify themselves (CITE SAPERSTEIN AND CO). For example, a person with one Black and one White parent who is routinely treated by others as Black and discriminated against as Black may be more likely to identify themselves as exclusively Black than a similar person of Black and White ancestry who experiences less consistent discrimination. Thus, any analysis of outcomes for biracial individuals based on self-identification must deal with a serious potential for reverse causation in the observed differences between biracial individuals and their constituent groups (CITE BRATTER).
+Prior work on the outcomes for biracial individuals has been hampered by several methodological issues. With good reason, researchers have been reluctant to use data in which multiracial or biracial status is determined solely by the self-identification of respondents. We know that far fewer people identify as biracial than could feasibly do so based on their parents' races <!-- TODO cite morning? morning and Goldstein? who? --> and that various selection effects operate on the decision to identify as biracial among those who could [@roth_end_2005a; @davenport_role_2016]. Furthermore, data on changes in racial reporting over time suggests that other status markers like education and income may influence how people identify themselves [@saperstein_racial_2012; @saperstein_mulatto_2013]. For example, a person with one Black and one White parent who is routinely treated by others as Black and discriminated against as Black may be more likely to identify themselves as exclusively Black than a similar person of Black and White ancestry who experiences less consistent discrimination. Thus, any analysis of outcomes for biracial individuals based on self-identification must deal with a serious potential for reverse causation in the observed differences between biracial individuals and their constituent groups [@bratter_multiracial_2018].
 
-Instead of self-identification, researchers have generally relied upon survey data in which the racial identification of a respondent's biological parents are provided in some form or another. CITE CAMPBELL used data from the National Longitudinal Survey of Adolescent to Adult Health (Add Health) to examine high school GPA, advanced placement in math, and four-year college enrollment among biracial and monoracial individuals identified by co-resident biological parents' races. CITE HERMAN used data on high school students in California and Wisconsin in which the students reported their parents' races to examine differences in GPA. Both of these studies find some support for an "in-between" status for many biracial groups, but are both hampered by a lack of statistical power due to small sample sizes. CITE KAO uses data from the National Educational Longitudinal Study of 1988 to examine mathematics achievement scores and GPA for biracial Blacks and Asians, and finds that biracial Blacks have outcomes similar to monoracial Blacks, while biracial Asians have outcomes more similar to monoracial Whites. This study, however, is hampered by the fact that biracial students are identified by a discrepancy between their reported race and one parent's reported race, rather than by both biological parent's races.
+Instead of self-identification, researchers have generally relied upon survey data in which the racial identification of a respondent's biological parents are provided in some form or another. @campbell_multiracial_2009 used data from the National Longitudinal Survey of Adolescent to Adult Health (Add Health) to examine high school GPA, advanced placement in math, and four-year college enrollment among biracial and monoracial individuals identified by co-resident biological parents' races. @herman_blackwhiteother_2009 used data on high school students in California and Wisconsin in which the students reported their parents' races to examine differences in GPA. Both of these studies find some support for an "in-between" status for many biracial groups, but are both hampered by a lack of statistical power due to small sample sizes. @kao_racial_1999 used data from the National Educational Longitudinal Study of 1988 to examine mathematics achievement scores and GPA for biracial Blacks and Asians, and finds that biracial Blacks have outcomes similar to monoracial Blacks, while biracial Asians have outcomes more similar to monoracial Whites. This study, however, is hampered by the fact that biracial students are identified by a discrepancy between their reported race and one parent's reported race, rather than by both biological parent's races.
 
-The primary difficulty with the survey data used in the preceding studies is that the sample size for most biracial groups will be small and thus results tend to be imprecise and inconclusive. An alternative approach is to use large scale Census or American Community Survey (ACS) data to identify biracial children by the race of the biological parents in their household. This approach can generate much larger samples of biracial individuals, although it does exclude examination of children living in non-nuclear households. Furthermore, researchers then have a limited range of outcomes to explore because biracial individuals identified by this method are by definition children and the data sources includes relatively little detailed information. This approach has been used previously to examine the likelihood of living in poverty (CITATIONS) and residential segregation (CITATIONS). SUMMARIZE FINDINGS. While these findings provide valuable information of the context of biracial childrens' lived experience, but do not directly measure their own outcomes, but rather the experiences of their parents. 
+The primary difficulty with the survey data used in the preceding studies is that the sample size for most biracial groups will be small and thus results tend to be imprecise and inconclusive. An alternative approach is to use large scale Census or American Community Survey (ACS) data to identify biracial children by the race of the biological parents in their household. This approach can generate much larger samples of biracial individuals, although it does exclude examination of children living in non-nuclear households. Furthermore, researchers then have a limited range of outcomes to explore because biracial individuals identified by this method are by definition children and the data sources include relatively little detailed information. This approach has been used previously to examine the likelihood of living in poverty [@bratter_multiracial_2013; @bratter_poverty_2013] and residential segregation [@ellis_agents_2012]. <!-- TODO briefly summarize findings --> While these findings provide valuable information of the context of biracial childrens' lived experience, but do not directly measure their own outcomes, but rather the experiences of their parents.
 
 However, one important educational outcome is identifiable for children in Census and ACS data - grade retention. Grade retention is partially identifiable in these data sources and provides one of the earliest measurable forms of stratification that individuals face in their lives.
 
@@ -144,22 +147,14 @@ The cross-tabulation of parent's races leads to ten distinct biracial categories
 
 ```{r}
 #| label: tbl-descriptive
-#| tbl-cap: Descriptive statistics by race. Shading indicates biracial group. Groups ordered by sample size.
-tbl_summary <- acs %>%
+#| tbl-cap: Descriptive survey-weighted statistics by race. Shading indicates biracial group. Groups ordered by sample size.
+tbl_summary <- acs_design %>%
   group_by(race) %>%
   summarize(n=n(), 
-            held_back=percent(mean(below_exp_grade), accuracy=0.01),
-            mean_age=round(mean(age), 1),
-            f_born=percent(mean(foreign_born),  accuracy=0.1),
-            par_fb=percent(mean(foreign_born_father | 
-                                  foreign_born_mother), accuracy=0.1),
-            fam_inc=dollar(round(mean(family_income), 0)),
-            own_home=percent(mean(own_home), accuracy=0.1),
-            par_ba=percent(mean(degree_father=="BA" | 
-                                  degree_father=="G" | 
-                                  degree_mother=="BA" | 
-                                  degree_mother=="G"), accuracy=0.1)
-  ) %>%
+            held_back=percent(as.numeric(survey_mean(below_exp_grade, 
+                                                     vartype=NULL)), 
+                              accuracy=0.01),
+            mean_age=round(survey_mean(age, vartype=NULL), 1)) %>%
   arrange(desc(n)) %>%
   mutate(n=comma(n))
 
@@ -172,17 +167,9 @@ tbl_summary %>%
       col.names=c("race",
                   "n",
                   "clearly below expected grade", 
-                  "mean age",
-                  "foreign-born",
-                  "either parent foreign-born",
-                  "mean family income",
-                  "own home",
-                  "either parent, college degree"
-      )) %>%
-  kable_styling(font_size=8) %>%
-  column_spec(3:10, width = "1.2cm") %>%
+                  "mean age" )) %>%
+  kable_styling() %>%
   row_spec(index_biracial, background = "#D3D3D3")
-#%>% landscape()
 ```
 
 To measure grade retention, I compare the age of respondents to their current grade in school. Because the ACS lacks data on the exact birthday of respondents, it is not possible to exactly identify students who are below the expected grade level. A student of any given age in years can always be expected in two different grades. For example, a first grader is expected to be either six or seven years of age, while a second grader is expected to be either seven or eight years of age. Therefore, with information only on current grade and age in years, it is impossible to determine whether a seven year old in first grade is behind the expected grade level.
@@ -223,12 +210,12 @@ g <-  coef_table %>%
   labs(x=NULL,
        y="predicted probability of being behind expected grade")
 
-g+annotate("text", 1, 0.035, hjust="left",
-             label="Grey bands give 83.4%\nconfidence interval around\nmonoracial estimates")+
-  annotate("text", 2, 0.045, hjust="left",
-             label="Red band gives 83.4%\nconfidence interval around\nmidpoint estimate")+
-  annotate("text", 2.5, 0.036, hjust="left",
-             label="Actual biracial estimate\nshown with 83.4% confidence\ninterval")
+g+annotate("text", 1, 0.036, hjust="left",
+             label="Grey bands indicate 83.4%\nconfidence interval around\nmonoracial estimates")+
+  annotate("text", 2, 0.0445, hjust="left",
+             label="Red band indicate 83.4%\nconfidence interval around\nmidpoint estimate")+
+  annotate("text", 2.5, 0.0365, hjust="left",
+             label="Actual biracial estimate\nshown with 83.4%\nconfidence interval")
 ```
 
 Additionally, I include a measure of the "halfway" point between the two racial groups.[^3] This halfway point allows me to determine where the biracial group falls relative to the expectation of being halfway between the two constituent monoracial groups. In this case, Black/White students are much closer to White students in their risk of grade retention, and have probabilities much lower than both Black students and the halfway expectation.
@@ -269,6 +256,8 @@ The baseline model also includes the race of the respondent. I then add addition
 
 # Results
 
+## Monoracial Differences
+
 I begin by showing the relative risk of being below expected grade among monoracial respondents across models. @tbl-monoracial reports average marginal effects on the probability of grade retention for each monoracial minority group in comparison to White students. Understanding these differences and how they change across models helps me to understand the potential for how biracial respondents might be positioned.
 
 Model 1 only controls for structural factors such as state of residence, student location, grade, and year. These results provide a baseline estimate of the differences across monoracial groups without controlling for differences in cultural and material resources across groups. The results show that Black, Indigenous, and Latino students all have substantially higher probability of grade retention than White students. Indigenous students have substantially higher risk than all other students, with a probability of grade retention that is 4.1% percentage points higher than White students. Asian students have the lowest probability of grade retention, and their risk is slightly lower than Whites.
@@ -285,7 +274,7 @@ SUMMARIZE THIS?
 #| results: asis
 #| label: tbl-monoracial
 #| tbl-cap: Average marginal differences in the probability of being behind grade by monoracial group, relative to a monoracial white student
-texreg(map(results_monoracial, convert_marg),
+texreg(map(results_monoracial[-1], convert_marg),
        digits=3,
        caption = "Average marginal differences in the probability of being clearly behind grade by monoracial group, relative to a monoracial white student",
        caption.above=TRUE,
@@ -301,6 +290,57 @@ texreg(map(results_monoracial, convert_marg),
               "Parent's education" = c("No","No","Yes","Yes"),
               "Family resources" = c("No","No","No","Yes")))
 ```
+
+## Resource Differences by Race
+
+```{r}
+#| label: tbl-resources
+#| tbl-cap: Mean resources by racial group. All results are survey weighted. Results sorted by counterfactual probability of grade retention. Shading indicates biracial group.
+index_biracial <- which(str_detect(tbl_resources$race, "/"))
+
+tbl_resources %>%
+  select(race, held_back_cf, fam_inc, own_home, m_ba, f_ba, f_born, par_fb,
+         spk_eng_well, spk_eng_par) %>%
+  mutate(held_back_cf=percent(held_back_cf/100, accuracy=0.1),
+         own_home=percent(own_home/100, accuracy=0.1),
+         m_ba=percent(m_ba/100, accuracy=0.1),
+         f_ba=percent(f_ba/100, accuracy=0.1),
+         f_born=percent(f_born/100, accuracy=0.1),
+         par_fb=percent(par_fb/100, accuracy=0.1),
+         spk_eng_well=percent(spk_eng_well/100, accuracy=0.1),
+         spk_eng_par=percent(spk_eng_par/100, accuracy=0.1),
+         fam_inc=dollar(fam_inc)) %>%
+  kbl(booktabs = TRUE,
+      linesep = NULL,
+      align = c("l",rep("r", ncol(tbl_resources)-1)),
+      col.names=c("race","held back, counterfactual","family income",
+                  "own home","mother, 4-year college degree",
+                  "father, 4-year college degree",
+                  "foreign-born","either parent foreign-born",
+                  "speak English well", 
+                  "Both parents speak english well")) %>%
+  kable_styling() %>%
+  row_spec(index_biracial, background = "#D3D3D3") %>%
+  column_spec(2:10, width = "1.5cm") %>%
+  landscape()
+```
+
+|                   | Lower than both | Same as lower | Between | Same as higher | Higher than both |
+|------------|:----------:|:----------:|:----------:|:----------:|:----------:|
+| White/Asian       |        X        |               |         |                |                  |
+| Black/Asian       |                 |   X (Asian)   |         |                |                  |
+| Black/Latino      |                 |   X (Black)   |         |                |                  |
+| White/Latino      |                 |   X (White)   |         |                |                  |
+| Indigenous/Latino |                 |  X (Indig.)   |         |                |                  |
+| Latino/Asian      |                 |   X (Asian)   |         |                |                  |
+| White/Indigenous  |                 |               |    X    |                |                  |
+| Indigenous/Asian  |                 |               |    X    |                |                  |
+| Black/Indigenous  |                 |               |    X    |                |                  |
+| Black/White       |                 |               |         |   X (Black)    |                  |
+
+: Relative placement for biracial groups in comparison to monoracial constituent groups of counterfactual predicted probability of being held back based due to resources.
+
+## Biracial Placement
 
 I now turn to the results for biracial respondents. Due to the number of comparisons being made, I split these results into two separate figures. In @fig-black-models, I show the placement of each biracial group involving one black parent in comparison to their two monoracial constituent groups. To allow comparison across models, I compare the results from the baseline model (Model 1 in @tbl-monoracial) and the full model that accounts for all cultural and family resources (Model 4 in @tbl-monoracial).
 
