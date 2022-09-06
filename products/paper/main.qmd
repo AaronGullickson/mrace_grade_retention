@@ -122,14 +122,16 @@ However, one important educational outcome is identifiable for children in Censu
 
 # Grade Retention as an Outcome
 
--   Why grade retention as an outcome?
+- Define what grade retention is and the era of "social promotion." Recent work suggests a decline in grade retention. Can cite Warren and Saliba on the trends.
+- Grade retention is consequential for later educational outcomes. CITE the evidence on this although, Warren and Saliba are also very iff-y on this. The Andrew article on "scarring" effects of grade retention is also a good one here as is the Hauser et. al. 2001 piece. Furthermore, little evidence on the positive effects of grade retention (again cite Hauser 2001). Grade retention also varies by race and socioeconomic background and is thus can be seen as a mechanism for the reproduction of class and racial inequality. In fact, because grade retention can happen quite early in the K-12 system, for many children, it may be the first direct encounter with a "sorting" mechanism for inequality.
+- There are many challenges to measuring grade retention in existing data sources. One of the most common techniques is to flag students who are behind the expected grade for their age. This technique is imperfect because
+  - it captures a cumulative prevalence measure of grade retention rather than incidence.
+  - it cannot distinguish cases in which children were delayed in beginning school ("redshirted") from grade retention. 
+  - Students can reasonable be in two modal grades based on a given calendar year of age. Without detailed information on birthdates and survey timing, overall grade retention will be underestimated. For example, a child who is reported as 9 years old and in third grade could either be in the expected grade or could have been held back, depending on their birthday. A child who is 10 years old, however, is clearly behind expected grade.
+- Unfortunately, the only measure of grade retention available in the American Community Survey is based on students being clearly behind expected grade. The CPS has some advantages for better measuring grade retention, but lacks the sample size to precisely estimate parameters for biracial populations. 
+- While being clearly behind expected grade is a problematic measure of grade retention for researchers seeking to better understand the process of grade retention itself, that is not my goal here. Rather, I am using this measure as an early and accessible measure of racial stratification for young children and adolescents. I can thus use it as a window to understand biracial students' placement within a racial hierarchy. This approach is similar to that employed by Rosenfeld (CITE) to examine the differential experiences of children from straight and LGBT families. From this perspective, the major potential problem is that the overall measure underestimates grade retention. However, because this underestimation is largely a function of birthdate, it is unlikely to bias the results presented here.
+- There is a question of how much racial inequality is present in grade retention rates. Hauser et. al. 2001 suggest that while Black and Latino students are more likely to have been held back, those differences are largely explained by differences in STUFF. However, other more recent research finds at least moderate racial differences, particularly between Black an White students, even after controlling for a variety of other variables (cite Warren and Sariba, Rosenfeld, others?). Therefore, understanding the effect of socioeconomic and other resources on the differences between monoracial groups is also key to understanding the larger research question, just as it is for biracial students.  
 
-    -   Grade retention is a relatively common practice. Discuss overall trends in grade retention and connection to educational reforms.
-    -   Grade retention has negative effect on later outcomes, even controlling for cognitive differences (CITE WORK HERE).
-    -   Clear inequalities by race in practices of grade retention as well as by SES (CITE WORK).
-    -   In effect, grade retention may be for many individuals the first encounter with the wider stratification system that sorts individuals and helps to perpetuate inequality.
-
--   What I do and how it improves our understanding.
 
 # Data and Methods
 
