@@ -259,23 +259,13 @@ All statistics reported here adjust for sampling weights among respondents. All 
 
 ## Monoracial Differences
 
-I begin by showing the relative risk of being below expected grade among monoracial respondents across models. @tbl-monoracial reports average marginal effects on the probability of grade retention for each monoracial minority group in comparison to White students. Understanding these differences and how they change across models helps me to understand the potential for how biracial respondents might be positioned.
-
-Model 1 only controls for structural factors such as state of residence, student location, grade, and year. These results provide a baseline estimate of the differences across monoracial groups without controlling for differences in cultural and material resources across groups. The results show that Black, Indigenous, and Latino students all have substantially higher probability of grade retention than White students. Indigenous students have substantially higher risk than all other students, with a probability of grade retention that is 4.1% percentage points higher than White students. Asian students have the lowest probability of grade retention, and their risk is slightly lower than Whites.
-
-The subsequent models control for a variety of additional variables. Model 2 includes controls for whether the student and each of their parents are native-born and speak English well. Model 3 controls for the highest degree received for each parent, and Model 4 controls for family income (square rooted), home ownership, and whether the student's parents are married.
-
-In general Model 2 and Model 3 have substantial effects on the observed inequality across racial groups, while the additional variables from Model 4 have less impact. Controlling for the characteristics related to immigration in Model 2 cuts the gap between White and Latino students in half and increases the gap between Asian and White students. It has no impact on the gap between White and Black or White and Indigenous students because most of these students are native-born with native-born parents.
-
-Controlling for education in Model 3 reduces the gap substantially for Black and Indigenous students and removes the gap entirely for Latino students. In fact, the results of both Models 3 and 4 suggest that, when holding constant cultural and family resources, Latino students are slightly less likely than White students to be held back.
-
-SUMMARIZE THIS?
+I begin by showing the relative risk of being behind expected grade among monoracial respondents across models. @tbl-monoracial reports average marginal effects on the probability of being behind expected grade (hereafter BBEG) for each monoracial minority group in comparison to White students. Understanding these differences and how they change across models helps me to understand the potential for how biracial respondents might be positioned.
 
 ```{r monoracial-results}
 #| results: asis
 #| label: tbl-monoracial
 #| tbl-cap: Average marginal differences in the probability of being behind grade by monoracial group, relative to a monoracial white student.
-screenreg(map(results_monoracial[-1], convert_marg),
+texreg(map(results_monoracial[-1], convert_marg),
        digits=3,
        caption = "Average marginal differences in the probability of being clearly behind grade by monoracial group, relative to a monoracial white student",
        caption.above=TRUE,
@@ -292,7 +282,25 @@ screenreg(map(results_monoracial[-1], convert_marg),
               "Other family resources" = c("No","No","No","Yes")))
 ```
 
-## Resource Differences by Race
+Model 1 only controls for structural factors such as state of residence, student location, grade, and year. These results provide a baseline estimate of the differences across monoracial groups without controlling for differences in cultural and material resources across groups. The results show that Black, Indigenous, and Latino students all have substantially higher probability of BBEG than White students. Indigenous students have substantially higher risk than all other students, with a probability of BBEG that is 4.1% percentage points higher than White students. Asian students have the lowest probability of BBEG, and their risk is slightly lower than Whites.
+
+The subsequent models control for a variety of additional variables. Model 2 includes controls for whether the student and each of their parents are native-born and speak English well. Model 3 controls for the highest degree received for each parent, and Model 4 controls for family income (square rooted), home ownership, and whether the student's parents are married.
+
+Model 2 and Model 3 have substantial effects on the observed inequality across racial groups, while the additional variables from Model 4 have less impact. Controlling for the characteristics related to immigration and acculturation in Model 2 cuts the gap between White and Latino students in half and increases the gap between Asian and White students. It has no impact on the gap between White and Black or White and Indigenous students because most of these students are native-born with native-born parents.
+
+Controlling for education in Model 3 reduces the gap substantially for Black and Indigenous students and removes the gap entirely for Latino students. In fact, the results of both Models 3 and 4 suggest that, when holding constant cultural and family resources, Latino students are slightly less likely than White students to be held back.
+
+In total, resource differentials account for a substantial part of the overall racial differences in the risk of BBEG, but not all of these differences. Black and Indigenous students remain at higher risk than other students. Notably, Asian students rather than White students have the lowest risk of BBEG in all models. The most notable shift across models is for Latino students. Their higher risk of BBEG relative to White students is completely accounted for by resource differentials. When comparing hite and Latino students with the same level or resources in Model 4, Latino students actually have slightly lower risk of BBEG.
+
+Although, the racial differences in risk of BBEG are substantially reduced by controlling for resource differentials, the remaining gaps across all pairwise combinations are still large enough in most cases to sustain the question of where biracial individuals fit within these gaps. Before turning to this question, however, I want to better understand how the resources of biracial individuals compare to their monoracial constituent groups.
+
+## The Distribution of Resources for Biracial Individuals
+
+@tbl-resources shows the mean values of the resource variables across monoracial and biracial groups.[^7] Because of the number of variables and groups involved, this table can be overwhelming to read. Therefore, I also provide a summation of these resource differentials by racial group by calculating a counterfactual probability of BBEG for each group based on their observed distribution of resource characteristics. This counterfactual probability is calculated by estimating the average predicted probability for each group from the fullest model (Model 4 of \@tbl-monoracial) when all other variables, including race, are held at their mean.[^8]
+
+[^7]: For compactness, I combine the parent foreign-born and English proficiency questions into whether either parent is foreign-born or speak English. In the models, I use separate variables for mothers and fathers. Tables in the supplementary materials provide the full breakdown of these variables by racial group.
+
+[^8]: It might seem odd to hold categorical variables at their mean, but because all categorical variables are technically entered into the models as 0/1 numeric dummy variables, their mean value can be calculated as the proportion of cases with a value of 1. This technique is frequently used in multilevel models to deal with grand and group mean centering of variables. <!-- TODO CITE raudenbush and bryk? -->
 
 ```{r}
 #| label: tbl-resources
@@ -314,7 +322,7 @@ tbl_resources %>%
   kbl(booktabs = TRUE,
       linesep = NULL,
       align = c("l",rep("r", ncol(tbl_resources)-1)),
-      col.names=c("race","held back, counterfactual","family income",
+      col.names=c("race","behind expected grade, counterfactual","family income",
                   "own home","mother, 4-year college degree",
                   "father, 4-year college degree",
                   "foreign-born","either parent foreign-born",
@@ -325,6 +333,10 @@ tbl_resources %>%
   column_spec(2:10, width = "1.5cm") %>%
   landscape()
 ```
+
+The results indicate that we would expect very different risk of BBEG across biracial groups because of differences in resources. For example, White/Asian students have the lowest counterfactual risk of BBEG of all groups at 2.4%, owing to their exceptionally high family income and the high college attainment of their parents. At the other end of the spectrum, Indigenous/Latino students have a counterfactual risk of BBEG nearly 2% higher, given their much lower family resources.
+
+My particular interest, however, is in how each biracial group compares to its constituent monoracial groups. For example, while Indigenous/Latino students have the highest counterfactual risk of BBEG among biracial students, their risk is still lower than their two constituent groups of Indigenous (4.5%) and Latino (5.3%) students, owing in large part to a somewhat higher family income, greater parental educational attainment, and greater acculturation. These results suggest positive selection into Indigenous/Latino interracial unions.
 
 |                   | Lower than both | Same as lower | Between | Same as higher | Higher than both |
 |------------|:----------:|:----------:|:----------:|:----------:|:----------:|
@@ -339,7 +351,14 @@ tbl_resources %>%
 | Black/Indigenous  |                 |               |    X    |                |                  |
 | Black/White       |                 |               |         |   X (Black)    |                  |
 
-: Relative placement for biracial groups in comparison to monoracial constituent groups of counterfactual predicted probability of being held back based due to resources.
+: Relative placement for biracial groups in comparison to monoracial constituent groups of counterfactual probability of being behind grade from resources alone.
+
+Table 4 summarizes the patterns from @tbl-resources across all ten biracial groups. In six of these cases, the biracial group would have outcomes similar or better than the monoracial group with better resources. These results imply that for the majority of these groups, parents in these matches are being positively selected from their constituent groups.
+
+Only three groups exhibit an in-between status based on resources. All three of these groups are part-Indigenous. This finding does not hold for Indigenous/Latino students, but nonetheless suggests less selectivity in crossing this boundary.
+
+The Black/White case stands out as an outlier. Black/White students have similar resources as Black students and both groups have fewer resources than White students. This is observable in @tbl-resources across family income, home ownership, and parental educational attainment. Unlike most of these other groups, there does not seem to be substantial positive class selectivity into Black/White interracial unions. 
+The effect of controlling for these resources will be complex and different across biracial groups. For those biracial groups with resources similar to their more advantaged constituent group, we should see that these controlling for these resources should reduce their advantage relative to the less advantaged monoracial group. For the Black/White case, on the other hand, we would expect that controlling for resource differentials should eliminate some of their disadvantage relative to Whites. For the remaining “in-between” groups, it is more difficult to make a priori predictions.
 
 ## Biracial Placement
 
@@ -349,7 +368,7 @@ I now turn to the results for biracial respondents. Due to the number of compari
 #| label: fig-black-models
 #| fig-pos: p
 #| fig-cap: Probability of being behind grade for biracial respondents with one black parent, in comparison to their monoracial comparison groups. 83.4% confidence bands shown around each estimate. Non-overlap in confidence bands roughly indicates statistically significant difference at the 5% level, Baseline model includes year, grade, location, and state fixed effects. Full models include control variables for nativity, English proficiency, income, education, home ownership, and marital status of parents.
-#| fig-height: 7.5
+#| fig-height: 7.3
 coef_table %>%
   filter(model=="Baseline model" | model=="Full model") %>%
   filter(str_detect(mrace, "Black")) %>%
@@ -391,7 +410,7 @@ Altogether, the results here strongly suggest that the risk of grade retention f
 #| label: fig-other-models
 #| fig-pos: p
 #| fig-cap: Probability of being behind grade for non-black biracial respondents, in comparison to their monoracial comparison groups. 83.4% confidence bands shown around each estimate. Non-overlap in confidence bands roughly indicates statistically significant difference at the 5% level, Baseline model includes year, grade, location, and state fixed effects. Full models include control variables for nativity, English proficiency, income, education, home ownership, and marital status of parents.
-#| fig-height: 7.5
+#| fig-height: 7.3
 coef_table %>%
   filter(model=="Baseline model" | model=="Full model") %>%
   filter(!str_detect(mrace, "Black")) %>%
