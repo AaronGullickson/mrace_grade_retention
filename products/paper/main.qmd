@@ -165,10 +165,10 @@ tbl_summary %>%
   kbl(booktabs = TRUE,
       linesep = NULL,
       align = c("l",rep("r", ncol(tbl_summary)-1)),
-      col.names=c("race",
-                  "n",
-                  "clearly below expected grade", 
-                  "mean age" )) %>%
+      col.names=c("Race",
+                  "Sample size",
+                  "Clearly behind expected grade", 
+                  "Mean age" )) %>%
   kable_styling() %>%
   row_spec(index_biracial, background = "#D3D3D3")
 ```
@@ -300,7 +300,7 @@ Although, the racial differences in risk of BBEG are substantially reduced by co
 
 [^7]: For compactness, I combine the parent foreign-born and English proficiency questions into whether either parent is foreign-born or speak English. In the models, I use separate variables for mothers and fathers. Tables in the supplementary materials provide the full breakdown of these variables by racial group.
 
-[^8]: It might seem odd to hold categorical variables at their mean, but because all categorical variables are technically entered into the models as 0/1 numeric dummy variables, their mean value can be calculated as the proportion of cases with a value of 1. This technique is frequently used in multilevel models to deal with grand and group mean centering of variables. <!-- TODO CITE raudenbush and bryk? -->
+[^8]: It might seem odd to hold categorical variables at their mean, but because all categorical variables are technically entered into the models as 0/1 numeric indicator variables, their mean value can be calculated as the proportion of cases with the indicated value. This technique is frequently used in multilevel models to deal with grand and group mean centering of variables. <!-- TODO CITE raudenbush and bryk? -->
 
 ```{r}
 #| label: tbl-resources
@@ -320,38 +320,47 @@ tbl_resources %>%
          spk_eng_par=percent(spk_eng_par/100, accuracy=0.1),
          fam_inc=dollar(fam_inc)) %>%
   kbl(booktabs = TRUE,
-      linesep = NULL,
+      linesep = NULL, position = "p",
       align = c("l",rep("r", ncol(tbl_resources)-1)),
-      col.names=c("race","behind expected grade, counterfactual","family income",
-                  "own home","mother, 4-year college degree",
-                  "father, 4-year college degree",
-                  "foreign-born","either parent foreign-born",
-                  "speak English well", 
+      col.names=c("Race","Behind expected grade, counterfactual","Family income",
+                  "Own home","Mother, 4-year college degree",
+                  "Father, 4-year college degree",
+                  "Foreign-born","Either parent foreign-born",
+                  "Speak English well", 
                   "Both parents speak english well")) %>%
-  kable_styling() %>%
+  kable_styling(latex_options = c("scale_down")) %>%
   row_spec(index_biracial, background = "#D3D3D3") %>%
-  column_spec(2:10, width = "1.5cm") %>%
-  landscape()
+  column_spec(2:10, width = "1.5cm")
+#%>%
+#  landscape()
 ```
 
 The results indicate that we would expect very different risk of BBEG across biracial groups because of differences in resources. For example, White/Asian students have the lowest counterfactual risk of BBEG of all groups at 2.4%, owing to their exceptionally high family income and the high college attainment of their parents. At the other end of the spectrum, Indigenous/Latino students have a counterfactual risk of BBEG nearly 2% higher, given their much lower family resources.
 
 My particular interest, however, is in how each biracial group compares to its constituent monoracial groups. For example, while Indigenous/Latino students have the highest counterfactual risk of BBEG among biracial students, their risk is still lower than their two constituent groups of Indigenous (4.5%) and Latino (5.3%) students, owing in large part to a somewhat higher family income, greater parental educational attainment, and greater acculturation. These results suggest positive selection into Indigenous/Latino interracial unions.
 
-|                   | Lower than both | Same as lower | Between | Same as higher | Higher than both |
-|------------|:----------:|:----------:|:----------:|:----------:|:----------:|
-| White/Asian       |        X        |               |         |                |                  |
-| Black/Asian       |                 |   X (Asian)   |         |                |                  |
-| Black/Latino      |                 |   X (Black)   |         |                |                  |
-| White/Latino      |                 |   X (White)   |         |                |                  |
-| Indigenous/Latino |                 |  X (Indig.)   |         |                |                  |
-| Latino/Asian      |                 |   X (Asian)   |         |                |                  |
-| White/Indigenous  |                 |               |    X    |                |                  |
-| Indigenous/Asian  |                 |               |    X    |                |                  |
-| Black/Indigenous  |                 |               |    X    |                |                  |
-| Black/White       |                 |               |         |   X (Black)    |                  |
+```{r}
+#| label: tbl-resource-summary
+#| tbl-cap: Relative placement for biracial groups in comparison to monoracial constituent groups of counterfactual probability of being behind grade from resources alone.
+race <- c("White/Asian","Black/Asian","Latino/Asian","White/Latino",
+          "Black/Latino","Indigenous/Latino","White/Indigenous",
+          "Black/Indigenous","Indigenous/Latino","Black/White")
+lower_both <- c("X",rep("",9))
+same_lower <- c("","X (Asian)","X (Asian)","X (White)","X (Black)","X (Indig.)",
+                rep("",4))
+between <- c(rep("",6),rep("X",3),"")
+same_higher <- c(rep("",9),"X (Black)")
+higher_both <- rep("",10)
+tibble(race, lower_both, same_lower, between, same_higher, higher_both) %>%
+ kbl(booktabs = TRUE,
+      linesep = NULL,
+      align = c("l",rep("r", 5)),
+      col.names=c("Biacial","Lower than both","Same as lower","Between",
+                  "Same as higher","Higher than both")) %>%
+  kable_styling() %>%
+  column_spec(1:6, width = "2cm")
 
-: Relative placement for biracial groups in comparison to monoracial constituent groups of counterfactual probability of being behind grade from resources alone.
+```
 
 Table 4 summarizes the patterns from @tbl-resources across all ten biracial groups. In six of these cases, the biracial group would have outcomes similar or better than the monoracial group with better resources. These results imply that for the majority of these groups, parents in these matches are being positively selected from their constituent groups.
 
