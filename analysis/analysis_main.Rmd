@@ -128,6 +128,23 @@ So, I have to consider the shrinking (and in the case of Latinos, flipping direc
 
 ## Average adjusted predictions for biracials
 
+```{r}
+marg(model4, "race", type="effects",
+     at_var_interest=c("White","Black/White","Black"))
+marg(model4, "race", type="effects",
+     at_var_interest=c("Black","Black/Latino","Latino"))
+marg(model4, "race", type="effects",
+     at_var_interest=c("Asian","White/Asian"))
+marg(model4, "race", type="effects",
+     at_var_interest=c("Indigenous","White/Indigenous"))
+marg(model4, "race", type="effects",
+     at_var_interest=c("White","White/Indigenous"))
+marg(model4, "race", type="effects",
+     at_var_interest=c("White","White/Latino"))
+marg(model4, "race", type="effects",
+     at_var_interest=c("Latino","White/Latino"))
+```
+
 I want to compare each multiracial group to:
 
 1.  Its two constituent monoracial groups (e.g. Compare Black/White to White and Black)
@@ -148,6 +165,67 @@ coef_table_mod0 <- calculate_marg_means(model0)
 ```
 
 Now I can use this nice table to plot out the results. I illustrate what this basic plot looks like below for the case of black/white individuals.
+
+```{r new-plot-attempt}
+means_marginal <- marg(model0, "race", type="levels",
+                       at_var_interest=c("White","Black/White","Black"))[[1]]
+
+coefs <- tibble(term=str_remove(means_marginal$Label, "race = "), 
+                estimate=means_marginal$Margin, 
+                se=means_marginal$Standard.Error) %>%
+  mutate(multiracial=str_detect(term, "/"))
+
+
+coefs$estimate_mid <- ifelse(coefs$multiracial, 
+                             mean(coefs$estimate[!coefs$multiracial]),
+                             coefs$estimate)
+coefs$se_mid <- ifelse(coefs$multiracial, 
+                       sqrt(sum(coefs$se[!coefs$multiracial]^2)/4),
+                       coefs$se)
+
+coefs$ratio <- coefs$se/coefs$se[2]
+coefs$ratio[2] <- coefs$se[2]/coefs$se_mid[2]
+
+coefs$z <- 1.96*sqrt(1+coefs$ratio^2)/(1+coefs$ratio)
+coefs$upper_self <- ifelse(coefs$multiracial, coefs$estimate_mid+coefs$z*coefs$se_mid,
+                           coefs$estimate+coefs$z*coefs$se)
+coefs$lower_self <- ifelse(coefs$multiracial, coefs$estimate_mid-coefs$z*coefs$se_mid,
+                           coefs$estimate-coefs$z*coefs$se)
+coefs$term <- factor(coefs$term, levels=c("White","Black/White","Black"))
+coefs$colors <- ifelse(coefs$multiracial, "Multiracial", as.character(coefs$term))
+
+
+se <- coefs %>%
+  filter(!multiracial) %>%
+  select(term, estimate, se) %>%
+  rename(comparison=term, estimate_comparison=estimate, se_comparison=se)
+
+temp <- bind_rows(coefs[2,1:3], coefs[2,1:3]) %>%
+  mutate(comparison=c("Black","White")) %>%
+  left_join(se) %>%
+  mutate(ratio=se/se_comparison,
+         z=1.96*sqrt(1+ratio^2)/(1+ratio),
+         upper=ifelse(estimate<estimate_comparison, estimate+z*se, estimate),
+         lower=ifelse(estimate>estimate_comparison, estimate-z*se, estimate),
+         colors=comparison)
+
+
+ggplot(coefs, aes(x=term, y=estimate, color=colors))+
+  geom_rect(aes(xmax=Inf, xmin=-Inf, ymin=lower_self,
+                ymax=upper_self, fill=colors), color=NA, alpha=0.2)+
+  geom_linerange(data=temp, aes(ymin=lower, ymax=upper, color=colors),
+                  position = position_dodge2(width = 0.1))+
+  geom_point()+
+  coord_flip()+
+  scale_y_continuous(labels = scales::percent)+
+  scale_color_manual(values=c("red","black","blue"))+
+  scale_fill_manual(values=c("red","black","blue"))+
+  labs(x=NULL,
+       y="predicted probability of being behind expected grade")+
+  theme_bw()+
+  theme(legend.position = "none")
+
+```
 
 ```{r example-plot, fig.cap="Probability of being behind grade for biracial black/white respondents in comparison to their monoracial comparison groups. 83.4% confidence bands shown around each estimate. Non-overlap in confidence bands roughly indicates statistically significant difference at the 5% level"}
 g <- coef_table_mod0 %>%
