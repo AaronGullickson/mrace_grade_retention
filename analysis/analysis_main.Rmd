@@ -293,7 +293,7 @@ ggplot(coef_table, aes(x=term, y=estimate, color=colors))+
   labs(x=NULL,
        y="average adjusted predicted probability of being behind expected grade")
 
-save(coef_table, file=here("analysis","output","coef_table.RData"))
+save(coef_table, ci_df, file=here("analysis","output","coef_table.RData"))
 ```
 
 ## Summarizing the model results
