@@ -10,7 +10,6 @@ output:
     lightbox: TRUE
 ---
 
-
 ```{r time-start}
 timestamp()
 ```
@@ -21,6 +20,7 @@ library(here)
 source(here("analysis","check_packages.R"))
 source(here("analysis","useful_functions.R"))
 load(here("analysis","output","acs.RData"))
+color_choices <- c("#003f5c","#58508d","#bc5090","#ff6361","#000000","#ffa600")
 ```
 
 ```{r create-design}
@@ -57,7 +57,7 @@ The results clearly show substantial differences in the grade retention of singl
 
 The biracial groups are generally a little bit younger than the monoracial groups, although the monoracial groups also vary in age a bit. Its possible this may bias the grade retention percentages down a bit, but the differences seem quite minor.
 
-# Model building 
+# Model building
 
 ## Running the models
 
@@ -70,7 +70,6 @@ Here are the model structure that I will use:
 4.  Add family income (square rooted), own your own home, and whether parents are married.
 
 All models are estimated as logit models. I use the `survey` library to adjust for variable sample weights and clustering of respondents in the same household. Warning, the code chunks below take a bit of time to run!
-
 
 ```{r build-models, results='asis'}
 model0 <- svyglm(below_exp_grade~race, design=acs_design, family=binomial)
@@ -120,7 +119,7 @@ knitreg(map(results_monoracial, convert_marg),
 save(results_monoracial, file=here("analysis","output","monoracial_results.RData"))
 ```
 
-The results indicate that controlling for everything in Model 5 reduces the racial disparities substantially. Comparing Model 5 to Model 2, the controls cut the effect in half for the Black and Indigenous groups. Controlling for resourcess doesn't change the very small gap between Whites and Asians much, and Asians continue to have slightly lower rates. The biggest change is for Latinos. In Model 2, Latinos had the second highest probabilities and were 2.2% higher than whites. After controlling for everything, that actually reverse direction, such that Latinos have slightly lower expected probabilities than whites (0.2% less). 
+The results indicate that controlling for everything in Model 5 reduces the racial disparities substantially. Comparing Model 5 to Model 2, the controls cut the effect in half for the Black and Indigenous groups. Controlling for resourcess doesn't change the very small gap between Whites and Asians much, and Asians continue to have slightly lower rates. The biggest change is for Latinos. In Model 2, Latinos had the second highest probabilities and were 2.2% higher than whites. After controlling for everything, that actually reverse direction, such that Latinos have slightly lower expected probabilities than whites (0.2% less).
 
 The gap is cut in half for Latinos by the nativity and language variables. These variables also increase the advantage of Asians as expected. they have no effect on the Black and Indigenous effects as expected.
 
@@ -133,7 +132,7 @@ I want to compare each multiracial group to:
 1.  Its two constituent monoracial groups (e.g. Compare Black/White to White and Black)
 2.  The assumption that the biracial group will be halfway between the two constituent monoracial groups.
 
-I can do this by calculating the *average adjusted prediction* of the dependent variable across all of the possible race groups. The average adjusted prediction (this is the stata-ese language - it is also called variously a predictive margin among other things). The adjusted predition in general is just the predicted value of the dependent variable for some set of values on the covariates. In this case, I want to predict on the level of the response to get predicted probabilities of being held back. The average adjusted prediction essentially gets the adjusted prediction for every observation in the data based on their covariates and then takes the average. Essentially, this is equivalent to treating every respondent as if they belonged to group A when calculating the average adjusted prediction for group A. The average adjusted prediction is directly related to the *average marginal effect* (AME) in that the AME for a group difference is simply the difference in the average adjusted prediction across groups.
+I can do this by calculating the *average adjusted prediction* of the dependent variable across all of the possible race groups. The average adjusted prediction (this is the stata-ese language - it is also called variously a predictive margin among other things). The adjusted prediction in general is just the predicted value of the dependent variable for some set of values on the covariates. In this case, I want to predict on the level of the response to get predicted probabilities of being held back. The average adjusted prediction essentially gets the adjusted prediction for every observation in the data based on their covariates and then takes the average. This is equivalent to treating every respondent as if they belonged to group A when calculating the average adjusted prediction for group A. The average adjusted prediction is directly related to the *average marginal effect* (AME) in that the AME for a group difference is simply the difference in the average adjusted prediction across groups.
 
 Its easy to get a simple adjusted prediction at specific values using the `predict` command, but more complicated for the average adjusted prediction. In order to calculate these average adjusted predictions, I use the `marg` command in the `modmargs` library. This function has a nice `type="levels"` argument that directly gives you the average adjusted prediction. Standard errors for these average adjusted predictions are calculated by the [delta method](https://cran.r-project.org/web/packages/modmarg/vignettes/delta-method.html). I also adjust all SEs for clustering of respondents within households and variance in person weights.
 
@@ -141,90 +140,101 @@ To compare the results for each biracial group to the halfway assumption, I need
 
 $$\frac{\sqrt{s_1^2+s_2^2}}{2}$$ where $s_1$ is the standard error for monoracial group 1 and $s_2$ is the standard error for monoracial group 2. This formula follows from the standard formulas for the variance of the sum of random variables.
 
-In order to calculate all the values that I need, I have created a function that will put this into a nice table for later plotting.
+I have created a function that computes these average adjusted predictions, calculates midpoint values and SEs and does some other computaations described below. It spits out a list with a `coef_table` showing the average adjusted predictions and a `ci_df` which provides additional information needed for the graphs. Basically, this output will allow me to create the plots I need for each biracial comparison.
 
 ```{r calc-cond-means, warning=FALSE}
-coef_table_mod0 <- calculate_marg_means(model0)
+results_mod0 <- calculate_marg_means(model0)
 ```
 
-Now I can use this nice table to plot out the results. I illustrate what this basic plot looks like below for the case of black/white individuals.
+Now I can use this output to plot out the results. I illustrate what this basic plot looks like below for the case of black/white individuals.
 
-```{r example-plot, fig.cap="Probability of being behind grade for biracial black/white respondents in comparison to their monoracial comparison groups. 83.4% confidence bands shown around each estimate. Non-overlap in confidence bands roughly indicates statistically significant difference at the 5% level"}
-g <- coef_table_mod0 %>%
+```{r example-plot, fig.cap="Probability of being behind grade for biracial black/white respondents in comparison to their monoracial comparison groups. Non-overlap in color-coded confidence bands roughly indicates statistically significant difference at the 5% level"}
+results_mod0$coef_table %>%
   filter(mrace=="Black/White") %>%
-  ggplot(aes(x=term, y=estimate, color=multiracial,
-             ymin=estimate-1.386*se, ymax=estimate+1.386*se))+
-  geom_rect(aes(xmax=Inf, xmin=-Inf, ymin=estimate_mid-1.386*se_mid,
-                ymax=estimate_mid+1.386*se_mid, fill=multiracial), 
-            color=NA, alpha=0.2)+
-  geom_linerange(data=subset(coef_table_mod0, multiracial & mrace=="Black/White"))+
-  geom_point()+
+  ggplot(aes(x=term, y=estimate, color=colors))+
+  geom_rect(aes(xmax=Inf, xmin=-Inf, ymin=lower,
+                ymax=upper, fill=colors), color=NA, alpha=0.5)+
+  geom_linerange(data=filter(results_mod0$ci_df, mrace=="Black/White"), 
+                 position=position_dodge2(width = 0.05), size=1.2, alpha=0.5,
+                 aes(ymin=lower, ymax=upper, color=colors))+
+  geom_point(size=2)+
   coord_flip()+
-  theme_bw()+
-  theme(legend.position = "none", panel.grid = element_blank())+
-  scale_color_manual(values=c("grey40","red"))+
-  scale_fill_manual(values=c("grey40","red"))+
-  scale_linetype_manual(values=c(3,1))+
   scale_y_continuous(labels = scales::percent)+
+  scale_color_manual(values=color_choices[c(2,5:6)])+
+  scale_fill_manual(values=color_choices[c(2,5:6)])+
   labs(x=NULL,
-       y="predicted probability of being behind expected grade")
-
-g+annotate("text", 1, 0.036, hjust="left",
-             label="Grey bands give 83.4%\nconfidence interval around\nmonoracial estimates")+
-  annotate("text", 2, 0.0445, hjust="left",
-             label="Red band gives 83.4%\nconfidence interval around\nmidpoint estimate")+
-  annotate("text", 2.3, 0.0365, hjust="left",
-             label="Biracial estimate shown\nin red with 83.4% confidence\ninterval")
+       y="predicted probability of being behind expected grade")+
+  theme_bw()+
+  theme(legend.position = "none", panel.grid = element_blank())
 ```
 
-This result is from the baseline model with no control variables, so this would be identical to the result you would get by just calculating raw proportions (although the SEs are slightly higher due to survey design effects of clustering and variable weights). The grey bands for the monoracial groups bookmark the range of results we might expect and the red band gives what would be the midpoint value between the groups, adjusting for statistical uncertainty. I can then see where the actual biracial estimate falls within this range. The results here indicate that biracial black/white students have probabilities of grade retention much closer to the lower values of white than black students. However, their probability is still a bit higher than that for whites.
+This result is from the baseline model with no control variables, so this would be identical to the result you would get by just calculating raw proportions (although the standard errors are higher due to survey design effects of clustering and variable weights). The dots give the point estimates for all three groups. You can see from the graph that the point estimate of grade retention risk for Black/White students is much closer to the lower for White students than the higher risk for Black students.
 
-Why I am using 83% (technically 83.4%) confidence intervals? This is a nice visual trick. People often incorrectly believe that overlapping 95% confidence intervals on two means indicates that the difference in the means is not statistically significant at $p<.05$. This is not always true and leads in practice to a much lower $\alpha$ for rejection. A much better approximation is given when one uses1.386 rather than 1.96 in estimating the confidence interval, which produces an 83.4% confidence interval. The intuition behind this technique is given nicely [here](https://chris-said.io/2014/12/01/independent-t-tests-and-the-83-confidence-interval-a-useful-trick-for-eyeballing-your-data/). Because I use this interval, we can know that if intervals (or bands) do not overlap, then the difference in means between the two groups is statistically significant at $p<.05$. In this case, the biracial estimate is statistically significantly different from both monoracial estimates as well as the "halfway" estimate. In short, biracial black/white students are held back at rates much closer but somewhat higher than whites, rather than blacks.
+The figure also provides confidence bands that help to visualize whether the difference between groups are statistically significant. People often believe that an overlap in the 95% confidence interval means the difference between the parameters is not statistically significant at the 5% level. This is actually a mistake and leads to far more conservative assessments. The actual p-value of rejection corresponding to an overlap of 95% CI is about 0.0055 when the SEs of the two estimates are the same as shown in [this paper](https://link.springer.com/article/10.1007/s10654-011-9563-8).
 
-Its important to note that this technique is just an approximation because it depends on the assumption that the standard errors for the two means are the same, which is not going to be true here. However, it should give results that are quite close. Correcting for unequal SEs is far more complicated because the interval used will vary for any pairwise comparison which I am not doing here.
+If the SEs of the two estimates are the same (and they are independent), then there is a simple correction to this problem: use 83.4% confidence interval (z=1.386). In that case, lack of overlap in CIs indicates that the differences between estimates are statistically significant at the 5% level. Overlap indicates that they are not statistically significant.
+
+While this provides a nice and easy solution, it unfortunately only works in the case where the SEs are the same. Its a pretty good approximation when those SEs are close, but in my case, I get very different SEs due to massive differences in sample size across racial groups. To calculate the z-score for the confidence interval needed in the case of unequal SEs (and uncorrelated), first one needs to calculate $\rho=se_1/se_2$ which gives the ratio of the two SEs. It doesn't matter which serves as the numerator and denominator as the results are symmetric. The required z-score is then given by:
+
+$$z=1.96*\frac{\sqrt{1+\rho^2}}{1+\rho}$$
+
+The problem is that this z-score will be different for each pairwise comparison, and I want to make at least two comparisons in the figures - I want to compare the biracial group to each of its constituent monoracial groups. So, the way I handle this in the figure above is to calculate two confidence intervals for each biracial group. Each monoracial group gets a confidence band corresponding to that comparison and the biracial group gets two half-confidence intervals.All of these are color coded for the correct comparison and in the biracial case, they are only shown in the relevant direction. So in the case, above, the purple line doesn't come close to overlapping with the purple band for Black students and so this difference is clearly statistically distinguishable. The yellow line also does not overlap with the yellow band for whites, so this difference is also statistically distinguishable, although as you can see from the graph, that is just barely the case. 
+
+To check the graph, I can calculate AMEs for the Black/White group from the same model where I treat White and Black students, respectively, as the reference.
+
+```{r test-marg}
+marg(model0, "race", type="effects",
+     at_var_interest=c("White","Black/White"))
+marg(model0, "race", type="effects",
+     at_var_interest=c("Black","Black/White"))
+```
+
+As you can see, the results are consistent here. 
+
+The graph above also shows a grey band for the halfway point. To avoid getting cluttery, I do not put a separate confidence line on the Black/White estimate to differentiate this case. In general that line will be about halway between the other two, so I think its ok to just eyeball that one. If it annoys reviewer, it can be added.
 
 The results here are the same as the raw differences, but I can also fit this graph to any of the models, using the average adjusted predictions. The plot below does this for model 4, by panelizing each multiracial group.
 
-```{r cond-means-model4, warning=FALSE, fig.cap="Probability of being behind grade for biracial respondents in comparison to their monoracial comparison groups. 83.4% confidence bands shown around each estimate. Non-overlap in confidence bands roughly indicates statistically significant difference at the 5% level. Estimates are based on models that adjust for state, year, current grade, metropolitan status, gender, foreign born status, parent's foreign born status, English proficieny, parent's English proficiency, parent's education, family income, home ownership, and family structure."}
-coef_table_mod4 <- calculate_marg_means(model4)
+```{r cond-means-model4, warning=FALSE, fig.cap="Probability of being behind grade for biracial respondents in comparison to their monoracial comparison groups. Non-overlap in confidence bands of corresponding color indicates statistically significant difference at the 5% level. Estimates are based on models that adjust for state, year, current grade, metropolitan status, gender, foreign born status, parent's foreign born status, English proficieny, parent's English proficiency, parent's education, family income, home ownership, and family structure."}
+results_mod4 <- calculate_marg_means(model4)
 
-ggplot(coef_table_mod4, aes(x=term, y=estimate, color=multiracial,
-                       ymin=estimate-1.386*se, ymax=estimate+1.386*se))+
-  geom_rect(aes(xmax=Inf, xmin=-Inf, ymin=estimate_mid-1.386*se_mid,
-                ymax=estimate_mid+1.386*se_mid, fill=multiracial), 
-            color=NA, alpha=0.2)+
-  geom_linerange(data=subset(coef_table_mod4, multiracial))+
-  geom_point()+
+results_mod4$coef_table %>%
+  ggplot(aes(x=term, y=estimate, color=colors))+
+  geom_rect(aes(xmax=Inf, xmin=-Inf, ymin=lower,
+                ymax=upper, fill=colors), color=NA, alpha=0.5)+
+  geom_linerange(data=results_mod4$ci_df, 
+                 position=position_dodge2(width = 0.25), size=1, alpha=0.5,
+                 aes(ymin=lower, ymax=upper, color=colors))+
+  geom_point(size=2)+
   coord_flip()+
   facet_wrap(~mrace, ncol=3, scales="free_y")+
-  theme_bw()+
-  theme(legend.position = "none", panel.grid = element_blank())+
-  scale_color_manual(values=c("grey40","red"))+
-  scale_fill_manual(values=c("grey40","red"))+
-  scale_linetype_manual(values=c(3,1))+
   scale_y_continuous(labels = scales::percent)+
+  scale_color_manual(values=color_choices)+
+  scale_fill_manual(values=color_choices)+
   labs(x=NULL,
-       y="average adjusted predicted probability of being behind expected grade")
+       y="average adjusted predicted probability of being behind expected grade")+
+  theme_bw()+
+  theme(legend.position = "none", panel.grid = element_blank())
 ```
 
-As the table here shows, after controlling for other stuff, the majority of multiracial groups are quite similar to the monoracial constituent group with the lower grade retention rate. The only case where the biracial group is more like the higher monoracial group is for Latino/Asians. The Indigenous/Latino group is the only group statistically disginguishable as midway between the two constituent groups. The White/Indigenous group is also statistically distinguishable from both constitutent groups but much closer to Whites in their probability. The Black/Asian and Black/Indigenous groups also give point estimates at the midpoint, but the results are very noisy due to large SEs and so conclusions here would have to be speculative.
+As the table here shows, after controlling for other stuff, the majority of multiracial groups are quite similar to the monoracial constituent group with the lower grade retention rate. The only case where the biracial group is more like the higher monoracial group is for Latino/Asians, but the point estimate here is not statistically distinguishable from either monoracial group and both monoracial groups have similar risks after controlling for resources. The Indigenous/Latino, Black/Indigenous, and Black/Asian groups all have point estimates roughly at the halfway pont, but the results are also somewhat inconclusive because of the high SE in all three cases. In the case of the Black/Asian and Black/Indigeious gruops, we cannot rule out that they are higher or lower than either monoracial group. In the Indigenous/Latin group, we cannot rule out that they are like the lower group (Latinos) and the higher one is very, very close. So, basically, in all of the cases where we can make a solid determination, the determination is like the lower group.
 
 To compare these results across models, I can try a very large figure that panelizes by model on the column and group on the row.
 
-```{r cond-means-model-compare, fig.height=12, warning=FALSE, fig.cap="Probability of being behind grade for biracial respondents in comparison to their monoracial comparison groups. 83.4% confidence bands shown around each estimate. Non-overlap in confidence bands roughly indicates statistically significant difference at the 5% level. Each panel is based on a different model that accounts for certain variables. Subsequent panels cumulatively include all prior terms."}
+```{r cond-means-model-compare, fig.height=12, warning=FALSE, fig.cap="Probability of being behind grade for biracial respondents in comparison to their monoracial comparison groups. Non-overlap in confidence bands of corresponding color indicates statistically significant difference at the 5% level. Each panel is based on a different model that accounts for certain variables. Subsequent panels cumulatively include all prior terms."}
 #calculate remaining marginal means
-coef_table_mod1 <- calculate_marg_means(model1)
-coef_table_mod2 <- calculate_marg_means(model2)
+results_mod1 <- calculate_marg_means(model1)
+results_mod2 <- calculate_marg_means(model2)
 
-coef_table <- coef_table_mod0 %>%
+coef_table <- results_mod0$coef_table %>%
   mutate(model="crude")
-coef_table <- coef_table_mod1 %>%
+coef_table <- results_mod1$coef_table %>%
   mutate(model="fixed effects") %>%
   bind_rows(coef_table)
-coef_table <- coef_table_mod2 %>%
+coef_table <- results_mod2$coef_table %>%
   mutate(model="cultural resources") %>%
   bind_rows(coef_table)
-coef_table <- coef_table_mod4 %>%
+coef_table <- results_mod4$coef_table %>%
   mutate(model="parent resources") %>%
   bind_rows(coef_table) %>%
   mutate(model=factor(model, levels=c("crude","fixed effects",
@@ -241,27 +251,50 @@ coef_table <- coef_table_mod4 %>%
                                       "Indigenous/Latino",
                                       "Indigenous/Asian")))
 
-ggplot(coef_table, aes(x=term, y=estimate, color=multiracial,
-                       ymin=estimate-1.386*se, ymax=estimate+1.386*se))+
-  geom_rect(aes(xmax=Inf, xmin=-Inf, ymin=estimate_mid-1.386*se_mid,
-                ymax=estimate_mid+1.386*se_mid, fill=multiracial), 
-            color=NA, alpha=0.2)+
-  geom_linerange(data=subset(coef_table, multiracial))+
+ci_df <- results_mod0$ci_df %>%
+  mutate(model="crude")
+ci_df <- results_mod1$ci_df %>%
+  mutate(model="fixed effects") %>%
+  bind_rows(ci_df)
+ci_df <- results_mod2$ci_df %>%
+  mutate(model="cultural resources") %>%
+  bind_rows(ci_df)
+ci_df <- results_mod4$ci_df %>%
+  mutate(model="parent resources") %>%
+  bind_rows(ci_df) %>%
+  mutate(model=factor(model, levels=c("crude","fixed effects",
+                                      "cultural resources",
+                                      "parent resources")),
+         mrace=factor(mrace, levels=c("Black/White",
+                                      "Black/Latino",
+                                      "Black/Asian",
+                                      "Black/Indigenous",
+                                      "White/Indigenous",
+                                      "White/Latino",
+                                      "White/Asian",
+                                      "Latino/Asian",
+                                      "Indigenous/Latino",
+                                      "Indigenous/Asian")))
+
+ggplot(coef_table, aes(x=term, y=estimate, color=colors))+
+  geom_rect(aes(xmax=Inf, xmin=-Inf, ymin=lower, ymax=upper, fill=colors), 
+            color=NA, alpha=0.5)+
+  geom_linerange(data=ci_df, 
+                 position=position_dodge2(width = 0.1), size=1, alpha=0.5,
+                 aes(ymin=lower, ymax=upper, color=colors))+
   geom_point()+
   coord_flip()+
   facet_grid(mrace~model, scales="free_y")+
   theme_bw()+
   theme(legend.position = "none", panel.grid = element_blank())+
-  scale_color_manual(values=c("grey40","red"))+
-  scale_fill_manual(values=c("grey40","red"))+
-  scale_linetype_manual(values=c(3,1))+
+  scale_color_manual(values=color_choices)+
+  scale_fill_manual(values=color_choices)+
   scale_y_continuous(labels = scales::percent)+
   labs(x=NULL,
        y="average adjusted predicted probability of being behind expected grade")
 
-save(coef_table, file=here("analysis","output","coef_table.RData"))
+save(coef_table, ci_df, file=here("analysis","output","coef_table.RData"))
 ```
-
 
 ## Summarizing the model results
 
@@ -269,45 +302,45 @@ Ok, let me first try to summarize these results, by group.
 
 ### Black/White results
 
-For the first three models, the results are pretty consistent. Black/White biracials are much closer to the lower grade retention rates of whites, although they have rates that are clearly still higher than whites. Controlling for parental resources changes things considerably. First, the gap between Blacks and Whites shrinks considerably (visually it looks like its cut about in half). Second, Black/White biracials actually have lower rates than either group. They aren't that different than whites in effect size but the difference is statistically significant.
+For the first three models, the results are pretty consistent. Black/White biracials are much closer to the lower grade retention rates of whites, although they have rates that are clearly still higher than whites. Controlling for parental resources changes things considerably. First, the gap between Blacks and Whites shrinks considerably (visually it looks like its cut about in half). Second, Black/White biracials actually have lower rates than either group, although the difference from White students is not statistically significant.
 
 Why does the big change occur in the parental resources model? As the analysis of family resources shows (separate report), the family resources of Black/White biracials are only slightly better than those of Black students and substantially worse than those of White students. So, Black/White biracials are at a disadvantage relative to whites, which is controlled for in the last model.
 
 ### Black/Latino results
 
-In the crude model, its clear that there isn't much difference in the grade retention rates of Blacks and Latinos, with Blacks having a slightly higher rate than Latinos. The Black/Latino group has rates well below either of these groups. In fact, their grade retention rates in the crude model are closer to Whites. 
+In the crude model, its clear that there isn't much difference in the grade retention rates of Blacks and Latinos, with Blacks having a slightly higher rate than Latinos. The Black/Latino group has rates well below either of these groups. In fact, their grade retention rates in the crude model are closer to Whites.
 
-Interestingly, the fixed effects model reverses the ordering of Blacks and Latinos, but this is then reversed again in the cultural resources model. In all of these models, the Black/Latino group remains below either of those two groups, although the gap shrinks considerably across models. 
+Interestingly, the fixed effects model reverses the ordering of Blacks and Latinos, but this is then reversed again in the cultural resources model. In all of these models, the Black/Latino group remains below either of those two groups, although the gap shrinks considerably across models and is not statistically significantly different from Latinos in the cultural resources model.
 
 Things change quite a bit in the parent resources model. The gap between blacks and Latinos grows and the Black/Latino group now looks almost identical to the Latino group. So, some of their lower probability, relative to Latinos, was due to better family resources, as can be seen on in the supplementary analysis of resources. Once that is controlled for, their outcomes are indistinguishable from Latino students.
 
 ### Black/Asian results
 
-The crude and fixed effects models indicate that Black/Asian students have grade retention rates similar to the lower grade retention rates of Asian students, although the high SE makes the precision of this effect quite weak. Controlling for cultural esources moves this group closer to the midpoint value. This makes sense because Black/Asian students are much more likely than Asian students to be native born and speak English well with native-born parents who also speak English well. So this gave them and advantage which is removed in that model. The family resources model moves the Black/Asian group slightly more toward the middle but does not change much from the previous model.
+The crude and fixed effects models indicate that Black/Asian students have grade retention rates similar to the lower grade retention rates of Asian students, although the high SE makes the precision of this effect quite weak. Controlling for cultural resources moves this group closer to the midpoint value. This makes sense because Black/Asian students are much more likely than Asian students to be native born and speak English well with native-born parents who also speak English well. So this gave them and advantage which is removed in that model. The family resources model moves the Black/Asian group slightly more toward the middle but does not change much from the previous model.
 
 Due to the shrinking of the differences between the two constituent groups in the later models, the confidence interval here ends up spanning all possibilities. So the results here are somewhat indeterminate. The point estimate suggests that their grade retention probability is half-way between, but the edge of the confidence intervals touch both those bands, so I cannot statistically distinguish their placement relative to those two possibilities.
 
 ### Black/Indigenous results
 
-These results are quite noisy because of the smaller sample sizes involved. These are the two monoracial groups with the highest grade retention rates, with or without controls. However, the difference between them is also quite large due to the very high grade retention probability for Indigenous students. This gap shrinks significantly in the model that adjusts for parental resources. 
+These results are quite noisy because of the smaller sample sizes involved. These are the two monoracial groups with the highest grade retention rates, with or without controls. However, the difference between them is also quite large due to the very high grade retention probability for Indigenous students. This gap shrinks significantly in the model that adjusts for parental resources.
 
-Because of the noise its quite difficult to determine the relative placement of Black/Indigenous students at all. The point estimate in the crude model starts closer to Black students but higher than them. Controlling for resources consistently moves the point estimate more toward the halfway point. The analysis of resources shows that this group has resources midway between the two groups, so this is not surprising. 
+Because of the noise its quite difficult to determine the relative placement of Black/Indigenous students at all. The point estimate in the crude model starts closer to Black students but higher than them. Controlling for resources consistently moves the point estimate more toward the halfway point. The analysis of resources shows that this group has resources midway between the two groups, so this is not surprising.
 
 ### White/Indigenous results
 
-This group starts fairly close to the midway point, but controlling for resources clearly moves them into the "lower half" space. Their results never look as good as whites, but look substantially better than Indigenous students, who continue to have the highest rate of grade retention. Its interesting that the resource models move them closer to white given that they still have resources that are quite a bit worse than Whites. Presumably this is because those resources are still substantially better than Indigenous students.
+This group starts fairly close to the midway point, but controlling for resources clearly moves them into the "lower half" space. Their results never look as good as whites (although the bars are so close to overlapping in the full model), but look substantially better than Indigenous students, who continue to have the highest rate of grade retention. Its interesting that the resource models move them closer to white given that they still have resources that are quite a bit worse than Whites. Presumably this is because those resources are still substantially better than Indigenous students.
 
-###  White/Latino results
+### White/Latino results
 
 Importantly, the ordering of the monoracial groups shifts as controls are added to the model. The crude and fixed effets models show that White students are much less likely to be held back relative to Latino students. Controlling for cultural resources reduces this gap substantially and the inclusion of family resources flips it so that Latino students have slightly lower grade retention rates than Whites. So in the final model, there is not much room to find a midway point for White/Latino biracials. Nonetheless, the results do give a point estimate for the White/Latino biracial group that is below the confidence band for Latino students and distinguishable from the higher rate of whites and the halfway point. So, White/Latino biracials have outcomes similar to the lower grade retention rates of Latinos.
 
 ### White/Asian results
 
-In all of the models, White/Asian students have grade retention rates lower than the rates of Asians - the monoracial group with the lower rates. Controls for family resources reduce this gap a bit because Asian/White students are the most privileged students overall and the confidence interval with Asian students overlaps slightly. So, we can determine that Asian/White students have grade retention rates at least as low as the lowest consistuent group (Asians) and possibly even lower. 
+In all of the models, White/Asian students have grade retention rates lower than the rates of Asians - the monoracial group with the lower rates. Controls for family resources reduce this gap to the point where the difference is not statistically distinguishable from Asian students. So, we can determine that Asian/White students have grade retention rates at least as low as the lowest consistuent group (Asians) and possibly even lower.
 
 ### Latino/Asian results
 
-This is the group with the biggest outlier in terms of the effect. The initial results in the crude model suggested that Latino/Asian students had rates similar to the lower rates of Asian students. Controlling for cultural resources shifted this to rates that were clost to the halfway point between the two monoracial groups. Controlling for family resources produced a point estimate that was *higher* than either monoracial group although also not statistically distinguishable from either monoracial group, partly because the differences between those two groups shrank so much. 
+This is the group with the biggest outlier in terms of the effect. The initial results in the crude model suggested that Latino/Asian students had rates similar to the lower rates of Asian students. Controlling for cultural resources shifted this to rates that were clost to the halfway point between the two monoracial groups. Controlling for family resources produced a point estimate that was *higher* than either monoracial group although also not statistically distinguishable from either monoracial group, partly because the differences between those two groups shrank so much.
 
 The change across models is a result of the high cultural and family resources of Latino/Asian students which compensates for slightly worse outcomes.
 
@@ -323,34 +356,34 @@ This is a very small group ($n=521$) so the CIs are quite wide. However, the res
 
 Overall, I can put these results into a table where I specify the potential placement of each biracial group relative to their monoracial peers. There are seven possible outcomes:
 
-* Lower than both groups
-* Same as lower group
-* Lower half
-* Halfway between
-* Upper half
-* Same as higher
-* Higher than both groups
+-   Lower than both groups
+-   Same as lower group
+-   Lower half
+-   Halfway between
+-   Upper half
+-   Same as higher
+-   Higher than both groups
 
 I put an X in each cell if the confidence intervals indicate this placement as a possibility with an asterisks indicating the point estimate for each case. Results are sorted by placement of the point estimate.
 
 |                   | Lower than both | Same as lower | Lower half | Halfway | Upper half | Same as higher | Higher than both |
 |-------------------|:---------------:|:-------------:|:----------:|:-------:|:----------:|:--------------:|:----------------:|
-| Black/White       |        X*       |               |            |         |            |                |                  |
-| White/Asian       |        X*       |       X       |            |         |            |                |                  |
-| White/Latino      |        X        |       X*      |            |         |            |                |                  |
-| Black/Latino      |        X        |       X*      |      X     |    X    |            |                |                  |
-| Indigenous/Asian  |        X        |       X*      |      X     |         |            |                |                  |
-| Indigenous/White  |                 |               |      X*    |         |            |                |                  |
-| Indigenous/Latino |                 |               |      X     |    X*   |      X     |                |                  |
-| Black Asian       |                 |       X       |      X     |    X*   |      X     |       X        |                  |
-| Black/Indigenous  |                 |       X       |      X     |    X*   |      X     |       X        |                  |
-| Latino/Asian      |                 |       X       |      X     |    X    |      X     |       X        |        x*        |
+| Black/White       |       X\*       |       X       |            |         |            |                |                  |
+| White/Asian       |       X\*       |       X       |            |         |            |                |                  |
+| White/Latino      |        X        |      X\*      |            |         |            |                |                  |
+| Black/Latino      |        X        |      X\*      |     X      |    X    |            |                |                  |
+| Indigenous/Asian  |        X\*      |       X       |     X      |    X    |            |                |                  |
+| Indigenous/White  |                 |       X       |    X\*     |         |            |                |                  |
+| Indigenous/Latino |                 |       X       |     X      |   X\*   |     X      |                |                  |
+| Black Asian       |                 |       X       |     X      |   X\*   |     X      |       X        |                  |
+| Black/Indigenous  |                 |       X       |     X      |   X\*   |     X      |       X        |                  |
+| Latino/Asian      |                 |       X       |     X      |    X    |     X      |       X        |       x\*        |
 
 The results I show here are based on model 4. They clearly show that most biracial groups are closer in outcomes to the monoracial group with the lower rates. 6 of the 10 groups have grade retention probabilities lower, indistinguishable from, or closer to the monoracial group with lower rates. Of the remaining four groups, three produce results that are statistically indeterminate. Only one case (Indigenous/Latino) produces a clear and distinguishable "halfway" placement.
 
 Being a part-black group in no way makes one more likely to suffer from hypodescent. In fact, the results for Black/White biracials where we would expect hypodescent to play the largest role are actually the farthest from hypodescent as possible. In general there is very little evidence of a penalty for being biracial that would be consistent with hypodescent or the marginal man hypothesis.
 
-In general, the results show that biracial groups are able to "slip through" the racialized structures that affect their more disadvantaged monoracial groups and this is not just a function of observable differences in class and nativity. 
+In general, the results show that biracial groups are able to "slip through" the racialized structures that affect their more disadvantaged monoracial groups and this is not just a function of observable differences in class and nativity.
 
 ## Sensitivity tests
 
@@ -366,16 +399,16 @@ model4_middle <- update(model4, design=subset(acs_design, current_grade>"5th" &
 model4_hs <- update(model4, design=subset(acs_design, current_grade>="9th"))
 
 
-coef_table_elem <- calculate_marg_means(model4_elem)
-coef_table_middle <- calculate_marg_means(model4_middle)
-coef_table_hs <- calculate_marg_means(model4_hs)
+results_elem <- calculate_marg_means(model4_elem)
+results_middle <- calculate_marg_means(model4_middle)
+results_hs <- calculate_marg_means(model4_hs)
 
-coef_table <- coef_table_elem %>%
+coef_table <- results_elem$coef_table %>%
   mutate(model="elementary")
-coef_table <- coef_table_middle %>%
+coef_table <- results_middle$coef_table %>%
   mutate(model="middle school") %>%
   bind_rows(coef_table)
-coef_table <- coef_table_hs %>%
+coef_table <- results_hs$coef_table %>%
   mutate(model="high school") %>%
   bind_rows(coef_table) %>%
   mutate(model=factor(model, levels=c("elementary","middle school",
@@ -390,47 +423,17 @@ coef_table <- coef_table_hs %>%
                                       "Latino/Asian",
                                       "Indigenous/Latino",
                                       "Indigenous/Asian")))
-  
-ggplot(coef_table, aes(x=term, y=estimate, color=multiracial,
-                       ymin=estimate-1.386*se, ymax=estimate+1.386*se))+
-  geom_rect(aes(xmax=Inf, xmin=-Inf, ymin=estimate_mid-1.386*se_mid,
-                ymax=estimate_mid+1.386*se_mid, fill=multiracial), 
-            color=NA, alpha=0.2)+
-  geom_linerange(data=subset(coef_table, multiracial))+
-  geom_point()+
-  coord_flip()+
-  facet_grid(mrace~model, scales="free_y")+
-  theme_bw()+
-  theme(legend.position = "none", panel.grid = element_blank())+
-  scale_color_manual(values=c("grey40","red"))+
-  scale_fill_manual(values=c("grey40","red"))+
-  scale_linetype_manual(values=c(3,1))+
-  scale_y_continuous(labels = scales::percent)+
-  labs(x=NULL,
-       y="average adjusted predicted probability of being behind expected grade")
-```
 
-The results get quite a bit noisier here because we are cutting the sample size substantially in each panel. The general pattern is that the results tend to look pretty similar across grade levels. What variations we do see could easily be the result of statistical noise as they tend to move around the most in cases with high error bands. The two notable cases where something might be going on:
-
-* For White/Black students, grade retention is clearly in the lower-half between Whites and the midway point rather than below whites for high school students. Notably, this is also where the white/black grows the largest. So the advantage that these students have relative to everyone else only holds for elementary and middle school. Nonetheless, their outcomes are still much closer to White students than Black students.
-* For White/Indigenous students, the placement varies across panels. In elementary school, these students are indistinguishable from White students. They are perfectly in the middle in middle school, and then in the lower half in high school. So it seems that their lowest outcomes happen earlier and on average you end up with a "lower half" across all grades. 
-
-In no case do the results here suggest a biasing effect of non-biological kids. We would expect that to be greater in higher grades, but the results are generally consistent across grades. In cases where they are not consistent, you would expect the results to move toward the larger population group with age, but I do not see that.
-
-### Models with stricter parent linking
-
-```{r models-parent-link, warning=FALSE, fig.height=12, fig.cap="Probability of being behind grade for biracial respondents in comparison to their monoracial comparison groups. 83.4% confidence bands shown around each estimate. Non-overlap in confidence bands roughly indicates statistically significant difference at the 5% level. Panels compare results depending on whether results are restricted only to children linked to a head of household or not."}
-#run separate models by grade groups
-model4_best_link <- update(model4, design=subset(acs_design, momrule==11 & poprule==11))
-
-coef_table_best_link <- calculate_marg_means(model4_best_link)
-
-coef_table <- coef_table_best_link %>%
-  mutate(model="only direct links")
-coef_table <- coef_table_mod4 %>%
-  mutate(model="all links") %>%
-  bind_rows(coef_table) %>%
-  mutate(model=factor(model, levels=c("all links","only direct links")),
+ci_df <- results_elem$ci_df %>%
+  mutate(model="elementary")
+ci_df <- results_middle$ci_df %>%
+  mutate(model="middle school") %>%
+  bind_rows(ci_df)
+ci_df <- results_hs$ci_df %>%
+  mutate(model="high school") %>%
+  bind_rows(ci_df) %>%
+  mutate(model=factor(model, levels=c("elementary","middle school",
+                                      "high school")),
          mrace=factor(mrace, levels=c("Black/White",
                                       "Black/Latino",
                                       "Black/Asian",
@@ -442,26 +445,31 @@ coef_table <- coef_table_mod4 %>%
                                       "Indigenous/Latino",
                                       "Indigenous/Asian")))
   
-ggplot(coef_table, aes(x=term, y=estimate, color=multiracial,
-                       ymin=estimate-1.386*se, ymax=estimate+1.386*se))+
-  geom_rect(aes(xmax=Inf, xmin=-Inf, ymin=estimate_mid-1.386*se_mid,
-                ymax=estimate_mid+1.386*se_mid, fill=multiracial), 
-            color=NA, alpha=0.2)+
-  geom_linerange(data=subset(coef_table, multiracial))+
+
+ggplot(coef_table, aes(x=term, y=estimate, color=colors))+
+  geom_rect(aes(xmax=Inf, xmin=-Inf, ymin=lower, ymax=upper, fill=colors), 
+            color=NA, alpha=0.5)+
+  geom_linerange(data=ci_df, 
+                 position=position_dodge2(width = 0.1), size=1, alpha=0.5,
+                 aes(ymin=lower, ymax=upper, color=colors))+
   geom_point()+
   coord_flip()+
   facet_grid(mrace~model, scales="free_y")+
   theme_bw()+
   theme(legend.position = "none", panel.grid = element_blank())+
-  scale_color_manual(values=c("grey40","red"))+
-  scale_fill_manual(values=c("grey40","red"))+
-  scale_linetype_manual(values=c(3,1))+
+  scale_color_manual(values=color_choices)+
+  scale_fill_manual(values=color_choices)+
   scale_y_continuous(labels = scales::percent)+
   labs(x=NULL,
        y="average adjusted predicted probability of being behind expected grade")
 ```
 
-The results here are extraordinarily stable across both specifications. 
+The results get quite a bit noisier here because we are cutting the sample size substantially in each panel. The general pattern is that the results tend to look pretty similar across grade levels. What variations we do see could easily be the result of statistical noise as they tend to move around the most in cases with high error bands. The two notable cases where something might be going on:
+
+-   For White/Black students, grade retention is clearly in the lower-half between Whites and the midway point rather than below whites for high school students. Notably, this is also where the white/black grows the largest. So the advantage that these students have relative to everyone else only holds for elementary and middle school. Nonetheless, their outcomes are still much closer to White students than Black students.
+-   For White/Indigenous students, the placement varies across panels. In elementary school, these students are indistinguishable from White students. They are perfectly in the middle in middle school, and then in the lower half in high school. So it seems that their lowest outcomes happen earlier and on average you end up with a "lower half" across all grades.
+
+In no case do the results here suggest a biasing effect of non-biological kids. We would expect that to be greater in higher grades, but the results are generally consistent across grades. In cases where they are not consistent, you would expect the results to move toward the larger population group with age, but I do not see that.
 
 ```{r time-end}
 timestamp()

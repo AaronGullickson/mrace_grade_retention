@@ -227,7 +227,8 @@ calculate_marg_means <- function(model) {
   #annoying
   coefs <- tibble(term=str_remove(means_marginal$Label, "race = "), 
                   estimate=means_marginal$Margin, 
-                  se=means_marginal$Standard.Error) 
+                  se=means_marginal$Standard.Error)  %>%
+    mutate(multiracial=str_detect(term, "/"))
   
   return(create_coef_table(coefs))
 }
@@ -258,12 +259,15 @@ create_coef_table <- function(coefs) {
                                    "White/Asian",
                                    "Indigenous/Asian",
                                    "Black/Indigenous")),
-             estimate_mid=ifelse(multiracial, 
-                                 mean(estimate[!multiracial]),
+             estimate_mid=ifelse(multiracial, mean(estimate[!multiracial]),
                                  estimate),
-             se_mid=ifelse(multiracial, 
-                           sqrt(sum(se[!multiracial]^2)/4),
-                           se))
+             se_mid=ifelse(multiracial, sqrt(sum(se[!multiracial]^2)/4),
+                           se),
+             ratio=ifelse(multiracial, se_mid/se, se/se[multiracial]),
+             z=1.96*sqrt(1+ratio^2)/(1+ratio),
+             upper=ifelse(multiracial, estimate_mid+z*se_mid, estimate+z*se),
+             lower=ifelse(multiracial, estimate_mid-z*se_mid, estimate-z*se),
+             colors=ifelse(multiracial, "Multiracial", term))
   }) %>%
     bind_rows()
   
@@ -285,7 +289,34 @@ create_coef_table <- function(coefs) {
   coef_table <- coef_table %>%
     mutate(term=factor(term, levels=race_full))
   
-  return(coef_table)
+  # now create the separate tibble for recording confidence half intervals
+  # for biracial groups
+  temp <- coefs %>%
+    filter(!multiracial) %>%
+    select(term, estimate, se) %>%
+    rename(comparison=term, estimate_comparison=estimate, se_comparison=se)
+  
+  ci_df1 <- coefs %>%
+    filter(multiracial) %>%
+    mutate(comparison=map_chr(str_split(term, "/"), function(x) {x[1]})) %>%
+    select(term, estimate, se, comparison)
+  
+  ci_df2 <- coefs %>%
+    filter(multiracial) %>%
+    mutate(comparison=map_chr(str_split(term, "/"), function(x) {x[2]})) %>%
+    select(term, estimate, se, comparison)
+  
+  ci_df <- bind_rows(ci_df1, ci_df2) %>%
+    arrange(term) %>%
+    left_join(temp) %>%
+    mutate(ratio=se/se_comparison,
+           z=1.96*sqrt(1+ratio^2)/(1+ratio),
+           upper=ifelse(estimate<estimate_comparison, estimate+z*se, estimate),
+           lower=ifelse(estimate>estimate_comparison, estimate-z*se, estimate),
+           colors=comparison,
+           mrace=factor(term, levels=levels(coef_table$mrace)))
+  
+  return(list(coef_table=coef_table, ci_df=ci_df))
 }
 
 convert_marg <- function(model) {
