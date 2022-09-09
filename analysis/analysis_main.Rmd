@@ -399,16 +399,16 @@ model4_middle <- update(model4, design=subset(acs_design, current_grade>"5th" &
 model4_hs <- update(model4, design=subset(acs_design, current_grade>="9th"))
 
 
-coef_table_elem <- calculate_marg_means(model4_elem)
-coef_table_middle <- calculate_marg_means(model4_middle)
-coef_table_hs <- calculate_marg_means(model4_hs)
+results_elem <- calculate_marg_means(model4_elem)
+results_middle <- calculate_marg_means(model4_middle)
+results_hs <- calculate_marg_means(model4_hs)
 
-coef_table <- coef_table_elem %>%
+coef_table <- results_elem$coef_table %>%
   mutate(model="elementary")
-coef_table <- coef_table_middle %>%
+coef_table <- results_middle$coef_table %>%
   mutate(model="middle school") %>%
   bind_rows(coef_table)
-coef_table <- coef_table_hs %>%
+coef_table <- results_hs$coef_table %>%
   mutate(model="high school") %>%
   bind_rows(coef_table) %>%
   mutate(model=factor(model, levels=c("elementary","middle school",
@@ -423,47 +423,17 @@ coef_table <- coef_table_hs %>%
                                       "Latino/Asian",
                                       "Indigenous/Latino",
                                       "Indigenous/Asian")))
-  
-ggplot(coef_table, aes(x=term, y=estimate, color=multiracial,
-                       ymin=estimate-1.386*se, ymax=estimate+1.386*se))+
-  geom_rect(aes(xmax=Inf, xmin=-Inf, ymin=estimate_mid-1.386*se_mid,
-                ymax=estimate_mid+1.386*se_mid, fill=multiracial), 
-            color=NA, alpha=0.2)+
-  geom_linerange(data=subset(coef_table, multiracial))+
-  geom_point()+
-  coord_flip()+
-  facet_grid(mrace~model, scales="free_y")+
-  theme_bw()+
-  theme(legend.position = "none", panel.grid = element_blank())+
-  scale_color_manual(values=c("grey40","red"))+
-  scale_fill_manual(values=c("grey40","red"))+
-  scale_linetype_manual(values=c(3,1))+
-  scale_y_continuous(labels = scales::percent)+
-  labs(x=NULL,
-       y="average adjusted predicted probability of being behind expected grade")
-```
 
-The results get quite a bit noisier here because we are cutting the sample size substantially in each panel. The general pattern is that the results tend to look pretty similar across grade levels. What variations we do see could easily be the result of statistical noise as they tend to move around the most in cases with high error bands. The two notable cases where something might be going on:
-
--   For White/Black students, grade retention is clearly in the lower-half between Whites and the midway point rather than below whites for high school students. Notably, this is also where the white/black grows the largest. So the advantage that these students have relative to everyone else only holds for elementary and middle school. Nonetheless, their outcomes are still much closer to White students than Black students.
--   For White/Indigenous students, the placement varies across panels. In elementary school, these students are indistinguishable from White students. They are perfectly in the middle in middle school, and then in the lower half in high school. So it seems that their lowest outcomes happen earlier and on average you end up with a "lower half" across all grades.
-
-In no case do the results here suggest a biasing effect of non-biological kids. We would expect that to be greater in higher grades, but the results are generally consistent across grades. In cases where they are not consistent, you would expect the results to move toward the larger population group with age, but I do not see that.
-
-### Models with stricter parent linking
-
-```{r models-parent-link, warning=FALSE, fig.height=12, fig.cap="Probability of being behind grade for biracial respondents in comparison to their monoracial comparison groups. 83.4% confidence bands shown around each estimate. Non-overlap in confidence bands roughly indicates statistically significant difference at the 5% level. Panels compare results depending on whether results are restricted only to children linked to a head of household or not."}
-#run separate models by grade groups
-model4_best_link <- update(model4, design=subset(acs_design, momrule==11 & poprule==11))
-
-coef_table_best_link <- calculate_marg_means(model4_best_link)
-
-coef_table <- coef_table_best_link %>%
-  mutate(model="only direct links")
-coef_table <- coef_table_mod4 %>%
-  mutate(model="all links") %>%
-  bind_rows(coef_table) %>%
-  mutate(model=factor(model, levels=c("all links","only direct links")),
+ci_df <- results_elem$ci_df %>%
+  mutate(model="elementary")
+ci_df <- results_middle$ci_df %>%
+  mutate(model="middle school") %>%
+  bind_rows(ci_df)
+ci_df <- results_hs$ci_df %>%
+  mutate(model="high school") %>%
+  bind_rows(ci_df) %>%
+  mutate(model=factor(model, levels=c("elementary","middle school",
+                                      "high school")),
          mrace=factor(mrace, levels=c("Black/White",
                                       "Black/Latino",
                                       "Black/Asian",
@@ -475,26 +445,31 @@ coef_table <- coef_table_mod4 %>%
                                       "Indigenous/Latino",
                                       "Indigenous/Asian")))
   
-ggplot(coef_table, aes(x=term, y=estimate, color=multiracial,
-                       ymin=estimate-1.386*se, ymax=estimate+1.386*se))+
-  geom_rect(aes(xmax=Inf, xmin=-Inf, ymin=estimate_mid-1.386*se_mid,
-                ymax=estimate_mid+1.386*se_mid, fill=multiracial), 
-            color=NA, alpha=0.2)+
-  geom_linerange(data=subset(coef_table, multiracial))+
+
+ggplot(coef_table, aes(x=term, y=estimate, color=colors))+
+  geom_rect(aes(xmax=Inf, xmin=-Inf, ymin=lower, ymax=upper, fill=colors), 
+            color=NA, alpha=0.5)+
+  geom_linerange(data=ci_df, 
+                 position=position_dodge2(width = 0.1), size=1, alpha=0.5,
+                 aes(ymin=lower, ymax=upper, color=colors))+
   geom_point()+
   coord_flip()+
   facet_grid(mrace~model, scales="free_y")+
   theme_bw()+
   theme(legend.position = "none", panel.grid = element_blank())+
-  scale_color_manual(values=c("grey40","red"))+
-  scale_fill_manual(values=c("grey40","red"))+
-  scale_linetype_manual(values=c(3,1))+
+  scale_color_manual(values=color_choices)+
+  scale_fill_manual(values=color_choices)+
   scale_y_continuous(labels = scales::percent)+
   labs(x=NULL,
        y="average adjusted predicted probability of being behind expected grade")
 ```
 
-The results here are extraordinarily stable across both specifications.
+The results get quite a bit noisier here because we are cutting the sample size substantially in each panel. The general pattern is that the results tend to look pretty similar across grade levels. What variations we do see could easily be the result of statistical noise as they tend to move around the most in cases with high error bands. The two notable cases where something might be going on:
+
+-   For White/Black students, grade retention is clearly in the lower-half between Whites and the midway point rather than below whites for high school students. Notably, this is also where the white/black grows the largest. So the advantage that these students have relative to everyone else only holds for elementary and middle school. Nonetheless, their outcomes are still much closer to White students than Black students.
+-   For White/Indigenous students, the placement varies across panels. In elementary school, these students are indistinguishable from White students. They are perfectly in the middle in middle school, and then in the lower half in high school. So it seems that their lowest outcomes happen earlier and on average you end up with a "lower half" across all grades.
+
+In no case do the results here suggest a biasing effect of non-biological kids. We would expect that to be greater in higher grades, but the results are generally consistent across grades. In cases where they are not consistent, you would expect the results to move toward the larger population group with age, but I do not see that.
 
 ```{r time-end}
 timestamp()
