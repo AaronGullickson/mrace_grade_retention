@@ -375,7 +375,7 @@ I now turn to the results for biracial respondents. Due to the number of compari
 ```{r fig-black-models}
 #| label: fig-black-models
 #| fig-pos: p
-#| fig-cap: Probability of being behind grade for biracial respondents with one black parent, in comparison to their monoracial comparison groups. 83.4% confidence bands shown around each estimate. Non-overlap in confidence bands roughly indicates statistically significant difference at the 5% level, Baseline model includes year, grade, location, and state fixed effects. Full models include control variables for nativity, English proficiency, income, education, home ownership, and marital status of parents.
+#| fig-cap: Probability of being behind grade for biracial respondents with one black parent, in comparison to their monoracial comparison groups. . Non-overlap in color corresponding confidence bands indicates statistically significant difference at the 5% level, Baseline model includes year, grade, location, and state fixed effects. Full models include control variables for nativity, English proficiency, income, education, home ownership, and marital status of parents.
 #| fig-height: 7.3
 coef_table %>%
   filter(model=="Baseline model" | model=="Full model") %>%
@@ -413,7 +413,7 @@ The role of parental resources is harder to determine for Black/Asian and Black/
 ```{r fig-other-models}
 #| label: fig-other-models
 #| fig-pos: p
-#| fig-cap: Probability of being behind grade for non-black biracial respondents, in comparison to their monoracial comparison groups. 83.4% confidence bands shown around each estimate. Non-overlap in confidence bands roughly indicates statistically significant difference at the 5% level, Baseline model includes year, grade, location, and state fixed effects. Full models include control variables for nativity, English proficiency, income, education, home ownership, and marital status of parents.
+#| fig-cap: Probability of being behind grade for non-black biracial respondents, in comparison to their monoracial comparison groups. Non-overlap in color corresponding confidence bands indicates statistically significant difference at the 5% level, Baseline model includes year, grade, location, and state fixed effects. Full models include control variables for nativity, English proficiency, income, education, home ownership, and marital status of parents.
 #| fig-height: 7.3
 coef_table %>%
   filter(model=="Baseline model" | model=="Full model") %>%
