@@ -27,6 +27,7 @@ editor: source
 library(here)
 source(here("analysis","check_packages.R"))
 source(here("analysis","useful_functions.R"))
+color_choices <- c("#003f5c","#58508d","#bc5090","#ff6361","#000000","#ffa600")
 ```
 
 ```{r load-data}
@@ -36,6 +37,12 @@ load(here("analysis","output","monoracial_results.RData"))
 load(here("analysis","output","tbl_resources.RData"))
 # change names of models for display
 coef_table <- coef_table %>%
+  mutate(model=factor(model,
+                      levels=c("crude","fixed effects","cultural resources",
+                               "parent resources"),
+                      labels=c("Raw","Baseline model","Cultural model",
+                               "Full model")))
+ci_df <- ci_df %>%
   mutate(model=factor(model,
                       levels=c("crude","fixed effects","cultural resources",
                                "parent resources"),
@@ -188,33 +195,24 @@ As an example, I display the percent of students clearly behind grade for White,
 ```{r example-plot}
 #| label: fig-example
 #| fig-cap: Probability of being clearly below expected grade for biracial black/white respondents in comparison to their monoracial comparison groups. 83.4% confidence bands shown around each estimate. Non-overlap in confidence bands roughly indicates statistically significant difference at the 5% level.
-g <-  coef_table %>%
-  filter(mrace=="Black/White" & model=="Raw") %>%
-  ggplot(aes(x=term, y=estimate, color=multiracial,
-             ymin=estimate-1.386*se, ymax=estimate+1.386*se))+
-  geom_rect(aes(xmax=Inf, xmin=-Inf, ymin=estimate_mid-1.386*se_mid,
-                ymax=estimate_mid+1.386*se_mid, fill=multiracial), 
-            color=NA, alpha=0.2)+
-  geom_linerange(data=subset(coef_table, multiracial & 
-                               mrace=="Black/White" &
-                               model=="Raw"))+
-  geom_point()+
-  coord_flip()+
-  theme_bw()+
-  theme(legend.position = "none", panel.grid = element_blank())+
-  scale_color_manual(values=c("grey40","red"))+
-  scale_fill_manual(values=c("grey40","red"))+
-  scale_linetype_manual(values=c(3,1))+
-  scale_y_continuous(labels = scales::percent)+
-  labs(x=NULL,
-       y="predicted probability of being behind expected grade")
 
-g+annotate("text", 1, 0.036, hjust="left",
-             label="Grey bands indicate 83.4%\nconfidence interval around\nmonoracial estimates")+
-  annotate("text", 2, 0.0445, hjust="left",
-             label="Red band indicate 83.4%\nconfidence interval around\nmidpoint estimate")+
-  annotate("text", 2.5, 0.0365, hjust="left",
-             label="Actual biracial estimate\nshown with 83.4%\nconfidence interval")
+coef_table %>%
+  filter(mrace=="Black/White" & model=="Raw") %>%
+  ggplot(aes(x=term, y=estimate, color=colors))+
+  geom_rect(aes(xmax=Inf, xmin=-Inf, ymin=lower,
+                ymax=upper, fill=colors), color=NA, alpha=0.5)+
+  geom_linerange(data=filter(ci_df, mrace=="Black/White" & model=="Raw"), 
+                 position=position_dodge2(width = 0.05), size=1.2, alpha=0.5,
+                 aes(ymin=lower, ymax=upper, color=colors))+
+  geom_point(size=2)+
+  coord_flip()+
+  scale_y_continuous(labels = scales::percent)+
+  scale_color_manual(values=color_choices[c(2,5:6)])+
+  scale_fill_manual(values=color_choices[c(2,5:6)])+
+  labs(x=NULL,
+       y="predicted probability of being behind expected grade")+
+  theme_bw()+
+  theme(legend.position = "none", panel.grid = element_blank())
 ```
 
 Additionally, I include a measure of the "halfway" point between the two racial groups.[^3] This halfway point allows me to determine where the biracial group falls relative to the expectation of being halfway between the two constituent monoracial groups. In this case, Black/White students are much closer to White students in their risk of grade retention, and have probabilities much lower than both Black students and the halfway expectation.
@@ -381,23 +379,21 @@ I now turn to the results for biracial respondents. Due to the number of compari
 coef_table %>%
   filter(model=="Baseline model" | model=="Full model") %>%
   filter(str_detect(mrace, "Black")) %>%
-  ggplot(aes(x=term, y=estimate, color=multiracial,
-             ymin=estimate-1.386*se, ymax=estimate+1.386*se))+
-  geom_rect(aes(xmax=Inf, xmin=-Inf, ymin=estimate_mid-1.386*se_mid,
-                ymax=estimate_mid+1.386*se_mid, fill=multiracial), 
-            color=NA, alpha=0.2)+
-  geom_linerange(data=subset(coef_table, multiracial 
-                             & (model=="Baseline model" | 
-                                  model=="Full model") & 
-                               str_detect(mrace, "Black")))+
+  ggplot(aes(x=term, y=estimate, color=colors))+
+  geom_rect(aes(xmax=Inf, xmin=-Inf, ymin=lower, ymax=upper, fill=colors), 
+            color=NA, alpha=0.5)+
+  geom_linerange(data=subset(ci_df, 
+                             (model=="Baseline model" |  model=="Full model") &
+                               str_detect(mrace, "Black")), 
+                 position=position_dodge2(width = 0.1), size=1, alpha=0.5,
+                 aes(ymin=lower, ymax=upper, color=colors))+
   geom_point()+
   coord_flip()+
   facet_grid(mrace~model, scales="free_y")+
   theme_bw()+
   theme(legend.position = "none", panel.grid = element_blank())+
-  scale_color_manual(values=c("grey40","red"))+
-  scale_fill_manual(values=c("grey40","red"))+
-  scale_linetype_manual(values=c(3,1))+
+  scale_color_manual(values=color_choices)+
+  scale_fill_manual(values=color_choices)+
   scale_y_continuous(labels = scales::percent)+
   labs(x=NULL,
        y="average predicted probability of being clearly behind expected grade")
@@ -421,23 +417,21 @@ The role of parental resources is harder to determine for Black/Asian and Black/
 coef_table %>%
   filter(model=="Baseline model" | model=="Full model") %>%
   filter(!str_detect(mrace, "Black")) %>%
-  ggplot(aes(x=term, y=estimate, color=multiracial,
-             ymin=estimate-1.386*se, ymax=estimate+1.386*se))+
-  geom_rect(aes(xmax=Inf, xmin=-Inf, ymin=estimate_mid-1.386*se_mid,
-                ymax=estimate_mid+1.386*se_mid, fill=multiracial), 
-            color=NA, alpha=0.2)+
-  geom_linerange(data=subset(coef_table, multiracial 
-                             & (model=="Baseline model" | 
-                                  model=="Full model") & 
-                               !str_detect(mrace, "Black")))+
+  ggplot(aes(x=term, y=estimate, color=colors))+
+  geom_rect(aes(xmax=Inf, xmin=-Inf, ymin=lower, ymax=upper, fill=colors), 
+            color=NA, alpha=0.5)+
+  geom_linerange(data=subset(ci_df, 
+                             (model=="Baseline model" | model=="Full model") &
+                               !str_detect(mrace, "Black")), 
+                 position=position_dodge2(width = 0.1), size=1, alpha=0.5,
+                 aes(ymin=lower, ymax=upper, color=colors))+
   geom_point()+
   coord_flip()+
   facet_grid(mrace~model, scales="free_y")+
   theme_bw()+
   theme(legend.position = "none", panel.grid = element_blank())+
-  scale_color_manual(values=c("grey40","red"))+
-  scale_fill_manual(values=c("grey40","red"))+
-  scale_linetype_manual(values=c(3,1))+
+  scale_color_manual(values=color_choices[-1])+
+  scale_fill_manual(values=color_choices[-1])+
   scale_y_continuous(labels = scales::percent)+
   labs(x=NULL,
        y="average predicted probability of being clearly behind expected grade")
