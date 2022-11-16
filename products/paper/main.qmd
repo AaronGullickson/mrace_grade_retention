@@ -438,7 +438,19 @@ Results for part-Latino students are complicated by the substantial change in th
 
 # Conclusions
 
--   Big claim: The results are consistent with a new "regime of hyperdescent" operating across all racial groups. This contributes to a muddying of racial distinctiveness via hybridity, while at the same time isolating monoracial members of the most stigmatized racial groups, consistent with arguments like Bonilla-Silva's Latin Americanization.
+-   Unlike prior work on this topic, most of the results here are robust due to large sample size and where the results are robust, they show a relatively consistent story across all groups: biracial students tend to have a grade retention risk similar to their monoracial constituent group with the lower risk.
+-   What does this pattern mean given the hypotheses of difference. We can strongly rule out a marginal man problem or a strong one-drop rule. Instead what emerges are two possible stories.
+    -   The first is a new regime of hyperdescent that seems to apply generally across a wide variety of cases, in contrast to the historical work on this topic.
+
+    -   The second is the possibility of a positive effect of hybridity on biracial students ability to negotiate racialized institutions. This may help to bring outcomes down from what might otherwise by a more in-between position based on other dynamics.
+-   What role do family resources and intergenerational selection play? The results vary somewhat by group, but generally show positive selection. The big exception is Black/White biracials who are more like Blacks in their outcomes. White/Asians stand out as particularly privileged relative to every other monoracial and biracial group in the sample. Nonetheless, while these resource differentials exist, they do not generally change the underlying story substantially - biracial outcomes are like those of the lower monoracial group. The one exception here is the Latino/Asian case.
+-   Better outcomes for biracial individuals is often incorrectly treated as a success story in the American context. While it may indicate that biracial individuals do better than some other groups within an American system of racial inequality, it does little to reduce that overall inequality. Instead it may heighten the relationship between outcomes BLAH BLAH
+-   What are the limitations of this study?
+    -   Although sample sizes are big generally, we still suffer from large sample errors in some cases of non-white biracials, particularly those of part Indigenous ancestry. There is some indication that indigeneity may work differently here, but that finding must be tempered by the wide margins of error for these groups.
+
+    -   It is possible that some of the lower risk for biracials reflects their younger average age.
+
+    -   Grade retention is an important early life outcome, but far from the only one. It is possible that the context in which it happens, often early in the educational system, does not continue throughout the life course and that we might see very different patterns emerge for other kinds of outcomes. More work should be done!
 
 # Acknowledgments {.appendix}
 
