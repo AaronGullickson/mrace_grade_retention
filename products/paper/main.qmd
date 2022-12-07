@@ -13,6 +13,8 @@ format:
     keep-tex: false
   docx:
     toc: false
+  html:
+    toc: false
 bibliography: ../project.bib
 execute: 
   eval: true
@@ -244,7 +246,8 @@ I begin by showing the relative risk of being CBEG among monoracial respondents 
 #| results: asis
 #| label: tbl-monoracial
 #| tbl-cap: Average marginal differences in the probability of being clearly behind expected grade by monoracial group, relative to a monoracial white student
-texreg(map(results_monoracial[-1], convert_marg),
+#texreg(map(results_monoracial[-1], convert_marg),
+htmlreg(map(results_monoracial[-1], convert_marg),
 #wordreg(map(results_monoracial[-1], convert_marg),
        digits=3,
        caption = "Average marginal differences in the probability of being clearly behind expected grade by monoracial group, relative to a monoracial white student",
