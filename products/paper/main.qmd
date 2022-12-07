@@ -24,7 +24,8 @@ editor: source
 csl: american-sociological-association.csl
 ---
 
-```{r setup}
+```{r}
+#: label: setup
 #| include: false
 library(here)
 source(here("analysis","check_packages.R"))
@@ -33,6 +34,8 @@ color_choices <- c("#003f5c","#58508d","#bc5090","#ff6361","#000000","#ffa600")
 ```
 
 ```{r load-data}
+#| label: load-data
+#| include: false
 load(here("analysis","output","acs.RData"))
 load(here("analysis","output","coef_table.RData"))
 load(here("analysis","output","monoracial_results.RData"))
