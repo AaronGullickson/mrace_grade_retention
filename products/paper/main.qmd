@@ -3,7 +3,7 @@ title: Differences in the Risk of Grade Retention for Biracial and Monoracial St
 author: 
   - Aaron Gullickson, *University of Oregon*
 abstract: Understanding how outcomes for biracial individuals compare to their monoracial peers is critical for understanding how patterns of racial inequality in the contemporary United States might be shifting. Yet, we know very little about the life chances of biracial individuals due to limitations in most available data sources. In this article, I utilize American Community Survey data from 2010-2019 to examine the risk of being clearly behind expected grade among biracial and monoracial K-12 students, helping to fill a gap in our understanding. With large sample sizes for most biracial groups, I am able to estimate grade retention risk for biracial students with enough precision to differentiate even modest differences in risk relative to monoracial groups. The results indicate that for most biracial groups, biracial students have risk similar to their monoracial constituent group with lower risk. Although biracial students tend to have favorable family resource characteristics, controlling for these characteristics does little to change the overall placement of their outcomes.
-thanks: The corresponding author can be reached at aarong@uoregon.edu. Supplementary materials provided with this article include full model results upon which figures are based as well as any senstivity analysis described herein. All code and data for this project are available at ...
+thanks: The corresponding author can be reached at aarong@uoregon.edu. Supplementary materials provided with this article include full model results upon which figures are based as well as any sensitivity analysis described herein. All code and data for this project are available at [https://osf.io/4fevt/?view_only=4abc6d86595c4313a8d4792471e9bc0d](https://osf.io/4fevt/?view_only=4abc6d86595c4313a8d4792471e9bc0d).
 format:
   pdf:
     documentclass: scrartcl
@@ -240,14 +240,15 @@ I begin by showing the relative risk of being CBEG among monoracial respondents 
 ```{r monoracial-results}
 #| results: asis
 #| label: tbl-monoracial
-#| tbl-cap: Average marginal differences in the probability of being behind grade by monoracial group, relative to a monoracial white student.
-wordreg(map(results_monoracial[-1], convert_marg),
+#| tbl-cap: Average marginal differences in the probability of being clearly behind expected grade by monoracial group, relative to a monoracial white student
+texreg(map(results_monoracial[-1], convert_marg),
+#wordreg(map(results_monoracial[-1], convert_marg),
        digits=3,
-       caption = "Average marginal differences in the probability of being clearly behind grade by monoracial group, relative to a monoracial white student",
+       caption = "Average marginal differences in the probability of being clearly behind expected grade by monoracial group, relative to a monoracial white student",
        caption.above=TRUE,
        label="tbl-monoracial",  #TODO: This does not work
        float.pos="t",
-       file="regtable.doc",
+#       file="regtable.doc",
        custom.gof.rows=
          list("State fixed effects" = c("Yes","Yes","Yes","Yes"),
               "Location fixed effects" = c("Yes","Yes","Yes","Yes"),
@@ -332,8 +333,8 @@ tibble(race, lower_both, same_lower, between, same_higher, higher_both) %>%
  kbl(booktabs = TRUE,
       linesep = NULL,
       align = c("l",rep("r", 5)),
-      col.names=c("Biacial","Lower than both","Same as lower","Between",
-                  "Same as higher","Higher than both")) %>%
+      col.names=c("Biacial","Lower probability than both","Similar probability as lower","Between",
+                  "Similar probability as higher","Higher probability than both")) %>%
   kable_styling() %>%
   column_spec(1:6, width = "2cm")
 
