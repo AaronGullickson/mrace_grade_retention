@@ -1,0 +1,223 @@
+---
+title: "Supplementary Materials for Differences in the Risk of Grade Retention for Biracial and Monoracial Students in the US, 2010-2019"
+format:
+  pdf:
+    documentclass: scrartcl
+    include-in-header: 
+      text: |
+        \usepackage{longtable}
+    papersize: letter
+    fig-height: 4
+    fig-pos: h
+    keep-tex: false
+  docx:
+    toc: false
+bibliography: ../project.bib
+execute: 
+  eval: true
+  echo: false
+  warning: false
+  error: false
+prefer-html: true
+editor: source
+csl: american-sociological-association.csl
+---
+
+```{r}
+#| label: setup
+#| include: false
+library(here)
+source(here("analysis","check_packages.R"))
+source(here("analysis","useful_functions.R"))
+load(here("analysis","output","bic_spec_tests.RData"))
+load(here("analysis","output","model_summaries.RData"))
+load(here("analysis","output","acs.RData"))
+```
+
+```{r}
+#| label: func-convert-model
+#| include: false
+
+#  because I only saved model summaries I need a function to convert this to 
+# something that knitreg likes
+convert_model <- function(model) {
+  tr <- createTexreg(
+    coef.names = rownames(model$coefficients),
+    coef = model$coefficients[,"Estimate"], 
+    se = model$coefficients[,"Std. Error"], 
+    pvalues = model$coefficients[,"Pr(>|t|)"],
+    gof.names = c("N","Null deviance","Model deviance", "Pseudo-R2"), 
+    gof = c(model$df.null+1, model$null.deviance, model$deviance, 
+            (model$null.deviance-model$deviance)/model$null.deviance), 
+    gof.decimal = c(F,F,F,T)
+  )
+}
+```
+
+```{r}
+#| label: create-design
+acs_design <- acs %>%
+  as_survey_design(ids = cluster, weights = perwt)
+```
+
+```{r}
+#| results: asis
+#| label: tbl-full-models
+#| tbl-cap: Log-odds ratios from full models predicting a student being clearly behind expected grade. All models used sample weights and adjust for design effects from sample weight variance and clustering of students within the same household.
+texreg(lapply(list(model0_summary, model1_summary, model2_summary, 
+                   model3_summary, model4_summary), convert_model),
+       digits = 3,
+       longtable = TRUE,
+       use.packages = FALSE,
+       caption.above = TRUE,
+       custom.coef.names = 
+         c("Intercept","Black","Indigenous","Asian","Latino","Black/White",
+           "Black/Indigenous","Black/Latino", "Black/Asian",
+           "White/Indigenous","White/Latino","White/Asian",
+           "Indigenous/Latino","Indigenous/Asian","Latino/Asian",
+           "Year (2010 origin)", "1st grade","2nd grade","3rd grade",
+           "4th grade","5th grade","6th grade","7th grade","8th grade",
+           "9th grade","10th grade","11th grade","12th grade","Alaska",
+           "Arizona","Arkansas","California","Colorado","Connecticut",
+           "Washington DC","Delaware","Florida","Georgia","Hawaii","Idaho",
+           "Illinois","Indiana","Iowa","Kansas","Kentucky","Louisiana",
+           "Maine","Maryland","Massachusetts","Michigan","Minnesota",
+           "Mississippi","Missouri","Montana","Nebraska","Nevada",
+           "New Hampshire","New Jersey","New Mexico","New York",
+           "North Carolina","North Dakota","Ohio","Oklahoma","Oregon",
+           "Pennsylvania","Rhode Island","South Carolina","South Dakota",
+           "Tennessee","Texas","Utah","Vermont","Virginia","Washington",
+           "West Virginia","Wisconsin","Wyoming","Non-metro","Central city",
+           "Metro non-central","Metro indeterminable","Female",
+           "Year x 1st grade","Year x 2nd grade","Year x 3rd grade",
+           "Year x 4th grade","Year x 5th grade","Year x 6th grade",
+           "Year x 7th grade","Year x 8th grade","Year x 9th grade",
+           "Year x 10th grade","Year x 11th grade","Year x 12th grade",
+           "Foreign-born","Mother foreign-born","Father foreign-born",
+           "Speaks English somewhat", "Speaks English well", 
+           "Mother speaks somewhat", "Mother speaks well",
+           "Father speaks somewhat", "Father speaks well",
+           "Mother High school diploma", "Mother AA degree", 
+           "Mother BA degree","Mother Grad degree",
+           "Father High school diploma", "Father AA degree", 
+           "Father BA degree","Father Grad degree",
+           "Family income (10K USD, sq. root)", "Owns home",
+           "parents married"),
+       groups = list("Race (ref. White)"=2:15, 
+                     "Grade (ref. Kindergarten)"=17:28,
+                     "State (ref. Alabama)"=29:78,
+                     "Location (ref. Indeterminable)"=79:82,
+                     "English proficiency (ref. none)"=99:100,
+                     "Mother's English proficiency (ref. none)"=101:102,
+                     "Father's English proficiency (ref. none)"=103:104,
+                     "Mother's highest degree (ref. none)"=105:108,
+                     "Father's highest degree (ref. none)"=109:112))
+```
+
+```{r tbl-bic}
+#| label: tbl-bic
+#| tbl-cap: Bayesian Information Criterion (BIC) statistics for models accounting for change over time using different specifications. All models also include categorical dummy variables for race, grade, state, and location.
+bic_scores$model[1] <- "Categorical year dummies, no interaction"
+bic_scores$model[2] <- "Categorical year dummies, year * grade interaction"
+bic_scores$model[3] <- "Continous year variable, no interaction"
+bic_scores$model[4] <- "Continous year variable, year * grade interaction"
+bic_scores$model[5] <- "Continous year variable, year * grade interaction + year * state interaction"
+
+bic_scores <- bic_scores[c(1,3,2,4,5),]
+
+bic_scores %>%
+  kbl(booktabs = TRUE,
+      linesep = NULL,
+      align = c("l","r"),
+      col.names=c("Model", "BIC Score")) %>%
+  kable_styling()
+```
+
+```{r desc-stats-ses}
+#| label: tbl-desc-stats-ses
+#| tbl-cap: Socioeconomic resources by race. Shading indicates biracial group. All results apply survey weights.
+
+tbl_summary <- acs_design %>%
+  group_by(race) %>%
+  summarize(fam_inc=survey_mean(family_income, vartype = NULL))
+
+tbl_summary <- acs_design %>%
+  group_by(race) %>%
+  summarize(fam_inc=round(survey_mean(family_income, vartype = NULL), 0),
+            own_home=round(survey_mean(own_home, vartype = NULL), 3)*100,
+            par_mar=round(survey_mean(parents_married, vartype = NULL), 3)*100,
+            f_lhs=round(survey_mean(degree_father=="LHS", vartype = NULL), 
+                        3)*100,
+            f_hs=round(survey_mean(degree_father=="HS", vartype = NULL), 3)*100,
+            f_aa=round(survey_mean(degree_father=="AA", vartype = NULL), 3)*100,
+            f_ba=round(survey_mean(degree_father=="BA" | degree_father=="G", 
+                                   vartype = NULL), 3)*100,
+            m_lhs=round(survey_mean(degree_mother=="LHS", vartype = NULL), 3)*100,
+            m_hs=round(survey_mean(degree_mother=="HS", vartype = NULL), 3)*100,
+            m_aa=round(survey_mean(degree_mother=="AA", vartype = NULL), 3)*100,
+            m_ba=round(survey_mean(degree_mother=="BA" | degree_mother=="G", 
+                                   vartype = NULL), 3)*100)
+
+index_biracial <- which(str_detect(tbl_summary$race, "/"))
+
+tbl_summary %>%
+  mutate_if(is.numeric, format, big.mark=",") %>%
+  kbl(booktabs=TRUE, linesep=NULL,
+      align = c("l",rep("r", ncol(tbl_summary)-1)),
+      col.names=c("race","mean family income","% own home",
+                  "% parents married",
+                  "% father, no HS diploma","% father, HS diploma",
+                  "% father, AA degree",  "% father, BA+ degree",
+                  "% mother, no HS diploma","% mother, HS diploma", 
+                  "%  mother, AA degree", "% mother, BA+ degree")) %>%
+  kable_styling(font_size=8) %>%
+  column_spec(2:12, width = "0.75cm") %>%
+  row_spec(index_biracial, background = "#D3D3D3")
+```
+
+```{r}
+#| label: tbl-desc-stats-cult
+#| tbl-cap: Cuiltural resources by race. Shading indicates biracial group. All results apply survey weights.
+tbl_summary <- acs_design %>%
+  group_by(race) %>%
+  summarize(f_born=round(survey_mean(foreign_born, vartype = NULL), 3)*100,
+            father_fb=round(survey_mean(foreign_born_father, 
+                                        vartype = NULL), 3)*100,
+            mother_fb=round(survey_mean(foreign_born_mother, 
+                                        vartype = NULL), 3)*100,
+            spk_eng_no=round(survey_mean(spk_eng=="No", vartype = NULL), 3)*100,
+            spk_eng_some=round(survey_mean(spk_eng=="Somewhat", 
+                                           vartype = NULL), 3)*100,
+            spk_eng_yes=round(survey_mean(spk_eng=="Yes", vartype = NULL), 3)*100,
+            f_spk_eng_no=round(survey_mean(spk_eng_father=="No", 
+                                           vartype = NULL), 3)*100,
+            f_spk_eng_some=round(survey_mean(spk_eng_father=="Somewhat", 
+                                             vartype = NULL), 3)*100,
+            f_spk_eng_yes=round(survey_mean(spk_eng_father=="Yes", 
+                                            vartype = NULL), 3)*100,
+            m_spk_eng_no=round(survey_mean(spk_eng_mother=="No", 
+                                           vartype = NULL), 3)*100,
+            m_spk_eng_some=round(survey_mean(spk_eng_mother=="Somewhat", 
+                                             vartype = NULL), 3)*100,
+            m_spk_eng_yes=round(survey_mean(spk_eng_mother=="Yes", 
+                                            vartype = NULL), 3)*100)
+
+index_biracial <- which(str_detect(tbl_summary$race, "/"))
+
+tbl_summary %>%
+  mutate_if(is.numeric, format, big.mark=",") %>%
+  kbl(booktabs=TRUE, linesep=NULL,
+      align = c("l",rep("r", ncol(tbl_summary)-1)),
+      col.names=c("race",
+                  "% foreign-born","% father foreign-born",
+                  "% mother foreign-born",
+                  "% speak no English", "% speak some English", 
+                  "% speak English",
+                  "% father speak no English", "% father speak some English", 
+                  "% father speak English",
+                  "% mother speak no English", "% mother speak some English",
+                  "% mother speak English")) %>%
+  kable_styling(font_size=8) %>%
+  column_spec(2:13, width = "0.75cm") %>%
+  row_spec(index_biracial, background = "#D3D3D3")
+```
