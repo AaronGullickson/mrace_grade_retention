@@ -64,13 +64,13 @@ acs_design <- acs %>%
 #| results: asis
 #| label: tbl-full-models
 #| tbl-cap: Log-odds ratios from full models predicting a student being clearly behind expected grade. All models used sample weights and adjust for design effects from sample weight variance and clustering of students within the same household.
-wordreg(lapply(list(model0_summary, model1_summary, model2_summary, 
+texreg(lapply(list(model0_summary, model1_summary, model2_summary, 
                    model3_summary, model4_summary), convert_model),
        digits = 3,
        longtable = TRUE,
        use.packages = FALSE,
        caption.above = TRUE,
-       file="full_reg.doc",
+       #file="full_reg.doc",
        custom.coef.names = 
          c("Intercept","Black","Indigenous","Asian","Latino","Black/White",
            "Black/Indigenous","Black/Latino", "Black/Asian",
