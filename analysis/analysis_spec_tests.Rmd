@@ -16,7 +16,7 @@ timestamp()
 
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, eval=TRUE)
+knitr::opts_chunk$set(echo = TRUE, eval=TRUE, warning=FALSE, message=FALSE)
 library(here)
 source(here("analysis","check_packages.R"))
 source(here("analysis","useful_functions.R"))
@@ -161,27 +161,35 @@ So I want to consider the following baseline models.
 - Model 4: same as model 2, but add in an interaction between current grade and year.
 - Model 5: same as model 4, but add in an interaction between state and year.
 
-I will judge model fit by the BIC statistic. I wil not consider survey design effects here for speed of computation.
+I will judge model fit by the BIC statistic.
 
 ```{r models-year-grade}
-model_add_cat <- glm(below_exp_grade~as.factor(year)+current_grade+state, 
-                     data=acs, family=binomial)
-model_add_cont <- glm(below_exp_grade~I(year-2010)+current_grade+state, 
-                     data=acs, family=binomial)
-model_inter_cat <- glm(below_exp_grade~as.factor(year)*current_grade+state, 
-                     data=acs, family=binomial)
-model_inter_cont <- glm(below_exp_grade~I(year-2010)*current_grade+state, 
-                     data=acs, family=binomial)
-model_inter_state <- glm(below_exp_grade~I(year-2010)*current_grade+
-                            I(year-2010)*state, 
-                     data=acs, family=binomial)
+acs_design <- acs %>%
+  as_survey_design(ids = cluster, weights = perwt)
+model0 <- svyglm(below_exp_grade~race, design=acs_design, family=binomial)
+model_add_cat <- svyglm(below_exp_grade~as.factor(year)+current_grade+state+race, 
+                     design=acs_design, family=binomial)
+model_add_cont <- svyglm(below_exp_grade~I(year-2010)+current_grade+state+race, 
+                     design=acs_design, family=binomial)
+model_inter_cat <- svyglm(below_exp_grade~as.factor(year)*current_grade+state+race, 
+                     design=acs_design, family=binomial)
+model_inter_cont <- svyglm(below_exp_grade~I(year-2010)*current_grade+state+race, 
+                     design=acs_design, family=binomial)
+model_inter_state <- svyglm(below_exp_grade~I(year-2010)*current_grade+
+                            I(year-2010)*state+race, 
+                     design=acs_design, family=binomial)
+```
 
-bic_scores <- sapply(list("categorical, additive"=model_add_cat,
+```{r bic-scores}
+bic_scores <- sapply(list("just race"=model0,
+                          "categorical, additive"=model_add_cat,
                           "categorical, interaction"=model_inter_cat, 
-                          "continuous, additive"=model_add_cont, 
+                          "continuous, additive"=model_add_cont,
                           "continuous, interaction"=model_inter_cont,
                           "continous, interaction + state*year continuous interaction"=model_inter_state),
-                     BIC) %>%
+                     function(x) {
+                       as.numeric(BIC(x, maximal=x)["BIC"])
+                     }) %>%
     enframe("model","BIC")
 
 bic_scores %>%
@@ -192,6 +200,34 @@ save(bic_scores, file=here("analysis","output","bic_spec_tests.RData"))
 ```
 
 The clearly preferred model is a continuous year term interacted with current grade.
+
+Now lets take a look at how much the marginal probabilities of CBEG by race varies across model specifications.
+
+```{r marg-fit-table}
+marg_prob_alt <- list(model0, model_add_cat, model_add_cont, model_inter_cat, 
+                  model_inter_cont, model_inter_state) |>
+  map_dfc(function(x) {
+    marg(x, "race", type="levels")[[1]]$Margin
+  })
+
+marg_prob_alt <- bind_cols(levels(acs$race), marg_prob_alt) |>
+  rename(race=...1, baseline=...2, year_dummy=...3, year_linear=...4,
+         year_dummy_interact=...5, year_linear_interact=...6, year_grade_state=...7)
+
+marg_prob_alt |>
+  gt() |>
+  fmt_percent(2:7, decimals = 3) |>
+  cols_label(race="Race", baseline="No Covariates", year_dummy="Year treated as dummy", 
+             year_linear="Year treated as linear", year_dummy_interact="Year (dummy) x Grade",
+             year_linear_interact="Year (linear) x Grade", 
+             year_grade_stat="Year (linear) x Grade and State") |>
+  tab_source_note("*Notes*: All models except no covariate case include dummies for current grade and state") |>
+  tab_spanner("Sensitivity tests on calendar year x grade coding", 3:7)
+
+save(marg_prob_alt, file=here("analysis","output","marg_prob_alt.RData"))
+```
+
+The answer is barely any. The only difference is the baseline model which makes sense because we are adding controls, but the difference between the model specifications is only visible out to the fifth decimal place on the proportions.
 
 
 ```{r time-end}
