@@ -57,6 +57,50 @@ The results clearly show substantial differences in the grade retention of singl
 
 The biracial groups are generally a little bit younger than the monoracial groups, although the monoracial groups also vary in age a bit. Its possible this may bias the grade retention percentages down a bit, but the differences seem quite minor.
 
+Lets look at these probabilities by race and grade.
+
+```{r prob-race-grade, fig.cap="Probability of grade retention by race and grade for monoracial groups"}
+tbl_race_grade <- acs_design %>%
+  group_by(race, current_grade) %>%
+  summarize(held_back=survey_mean(below_exp_grade, vartype=NULL)) %>%
+  ungroup()
+
+tbl_race_grade %>%
+  filter(!str_detect(race, "/")) %>%
+  ggplot(aes(x=current_grade, y=held_back, 
+             group=race, color=race))+
+  geom_point()+
+  geom_smooth(se=FALSE)+
+  scale_y_continuous(labels=scales::percent)+
+  labs(x="current grade", y="probability of being clearly behind expected grade")+
+  theme_bw()
+```
+
+In kindergarten, its clear that white students actually have a higher probability than Blacks and (slightly) Latinos but this quickly changes direction by even first grade. The kindergarten effect may be capturing some of the redshirting effect and lead to overall underestimates of racial inequality among monoracial groups.
+
+```{r}
+tbl_race_grade %>%
+  filter(race=="White" | race=="Black" | race=="Black/White") %>%
+  ggplot(aes(x=current_grade, y=held_back, 
+             group=race, color=race))+
+  geom_point()+
+  geom_smooth(se=FALSE)+
+  scale_y_continuous(labels=scales::percent)+
+  labs(x="current grade", y="probability of being clearly behind expected grade")+
+  theme_bw()
+```
+
+This figure shows how Black/White kids risk evolves over grade compared to their monoracial constituent groups. You don't get a full in-between status until higher grades.
+
+```{r tab-race-grade}
+tbl_race_grade %>%
+  pivot_wider(id_cols=race, names_from=current_grade, 
+              values_from=held_back) %>%
+  gt() %>%
+  fmt_percent(2:14) %>%
+  tab_caption("Probability of being clearly behind expected grade by race and current grade")
+```
+
 # Model building
 
 ## Running the models
@@ -393,7 +437,7 @@ I want to separate the results by age more or less, but I cannot take age direct
 
 ```{r models-by-grade, warning=FALSE, fig.height=12, fig.cap="Probability of being behind grade for biracial respondents in comparison to their monoracial comparison groups. 83.4% confidence bands shown around each estimate. Non-overlap in confidence bands roughly indicates statistically significant difference at the 5% level. Panels compare results when data are restricted to certain grade ranges."}
 #run separate models by grade groups
-model4_elem <- update(model4, design=subset(acs_design, current_grade<="5th"))
+model4_elem <- update(model4, design=subset(acs_design, current_grade>"K" & current_grade<="5th"))
 model4_middle <- update(model4, design=subset(acs_design, current_grade>"5th" & 
                                         current_grade<"9th"))
 model4_hs <- update(model4, design=subset(acs_design, current_grade>="9th"))
@@ -402,6 +446,8 @@ model4_hs <- update(model4, design=subset(acs_design, current_grade>="9th"))
 results_elem <- calculate_marg_means(model4_elem)
 results_middle <- calculate_marg_means(model4_middle)
 results_hs <- calculate_marg_means(model4_hs)
+
+save(results_elem, results_middle, results_hs, file=here("analysis","output","models_grade_robust.RData"))
 
 coef_table <- results_elem$coef_table %>%
   mutate(model="elementary")
