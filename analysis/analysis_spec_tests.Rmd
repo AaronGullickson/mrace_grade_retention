@@ -220,7 +220,7 @@ marg_prob_alt |>
   cols_label(race="Race", baseline="No Covariates", year_dummy="Year treated as dummy", 
              year_linear="Year treated as linear", year_dummy_interact="Year (dummy) x Grade",
              year_linear_interact="Year (linear) x Grade", 
-             year_grade_stat="Year (linear) x Grade and State") |>
+             year_grade_state="Year (linear) x Grade and State") |>
   tab_source_note("*Notes*: All models except no covariate case include dummies for current grade and state") |>
   tab_spanner("Sensitivity tests on calendar year x grade coding", 3:7)
 
