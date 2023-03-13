@@ -140,7 +140,7 @@ bic_scores %>%
 
 ```{r marg-fit-table}
 #| label: tbl-marg-fit
-#| tbl-cap: Marginal probabilities of grade retention by racial group across models using different specifications to model the the temporal trend in grade retention by current grade of the student.
+#| tbl-cap: Marginal probabilities of being clearly behind expected grade by racial group across models using different specifications to model the the temporal trend in grade retention by current grade of the student.
 marg_prob_alt %>%
   mutate(baseline=percent(round(baseline, 5)),
          year_dummy=percent(round(year_dummy, 5)),
