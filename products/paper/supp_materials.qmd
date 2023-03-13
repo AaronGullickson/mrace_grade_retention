@@ -31,6 +31,7 @@ source(here("analysis","check_packages.R"))
 source(here("analysis","useful_functions.R"))
 load(here("analysis","output","bic_spec_tests.RData"))
 load(here("analysis","output","model_summaries.RData"))
+load(here("analysis","output","marg_prob_alt.RData"))
 load(here("analysis","output","acs.RData"))
 ```
 
@@ -56,6 +57,7 @@ convert_model <- function(model) {
 
 ```{r}
 #| label: create-design
+#| eval: false
 acs_design <- acs %>%
   as_survey_design(ids = cluster, weights = perwt)
 ```
@@ -134,10 +136,33 @@ bic_scores %>%
   kable_styling()
 ```
 
+```{r marg-fit-table}
+#| label: tbl-marg-fit
+#| tbl-cap: Marginal probabilities of grade retention by racial group across models using different specifications to model the the temporal trend in grade retention by current grade of the student.
+marg_prob_alt %>%
+  mutate(baseline=percent(round(baseline, 5)),
+         year_dummy=percent(round(year_dummy, 5)),
+         year_linear=percent(round(year_linear, 5)),
+         year_dummy_interact=percent(round(year_dummy_interact, 5)),
+         year_linear_interact=percent(round(year_linear_interact, 5)),
+         year_grade_state=percent(round(year_grade_state, 5))) %>%
+  kbl(booktabs=TRUE, linesep=NULL,
+      align = c("l",rep("r", ncol(marg_prob_alt)-1)),
+      col.names=c("Race", "No Covariates", "Year as dummy", 
+                  "Year as linear", "Year (dummy) x Grade",
+                  "Year (linear) x Grade", 
+                  "Year (linear) x Grade and State")) %>%
+  add_header_above(c(" " = 2, 
+                     "Sensitivity tests on calendar year x grade coding" = 5)) %>%
+  column_spec(2:7, width = "1.75cm") %>%
+  footnote(general = "All models except no covariate case include dummies for current grade and state")
+```
+
+
 ```{r desc-stats-ses}
 #| label: tbl-desc-stats-ses
 #| tbl-cap: Socioeconomic resources by race. Shading indicates biracial group. All results apply survey weights.
-
+#| eval: false
 tbl_summary <- acs_design %>%
   group_by(race) %>%
   summarize(fam_inc=survey_mean(family_income, vartype = NULL))
@@ -179,6 +204,7 @@ tbl_summary %>%
 ```{r}
 #| label: tbl-desc-stats-cult
 #| tbl-cap: Cultural resources by race. Shading indicates biracial group. All results apply survey weights.
+#| eval: false
 tbl_summary <- acs_design %>%
   group_by(race) %>%
   summarize(f_born=round(survey_mean(foreign_born, vartype = NULL), 3)*100,
