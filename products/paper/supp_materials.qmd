@@ -59,7 +59,6 @@ convert_model <- function(model) {
 
 ```{r}
 #| label: create-design
-#| eval: false
 acs_design <- acs %>%
   as_survey_design(ids = cluster, weights = perwt)
 ```
@@ -119,6 +118,38 @@ texreg(lapply(list(model0_summary, model1_summary, model2_summary,
                      "Father's highest degree (ref. none)"=109:112))
 ```
 
+```{r prob-race-grade, fig.cap=""}
+#| label: tbl-prob-race-grade
+#| tbl-cap: Probability of being clearly behind expected grade by race and current grade.
+tbl_race_grade <- acs_design %>%
+  group_by(race, current_grade) %>%
+  summarize(held_back=survey_mean(below_exp_grade, vartype=NULL)) %>%
+  ungroup() %>%
+  pivot_wider(id_cols=race, names_from=current_grade, 
+              values_from=held_back) %>%
+  rename(Race=race) %>%
+  mutate(K=percent(K, accuracy=0.01),
+         `1st`=percent(`1st`, accuracy=0.01),
+         `2nd`=percent(`2nd`, accuracy=0.01),
+         `3rd`=percent(`3rd`, accuracy=0.01),
+         `4th`=percent(`4th`, accuracy=0.01),
+         `5th`=percent(`5th`, accuracy=0.01),
+         `6th`=percent(`6th`, accuracy=0.01),
+         `7th`=percent(`7th`, accuracy=0.01),
+         `8th`=percent(`8th`, accuracy=0.01),
+         `9th`=percent(`9th`, accuracy=0.01),
+         `10th`=percent(`10th`, accuracy=0.01),
+         `11th`=percent(`11th`, accuracy=0.01),
+         `12th`=percent(`12th`, accuracy=0.01))
+
+tbl_race_grade %>%
+  kbl(booktabs = TRUE,
+      linesep = NULL,
+      align = c("l",rep("r", ncol(tbl_race_grade)-1))) %>%
+  kable_styling(font_size=8) %>%
+  column_spec(2:14, width = "0.6cm")
+```
+
 ```{r tbl-bic}
 #| label: tbl-bic
 #| tbl-cap: Bayesian Information Criterion (BIC) statistics for models accounting for change over time using different specifications. All models also include categorical dummy variables for race, grade, state, and location.
@@ -164,7 +195,6 @@ marg_prob_alt %>%
 ```{r desc-stats-ses}
 #| label: tbl-desc-stats-ses
 #| tbl-cap: Socioeconomic resources by race. Shading indicates biracial group. All results apply survey weights.
-#| eval: false
 tbl_summary <- acs_design %>%
   group_by(race) %>%
   summarize(fam_inc=survey_mean(family_income, vartype = NULL))
@@ -206,7 +236,6 @@ tbl_summary %>%
 ```{r}
 #| label: tbl-desc-stats-cult
 #| tbl-cap: Cultural resources by race. Shading indicates biracial group. All results apply survey weights.
-#| eval: false
 tbl_summary <- acs_design %>%
   group_by(race) %>%
   summarize(f_born=round(survey_mean(foreign_born, vartype = NULL), 3)*100,
