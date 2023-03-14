@@ -1,0 +1,1719 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+\PassOptionsToPackage{dvipsnames,svgnames,x11names}{xcolor}
+%
+\documentclass[
+  letterpaper,
+  DIV=11,
+  numbers=noendperiod]{scrartcl}
+
+\usepackage{amsmath,amssymb}
+\usepackage{lmodern}
+\usepackage{setspace}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+% Make \paragraph and \subparagraph free-standing
+\ifx\paragraph\undefined\else
+  \let\oldparagraph\paragraph
+  \renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+  \let\oldsubparagraph\subparagraph
+  \renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+
+
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}\usepackage{longtable,booktabs,array}
+\usepackage{calc} % for calculating minipage widths
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+% Allow footnotes in longtable head/foot
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\newlength{\cslhangindent}
+\setlength{\cslhangindent}{1.5em}
+\newlength{\csllabelwidth}
+\setlength{\csllabelwidth}{3em}
+\newlength{\cslentryspacingunit} % times entry-spacing
+\setlength{\cslentryspacingunit}{\parskip}
+\newenvironment{CSLReferences}[2] % #1 hanging-ident, #2 entry spacing
+ {% don't indent paragraphs
+  \setlength{\parindent}{0pt}
+  % turn on hanging indent if param 1 is 1
+  \ifodd #1
+  \let\oldpar\par
+  \def\par{\hangindent=\cslhangindent\oldpar}
+  \fi
+  % set entry spacing
+  \setlength{\parskip}{#2\cslentryspacingunit}
+ }%
+ {}
+\usepackage{calc}
+\newcommand{\CSLBlock}[1]{#1\hfill\break}
+\newcommand{\CSLLeftMargin}[1]{\parbox[t]{\csllabelwidth}{#1}}
+\newcommand{\CSLRightInline}[1]{\parbox[t]{\linewidth - \csllabelwidth}{#1}\break}
+\newcommand{\CSLIndent}[1]{\hspace{\cslhangindent}#1}
+
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{wrapfig}
+\usepackage{float}
+\usepackage{colortbl}
+\usepackage{pdflscape}
+\usepackage{tabu}
+\usepackage{threeparttable}
+\usepackage{threeparttablex}
+\usepackage[normalem]{ulem}
+\usepackage{makecell}
+\usepackage{xcolor}
+\KOMAoption{captions}{tableheading}
+\makeatletter
+\makeatother
+\makeatletter
+\makeatother
+\makeatletter
+\@ifpackageloaded{caption}{}{\usepackage{caption}}
+\AtBeginDocument{%
+\ifdefined\contentsname
+  \renewcommand*\contentsname{Table of contents}
+\else
+  \newcommand\contentsname{Table of contents}
+\fi
+\ifdefined\listfigurename
+  \renewcommand*\listfigurename{List of Figures}
+\else
+  \newcommand\listfigurename{List of Figures}
+\fi
+\ifdefined\listtablename
+  \renewcommand*\listtablename{List of Tables}
+\else
+  \newcommand\listtablename{List of Tables}
+\fi
+\ifdefined\figurename
+  \renewcommand*\figurename{Figure}
+\else
+  \newcommand\figurename{Figure}
+\fi
+\ifdefined\tablename
+  \renewcommand*\tablename{Table}
+\else
+  \newcommand\tablename{Table}
+\fi
+}
+\@ifpackageloaded{float}{}{\usepackage{float}}
+\floatstyle{ruled}
+\@ifundefined{c@chapter}{\newfloat{codelisting}{h}{lop}}{\newfloat{codelisting}{h}{lop}[chapter]}
+\floatname{codelisting}{Listing}
+\newcommand*\listoflistings{\listof{codelisting}{List of Listings}}
+\makeatother
+\makeatletter
+\@ifpackageloaded{caption}{}{\usepackage{caption}}
+\@ifpackageloaded{subcaption}{}{\usepackage{subcaption}}
+\makeatother
+\makeatletter
+\@ifpackageloaded{tcolorbox}{}{\usepackage[many]{tcolorbox}}
+\makeatother
+\makeatletter
+\@ifundefined{shadecolor}{\definecolor{shadecolor}{rgb}{.97, .97, .97}}
+\makeatother
+\makeatletter
+\makeatother
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same} % disable monospaced font for URLs
+\hypersetup{
+  pdftitle={Differences in the Risk of Grade Retention for Biracial and Monoracial Students in the US, 2010-2019},
+  colorlinks=true,
+  linkcolor={blue},
+  filecolor={Maroon},
+  citecolor={Blue},
+  urlcolor={Blue},
+  pdfcreator={LaTeX via pandoc}}
+
+\title{Differences in the Risk of Grade Retention for Biracial and
+Monoracial Students in the US, 2010-2019\thanks{Supplementary materials
+provided with this article include full model results upon which figures
+are based as well as any sensitivity analysis described herein. All code
+and data for this project are available at
+\url{https://osf.io/4fevt/?view_only=4abc6d86595c4313a8d4792471e9bc0d}.}}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+\begin{abstract}
+Understanding how outcomes for biracial individuals compare to their
+monoracial peers is critical for understanding how patterns of racial
+inequality in the contemporary United States might be shifting. Yet, we
+know very little about the life chances of biracial individuals due to
+limitations in most available data sources. In this article, I utilize
+American Community Survey data from 2010-2019 to examine the risk of
+being clearly behind expected grade among biracial and monoracial K-12
+students, helping to fill a gap in our understanding. With large sample
+sizes for most biracial groups, I am able to estimate grade retention
+risk for biracial students with enough precision to differentiate even
+modest differences in risk relative to monoracial groups. The results
+indicate that for most biracial groups, biracial students have risk
+similar to their monoracial constituent group with lower risk. Although
+biracial students tend to have favorable family resource
+characteristics, controlling for these characteristics does little to
+change the overall placement of their outcomes.
+\end{abstract}
+\ifdefined\Shaded\renewenvironment{Shaded}{\begin{tcolorbox}[borderline west={3pt}{0pt}{shadecolor}, enhanced, interior hidden, breakable, boxrule=0pt, frame hidden, sharp corners]}{\end{tcolorbox}}\fi
+
+\setstretch{1.5}
+\hypertarget{introduction}{%
+\section{Introduction}\label{introduction}}
+
+The experiences of mixed race individuals will play an important role in
+the future of race in the US. A rise in interracial unions since the
+1960s has resulted in a ``biracial baby boom'' of individuals whose
+parents cross racial lines (Root 1992) and this demographic surge may
+have transformative effects on racial boundaries (Alba 2020; Hochschild,
+Weaver, and Burch 2012). While racial mixing is nothing new to US
+history (Gullickson and Morning 2011; Morning 2000), this biracial boom
+is notable for its size and has occurred in an environment in which
+historical norms of racial classification may be eroding.
+
+The transformative potential of this biracial baby boom is contingent on
+both how these biracial individuals identify their own race and how they
+are sorted into a prevailing system of racial inequality. While
+extensive scholarship documents the identification and classification
+decisions made by or on behalf of multiracial individuals (Bratter and
+Heard 2009; Brunsma 2005; Davenport 2016; Herman 2004; Holloway et al.
+2009; Liebler 2016; Qian 2004; Roth 2005; Xie and Goyette 1997), only a
+smattering of research has documented how the life chances of biracial
+individuals compare to their monoracial peers (Campbell 2009; Herman
+2009; Kao 1999). In this article, I expand on this work by examining the
+risk of grade retention for K-12 students whose parents identify with
+different races.
+
+By examining this outcome, I am able to overcome two important
+limitations that have hampered prior work on the life chances of
+biracial individuals. First, using self identification of biracial
+respondents to analyze outcomes is problematic. Prior research indicates
+that individuals whose parents belong to different races do not
+consistently identify with both races (Doyle and Kao 2007; Gullickson
+2019; Liebler et al. 2017). Furthermore, social status and social
+mobility can predict racial identification generally (Saperstein and
+Gullickson 2013; Saperstein and Penner 2012) and social status is
+related to the identification choices of biracial individuals
+specifically (Davenport 2016; Roth 2005). Thus, differences in outcomes
+among biracial individuals may in part produce differences in
+identification, rather than the other way around.
+
+This problem of reverse causation can be eliminated when researchers
+have access to the racial identification of a respondent's biological
+parents. Even when such information is available, however, researchers
+run into a second limitation of sample size. The samples of biracial
+respondents in many data sources are too small to make reliable
+statistical inferences. This limitation is particularly severe for
+biracial individuals with two non-white parents.
+
+Biracial children who reside with both biological parents can be
+identified in large scale data sources such as the Census. Researchers
+have previously utilized this feature to examine the classification
+choices made on behalf of these children (Roth 2005; Xie and Goyette
+1997). Analyzing outcomes for such children is more difficult, for the
+simple reason that they do not have many measurable outcomes yet.
+However, grade retention is measurable and important even for young
+children. Being held back in school is a relatively common occurrence
+that has consequences for later educational transitions (Jimerson 2001)
+and is disproportionately applied by race (Warren, Hoffman, and Andrew
+2014). Grade retention is one of the earliest stratifiers of life
+chances that an individual will experience.
+
+In this article, I use data from the American Community Survey to
+examine the likelihood of being held back in school for biracial
+children in comparison to their monoracial peers. Pooling data from 2010
+to 2019, I am able to draw a large enough sample to make reliable
+statistical inferences for most biracial groups, including those with
+two non-white parents. The results provide a window into the placement
+of biracial children within an existing system of racial inequality. In
+contrast to prevailing hypotheses that predict either a pattern of
+hypodescent or an in-between position for biracial individuals, I find a
+consistent pattern in which the risk of grade retention is similar to
+that of the lower risk constituent monoracial group. This result holds
+even after adjusting for differences in resources across respondents,
+despite the fact that most biracial groups are positively selected by
+parental resources relative to their monoracial group.
+
+\hypertarget{where-do-biracials-fit}{%
+\section{Where do Biracials Fit?}\label{where-do-biracials-fit}}
+
+How might we expect the outcomes for biracial individuals to differ from
+their monoracial peers? In every case, the relevant comparison is how a
+biracial person fares relative to the two constituent groups with which
+their parents identify. For example, in the case of an individual with
+one Black and one White parent, we would compare the average outcomes
+for such individuals to the average outcomes for individuals with two
+White and two Black parents, respectively. The outcome for the
+Black/White group may be similar to one of the monoracial groups, it may
+be somewhere in between the outcomes for the two monoracial groups, or
+it may be higher or lower than either of the monoracial groups.
+
+I distinguish three mechanisms that help us understand where biracial
+individuals might be positioned among these possibilities. First, I
+consider arguments regarding racial discrimination at both an individual
+and systemic level. Second, I consider arguments regarding different
+distributions of resources across racial groups. Third, I consider
+arguments regarding how the nature of hybridity itself may affect
+outcomes.
+
+\hypertarget{discrimination-and-classification}{%
+\subsection{Discrimination and
+Classification}\label{discrimination-and-classification}}
+
+Discrimination and bias by race play an important role in overall levels
+of racial inequality (Pager and Shepherd 2008; Quillian 2006).
+Discrimination need not be consciously recognized by actors, but may
+instead reflect cognitive biases and schema that individuals unknowingly
+rely upon and reinforce in social interactions (Quillian 2006).
+Discrimination can also be systemic in nature when biases are built into
+and reinforced by organizations and institutional systems (Reskin 2012).
+In our current ``colorblind'' regime (Bonilla-Silva 2006), such systems
+may be formally race neutral but produce disparate impacts by race
+(Pager and Shepherd 2008).
+
+The experiences of biracial individuals within such a system of
+discrimination depend almost entirely on how they are classified by
+others. To the extent that biracial individuals are classified as more
+like one of their monoracial constituent groups than the other, they
+will receive the same treatment and reap similar rewards or suffer
+similar penalties.
+
+The strongest historical precedent for understanding such classification
+in the US is the ``one-drop rule'' norm governing classification as
+Black. According to the one-drop rule, individuals of known Black
+ancestry are considered exclusively Black, regardless of other
+ancestries (Davis 1991). Davis (1991) generalizes this practice into the
+concept of \emph{hypodescent} in which individuals with mixed racial
+ancestry will be classified as members of the lower status group. A
+parallel pattern of \emph{hyperdescent} implies that individuals of
+mixed racial ancestry will be classified as members of the higher status
+group. This pattern of hyperdescent has historically governed the
+experiences of individuals with American Indian ancestry (Snipp 1989;
+Wolfe 2001).
+
+Although the hypodescent/hyperdescent paradigm is often used to frame
+the experiences of multiracial individuals, its generalizability and
+contemporary relevance is questionable. Hypodescent and hyperdescent are
+observed in two specific historical cases involving Black ancestry and
+American Indian ancestry, respectively. As Iverson et al. (2022) note,
+these two cases could just as parsimoniously be explained by a
+``dominance'' model which ranks ancestries by their tendencies to be
+supercessive or recessive in determining identification and
+classification.
+
+The development of particular norms may also reflect the historical
+regime in which they were developed (Gullickson and Morning 2011;
+Iverson et al. 2022). In this case, neither the hypodescent/hyperdescent
+or dominance paradigm may help us to fully understand the experiences of
+those of Latino and Asian ancestry due to more recent processes of
+racialization. Furthermore, the historical norms for all groups may be
+transforming in the post-Civil Rights era.
+
+If outcomes for biracial individuals all closer to one of their
+constituent groups, then we may have stronger evidence about such norms
+of classification. However, what if those outcomes fall in-between the
+two groups? Processes of classification and discrimination could still
+produce an in-between status for several reasons.
+
+First, racial ambiguity in appearance may lead to more inconsistent
+classification into single race categories across observers. Even if
+norms consistently indicate a certain type of classification, correct
+identification by observers is a probabilistic phenomenon and likely to
+be more heterogeneous for biracial individuals. As a result, biracial
+individuals will experience a lower sum total of discrimination and bias
+affecting the lower status group in the case of hypodescent and will not
+reap the same rewards as a member of the higher status group in the case
+of hyperdescent.
+
+Second, biracial people's experience of discrimination may be
+``softened'' because a more ambiguous physical appearance provokes less
+racial antipathy. The US already has a long history of this kind of
+softening. Because of the one-drop rule, Black individuals vary
+substantially in skin tone and those individuals with a lighter skin
+tone have better outcomes (Hughes and Hertel 1990; Keith and Herring
+1991; Monk 2014) and are viewed more favorably by both Blacks and Whites
+(Maddox and Gray 2002). Thus, light skin moderates the stigma of
+Blackness even among monoracial individuals.
+
+Third, biracial individuals may be classified into an ambiguous
+``middleman'' minority position. This kind of middle tier status for
+individuals of mixed race is common in Latin America (Telles and Sue
+2009) and Bonilla-Silva (2004) has argued that such a system may be
+emerging in the contemporary US as well. In this case, many biracial
+groups may occupy a nebulous and ill-defined middleman or buffer class
+position in-between whites and darker-skinned non-whites, helping to
+cement a new kind of racial hierarchy.
+
+\hypertarget{differential-resources}{%
+\subsection{Differential Resources}\label{differential-resources}}
+
+Racial inequality is at least partly explained by different
+distributions of material, cultural, and social resources across racial
+groups (Conley 1999). On average, socioeconomic background
+(e.g.~parental income, wealth, and education) differs by race and such
+socioeconomic background is consequential for outcomes. Other less
+materially defined resources also vary across groups such as cultural
+styles, social networks, and neighborhood quality. These differences in
+background resources reflect the accumulation of historical processes of
+discrimination and, when combined with contemporary processes of
+discrimination, magnify the overall level of racial inequality we
+observe.
+
+How do differences in the distribution of resources affect biracial
+individuals? Naively, we might expect biracial individuals to inherit
+parental resources roughly halfway between their two constituent groups,
+on average (Chew, Eggebeen, and Uhlenberg 1989). Prior research looking
+at biracial children in the Census data has found some evidence to
+support this argument (Chew et al. 1989). In such a case, the resources
+of biracial individuals would predict outcomes in-between the two
+constituent groups, barring other mechanisms.
+
+However, the actual resource position of biracial individuals is likely
+far more complicated because people are not randomly selected into
+interracial unions. The relationship between this selection process and
+a biracial child's outcomes depends on the strength and direction of
+that selection on each partner, its consistency across different types
+of unions, and how strongly the selected characteristic predicts
+outcomes in the next generation.
+
+Status exchange theory predicts that given an unequal racial hierarchy,
+individuals from a lower status racial group will be positively selected
+on socioeconomic characteristics into intermarriage with a higher status
+group, while individuals from a higher status racial group will be
+similarly negatively selected into the same marriage (Davis 1941; Fu
+2001; Merton 1941). Prior research has shown substantial evidence of
+this pattern in the case of Black male/White female marriages in the US,
+but weaker evidence for other types of unions (Fu 2001; Gullickson 2006;
+Hou and Myles 2011; Kalmijn 2010). Even in cases where status exchange
+is present, its net effect on resources is complex because status
+exchange positively selects one partner and negatively selects the other
+partner. Therefore the two effects may somewhat cancel each other out in
+terms of the overall distribution of resources across parents.
+
+Regardless of the underlying complexity of this selection process,
+delineating its role as opposed to other mechanisms is key to
+understanding the overall process that sorts biracial individuals within
+the racial hierarchy. Although this approach is sometimes characterized
+as pitting race versus class, that is not the case here. Instead, this
+delineation allows us to understand how race affects the outcomes of
+biracial individuals in a multigenerational process.
+
+\hypertarget{hybridity}{%
+\subsection{Hybridity}\label{hybridity}}
+
+The experience of hybridity itself may also positively or negatively
+affect outcomes for biracial individuals. According to ``marginal man''
+theory, biracial individuals will find it difficult to fit in due to the
+dissonance of an identity that crosses strong and salient racial
+boundaries (Park 1928; Stonequist 1935). This liminal identity conflict
+will result in negative mental health experiences that could feed into
+other negative outcomes as well. Evidence for such negative mental
+health experiences, however, has been mixed (Bratter and Gorman 2011;
+Campbell and Eggerling-Boeck 2006; Cheng and Lively 2009; Udry, Li, and
+Hendrickson-Smith 2003).
+
+Marginal man theorists viewed culture in monolithic and static terms and
+thus to be trapped in between two cultures was seen as a difficult
+experience. Contemporary views of culture instead emphasize the
+flexible, fragmented, and fluid use of cultural bits that comprise a
+``toolkit'' (DiMaggio 1997; Swidler 1986). From this perspective,
+biracial individuals may actually benefit from an enlarged cultural
+toolkit that allows them to navigate a variety of diverse social
+contexts (Shih et al. 2019).
+
+The complexity of the underlying mechanisms described above prevents
+simple and straightforward hypotheses regarding the position of biracial
+individuals. Different mechanisms may produce the same observed outcome
+and the weight of different mechanisms can also vary by groups as these
+groups may be governed by different regimes of classification. However,
+comparing outcomes across biracial groups may help us better understand
+the likely mechanisms involved and to disregard others as implausible.
+Accounting for the effect of parental resources on outcomes to the best
+of our ability is also key to reaching any conclusions about the
+placement of biracial individuals within the racial hierarchy.
+
+\hypertarget{prior-work}{%
+\section{Prior Work}\label{prior-work}}
+
+Prior work on the outcomes for biracial individuals has been hampered by
+several methodological issues. With good reason, researchers have been
+reluctant to use data in which multiracial or biracial status is
+determined solely by the self-identification of respondents. We know
+that far fewer people identify as biracial than could feasibly do so
+based on their parents' races (Morning and Saperstein 2018) and that
+various selection effects operate on the decision to identify as
+biracial among those who could (Davenport 2016; Roth 2005). Furthermore,
+research on changes in racial reporting over time suggests that other
+status markers like education and income may influence how people
+identify themselves (Saperstein and Gullickson 2013; Saperstein and
+Penner 2012). For example, a person with one Black and one White parent
+who is routinely treated by others as Black and discriminated against as
+Black may be more likely to identify themselves as exclusively Black
+than a similar person of Black and White ancestry who experiences less
+consistent discrimination. Thus, any analysis of outcomes for biracial
+individuals based on self-identification must deal with the potential
+for reverse causation in the observed differences between biracial
+individuals and their constituent groups (Bratter 2018).
+
+Instead of self-identification, researchers have generally relied upon
+survey data in which the racial identification of a respondent's
+biological parents are provided. Campbell (2009) used data from the
+National Longitudinal Survey of Adolescent to Adult Health (Add Health)
+to examine high school GPA, advanced placement in math, and four-year
+college enrollment among biracial and monoracial individuals identified
+by co-resident biological parents' races. Herman (2009) examined
+differences in GPA using data on high school students in California and
+Wisconsin in which the students reported their parents' races. Both of
+these studies found some support for an ``in-between'' status for many
+biracial groups, but are hampered by a lack of statistical power due to
+small sample sizes. Kao (1999) used data from the National Educational
+Longitudinal Study of 1988 to examine mathematics achievement scores and
+GPA for biracial students with Black and Asian parentage and finds that
+biracial Black students have outcomes similar to monoracial Black
+students, while biracial Asian students have outcomes more similar to
+monoracial White students. This study, however, is limited by the fact
+that biracial students are identified by a discrepancy between their
+reported race and one parent's reported race, rather than by both
+biological parents' races.
+
+Results in prior work tend to be inconclusive, due to the sample size
+for most biracial groups. An alternative approach is to use large scale
+Census or American Community Survey (ACS) data to identify biracial
+children by the race of the biological parents in their household. This
+approach can generate much larger samples of biracial individuals.
+However, researchers then have a limited range of outcomes to explore
+because biracial individuals identified by this method are by definition
+children. This approach has been used previously to examine the
+likelihood of living in poverty (Bratter and Damaske 2013; Bratter and
+Kimbro 2013) and residential segregation (Ellis et al. 2012). These
+studies provide valuable information on biracial childrens' lived
+experience, but do not directly measure their own outcomes. However, one
+important educational outcome is partially identifiable for children in
+Census and ACS data - grade retention.
+
+Grade retention is the practice of having students repeat a grade due to
+poor academic performance. Prior work on grade retention has failed to
+show a positive effect of grade retention on later educational outcomes,
+and has instead found evidence of ``scarring'' effects that lead to
+later negative educational outcomes, such as a higher dropout risk
+(Andrew 2014; Hughes et al. 2017; Jimerson 2001; Stearns et al. 2007).
+The risk of grade retention also varies substantially by race and class
+background, with Black and Latino students at particularly high risk of
+grade retention relative to other groups (Warren et al. 2014).
+
+Because grade retention often happens very early in the K-12 system, it
+is one of the earliest stratification mechanisms that individuals
+encounter. For these same reasons, it provides an important window into
+understanding the placement of biracial children within a racially
+stratified educational environment. In the remainder of this article, I
+examine this placement using data from the American Community Survey.
+
+\hypertarget{data-and-methods}{%
+\section{Data and Methods}\label{data-and-methods}}
+
+Data for this analysis come from the American Community Survey (ACS), an
+annual 1-in-100 survey of the US population, conducted by the Census
+Bureau. To increase sample size for smaller populations of biracial
+respondents, I pool ACS data for a full decade from 2010-2019. All data
+were extracted from the Minnesota Population Center's Integrated Public
+Use Microdata Series (Ruggles et al. 2020).
+
+Ideally, I would restrict the sample to children living in a household
+with two biological parents. However, while the ACS distinguishes
+between biological, adopted, and stepchildren, it only records the
+direct family relationship between the head of household and other
+members of the household. Respondents can therefore be identified as
+biological children of another member of the household only if that
+member is the head of household or the biological child of the head of
+household. Determining whether the partner/spouse of that biological
+parent is the other biological parent is more difficult.
+
+Prior work has used a variety of additional restrictions to limit the
+analysis to children who are more likely to be the biological children
+of both parents (Saenz et al. 1995; Xie and Goyette 1997). Consistent
+with this prior work, I restrict cases in two ways. First, I restrict
+the sample to cases where both parents were of a reasonable age at the
+birth of the child (aged 15-44 for mothers and aged 15-60 for fathers).
+Second, I restrict the sample to those cases where the reported race and
+Hispanicity of the child is inclusive of at least one of the parents'
+races.
+
+The final analytical sample consists of children aged 5-20 who are
+currently enrolled in the K-12 school system and live in a household
+with two parents who are both likely to be biological parents. This
+necessary sample restriction will bias the family structure of the
+analytical sample relative to the total population of K-12
+schoolchildren. Children living in two-parent nuclear households have
+greater educational success than other children as a result of material
+and social resources (Biblarz and Raftery 1999). Therefore, this sample
+restriction will bias overall estimates of grade retention downward.
+However, this bias is less problematic for the goal of this study, which
+is to estimate differences between groups. The sample restriction
+effectively eliminates differences in family structure across racial
+groups that may account for some observed differences in grade
+retention. However, the remaining differences observed here are likely
+to hold for the full population in the absence of strong racial
+differences in the effect of family structure on grade retention.
+
+The race of children is calculated by a cross-tabulation of parents'
+races. To produce reasonably parsimonious categories, I collapse each
+parent's race into the categories of White, Black, Asian, Latino, and
+Indigenous. These categories form the ``ethnoracial pentagon'' that is
+commonly used in popular practice and government tabulation to identify
+race in the US (Hollinger 1995). Parents are identified as Latino based
+on their response to the Hispanicity question, regardless of their
+response to the race question. Parents are identified as Indigenous if
+they responded as either American Indian/Alaska Native or as Pacific
+Islander. Because the goal of my analysis is to examine specifically the
+outcomes of ``first-generation'' biracial children, I exclude cases
+where at least one parent identified with multiple races. The
+cross-tabulation of parents' races leads to ten distinct biracial
+categories. The total sample size for each of these biracial categories
+is shown in Table~\ref{tbl-descriptive}, along with the sample size of
+the monoracial comparison groups.
+
+\hypertarget{tbl-descriptive}{}
+\begin{table}
+\caption{\label{tbl-descriptive}Descriptive survey-weighted statistics by race. Shading indicates
+biracial group. Groups ordered by sample size. }\tabularnewline
+
+\centering
+\begin{tabular}[t]{lrr}
+\toprule
+Race & Sample size & Clearly behind expected grade\\
+\midrule
+White & 1,703,079 & 3.51\%\\
+Latino & 386,718 & 5.11\%\\
+Asian & 146,479 & 2.56\%\\
+Black & 130,849 & 5.45\%\\
+\cellcolor[HTML]{D3D3D3}{White/Latino} & \cellcolor[HTML]{D3D3D3}{120,369} & \cellcolor[HTML]{D3D3D3}{3.13\%}\\
+\cellcolor[HTML]{D3D3D3}{White/Asian} & \cellcolor[HTML]{D3D3D3}{38,014} & \cellcolor[HTML]{D3D3D3}{1.82\%}\\
+\cellcolor[HTML]{D3D3D3}{Black/White} & \cellcolor[HTML]{D3D3D3}{26,829} & \cellcolor[HTML]{D3D3D3}{3.86\%}\\
+Indigenous & 16,224 & 7.86\%\\
+\cellcolor[HTML]{D3D3D3}{White/Indigenous} & \cellcolor[HTML]{D3D3D3}{13,689} & \cellcolor[HTML]{D3D3D3}{5.25\%}\\
+\cellcolor[HTML]{D3D3D3}{Black/Latino} & \cellcolor[HTML]{D3D3D3}{9,578} & \cellcolor[HTML]{D3D3D3}{3.93\%}\\
+\cellcolor[HTML]{D3D3D3}{Latino/Asian} & \cellcolor[HTML]{D3D3D3}{5,570} & \cellcolor[HTML]{D3D3D3}{2.43\%}\\
+\cellcolor[HTML]{D3D3D3}{Indigenous/Latino} & \cellcolor[HTML]{D3D3D3}{2,627} & \cellcolor[HTML]{D3D3D3}{5.25\%}\\
+\cellcolor[HTML]{D3D3D3}{Black/Asian} & \cellcolor[HTML]{D3D3D3}{2,084} & \cellcolor[HTML]{D3D3D3}{2.98\%}\\
+\cellcolor[HTML]{D3D3D3}{Black/Indigenous} & \cellcolor[HTML]{D3D3D3}{701} & \cellcolor[HTML]{D3D3D3}{5.96\%}\\
+\cellcolor[HTML]{D3D3D3}{Indigenous/Asian} & \cellcolor[HTML]{D3D3D3}{521} & \cellcolor[HTML]{D3D3D3}{2.60\%}\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Grade retention is difficult to measure accurately. In most data
+sources, researchers lack specific reports of grade retention and
+instead infer grade retention from a discrepancy between a student's
+reported age and grade. Prior studies have used the concept of a student
+being behind modal grade (Bianchi 1984; Frederick and Hauser 2008). The
+most notable limitation of this approach is the ambiguity created by the
+fact that at any given age, a student may reasonably be in two modal
+grades. Without detailed information on birthdates and survey timing,
+the correct modal grade for most students cannot be identified. This
+issue has been somewhat alleviated in prior work by the use of the
+October supplement to the Current Population Survey which is close to
+the beginning of the school year.
+
+The ACS data do not provide the ability to identify or limit survey
+timing, so I instead use a related measure of whether a given student is
+clearly behind expected grade (CBEG). A student is considered CBEG if
+their age is higher than either of the expected ages for a student of
+that grade. This measure will underestimate overall grade retention
+because it will miss students who have been retained but not yet had a
+birthday in their current grade that would place them CBEG. However, the
+goal of this study is not to estimate grade retention accurately, but
+rather to understand racial differences in grade retention. Because this
+bias is largely a function of when students have birthdays, it should be
+more or less random with regard to sociodemographic characteristics.
+This approach is equivalent to the method used by Rosenfeld (2010) on
+2000 Census data, but more detailed information on current grade in
+recent ACS data allows for more precise estimation.
+Table~\ref{tbl-descriptive} shows the percent of each monoracial and
+biracial group that is CBEG.
+
+Using grade-age comparisons to infer grade retention may inadvertently
+capture cases of ``academic redshirting'' in which parents intentionally
+delay their child's kindergarten enrollment by a year. Frederick and
+Hauser (2008) suggest that academic redshirting is in many cases be a
+form of preemptive retention for children with developmental delays and
+thus the error induced by these false positive cases may be minimal.
+However, Bassok and Reardon (2013) have shown that academic redshirting
+is more common among white and SES privileged parents, suggesting that
+the demographic covariates of academic redshirting may operate in the
+opposite direction of grade retention. Regardless, academic redshirting
+should be of minimal concern for the measure of CBEG used here. Academic
+redshirting most frequently occurs for students whose birthdays fall
+close to the cutoff period for enrollment (Bassok and Reardon 2013;
+Graue and DiPerna 2000). Therefore, academic redshirts spend most of a
+given school year at the older, but correct, modal age for their grade
+and most of these students will not be identified as CBEG.\footnote{Analysis
+  of the probability of being CBEG by race and grade, shown in the
+  supplementary materials, indicates that Black and Latino children in
+  kindergarten are less likely to be CBEG than White children, which may
+  be a consequence of redshirting. However, these differences quickly
+  reverse direction by first grade. As a sensitivity analysis, I
+  repeated the main analysis shown here separately for students in
+  elementary (1st-5th), middle school (6th-8th), and high school
+  (9th-12th) grades. These results are presented in the supplementary
+  materials. Although more statistically noisy due to smaller sample
+  sizes, those results are consistent with the conclusions drawn here.}
+
+My goal is to understand the risk of being CBEG for each biracial group
+relative to its constituent monoracial groups (e.g.~a Black/White
+student compared to White and Black students). Throughout this article,
+I use a visual approach to illustrate this placement. As an example, I
+display the percent of White, Black, and Black/White students who are
+CBEG in Figure~\ref{fig-example}. I display confidence bands/bars around
+all three point estimates, but these confidence ranges require some
+explanation as they are not standard 95\% confidence intervals. My goal
+is to determine whether the biracial group's point estimate is
+statistically distinguishable from a given monoracial constituent
+group's point estimate by non-overlap of confidence intervals. Overlap
+in 95\% confidence intervals is not equivalent to failing a hypothesis
+test of difference at \(p<0.05\) and when used in this way, such
+assessments lead to far more stringent tests (Knol, Pestman, and Grobbee
+2011). When standard errors between groups are equal, overlap in 83.4\%
+confidence intervals will achieve this goal. However, in cases where
+standard errors vary substantially across estimates, the calculation of
+the appropriate confidence interval is more complex and varies by each
+pairwise comparison.\footnote{The formula for calculating the z-score
+  for the correct interval is given by
+  \[1.96 * \frac{\sqrt{1+\rho^2}}{1+\rho}\] where \(\rho\) is the ratio
+  of the standard errors for the two statistics. See Knol et al. (2011)
+  for a detailed derivation.}
+
+\begin{figure}[t]
+
+{\centering \includegraphics{main_files/figure-pdf/fig-example-1.pdf}
+
+}
+
+\caption{\label{fig-example}Probability of being clearly behind expected
+grade for biracial black/white respondents in comparison to their
+monoracial comparison groups. Non-overlap in color corresponding
+confidence bands indicates statistically significant difference at the
+5\% level.}
+
+\end{figure}
+
+I calculate two confidence intervals for each biracial group. Each
+confidence interval is in comparison to one of the constituent
+monoracial groups. These confidence intervals are color-coded in
+Figure~\ref{fig-example} to indicate the reference group. I only draw
+half-intervals in the direction of the monoracial group's point
+estimate. Overlap in these color corresponding bars and bands indicates
+that the difference between the biracial group and the monoracial group
+is not statistically significant at \(p<.05\). For example, the yellow
+bar shown in Figure~\ref{fig-example} for biracial Black/White students
+does not quite overlap with the yellow band for White students,
+indicating that the point estimates for these two groups are
+statistically distinguishable at \(p<.05\).
+
+Additionally, I include a measure of the ``halfway'' point between the
+two monoracial groups in dark grey.\footnote{The halfway point is given
+  by taking the mean between the two monoracial group. Its standard
+  error is given by \(\sqrt{(s_1^2+s_2^2)/2}\) where \(s_1\) and \(s_2\)
+  are the standard errors of the estimates for the two monoracial
+  groups. To avoid clutter, I do not draw a third half-confidence
+  interval for this point. Its length will be roughly halfway between
+  the length of the other two intervals.} This halfway point allows me
+to determine where the biracial group falls relative to the expectation
+of being halfway between the two constituent monoracial groups. In this
+case, Black/White students are much closer to White students in their
+risk of grade retention, and have probabilities much lower than both
+Black students and the halfway expectation.
+
+Figure~\ref{fig-example} shows the raw differences between the three
+racial groups of interest. However, in practice, I want to estimate
+differences across groups while holding constant a variety of variables.
+To do this, I estimate a set of logit models that predict the likelihood
+of a student being CBEG by race and a variety of other variables. I then
+construct figures similar to Figure~\ref{fig-example} by calculating
+from the model the average predicted probabilities (APP) for each racial
+group. An APP estimates the average probability of the outcome by a
+given covariate across all cases, while holding constant all other
+variables. APPs are akin to average marginal effects (AME) and estimated
+in the same way. Whereas AMEs estimate differences or slopes, APPs
+estimate the level for a given category.
+
+I begin with a baseline model that adjusts for a variety of nuisance
+characteristics that may vary across groups and thus need to be
+controlled in all models. First, I include fixed effects for state of
+residence because states dictate educational policy and thus can differ
+substantially in the likelihood of grade retention. I also include dummy
+variables indicating whether the student lived in a central city,
+suburban, or rural area.\footnote{The location cannot be determined for
+  all students and I therefore also include a fourth category of unknown
+  in all models.}
+
+The probability of being CBEG also increases with the student's current
+grade, so I include fixed effects for the current grade of the student.
+Additionally, as Figure~\ref{fig-year-grade} shows, the percent of
+students who are CBEG has declined over time, but this decline has been
+much more substantial at higher grade levels. For the elementary grades,
+there is no evidence of a decline at all. To account for this
+grade-specific decline in the models I include an interaction between a
+linear year term and current grade. Sensitivity analysis showed that
+this functional form was preferred by the Bayesian information criterion
+to models with no interaction and a model with interaction terms that
+treated year as a categorical variable. I also considered a similar
+interaction between state and year, but this model was not
+preferred.\footnote{The supplementary materials provide, for each model
+  specification, the BIC scores and marginal probabilities of being
+  clearly behind expected grade for each racial group. The marginal
+  probabilities for each racial group are almost identical across
+  specifications, indicating that results are not driven by the modeling
+  choice made here.}
+
+\begin{figure}[t]
+
+{\centering \includegraphics{main_files/figure-pdf/fig-year-grade-1.pdf}
+
+}
+
+\caption{\label{fig-year-grade}Trends over time and grade in the percent
+of students clearly behind expected grade. Lines are fit to each set of
+points by grade via lowess smoothing.}
+
+\end{figure}
+
+The baseline model also includes the race of the respondent. I then add
+additional terms measuring material and cultural resources that may
+account for racial differences in a set of subsequent models. First, I
+include measures of nativity and English proficiency for both the
+respondent and each of their parents. Second, I include a categorical
+measure of highest degree earned for each parent. Finally, I include
+measures of family income (square rooted), home ownership, and whether
+the parents are married.
+
+All statistical analysis adjusts for sampling weights among respondents.
+All models incorporate design effects for variance in sample weights and
+the clustering of multiple respondents within the same household.
+
+\hypertarget{results}{%
+\section{Results}\label{results}}
+
+\hypertarget{monoracial-differences}{%
+\subsection{Monoracial Differences}\label{monoracial-differences}}
+
+I begin by showing the relative risk of being CBEG among monoracial
+respondents across models. Understanding these differences helps to
+clarify the potential for how biracial respondents might be positioned
+between monoracial groups. Table 2 reports average marginal effects on
+the probability of being CBEG for each monoracial minority group in
+comparison to White students.
+
+\hypertarget{tbl-monoracial}{}
+\begin{table}[t]
+\caption{\label{tbl-monoracial}Average marginal differences in the probability of being clearly behind
+expected grade by monoracial group, relative to a monoracial white
+student }
+\begin{center}
+\begin{tabular}{l c c c c}
+\hline
+ & Model 1 & Model 2 & Model 3 & Model 4 \\
+\hline
+Black                  & $0.015^{***}$  & $0.016^{***}$  & $0.010^{***}$  & $0.007^{***}$  \\
+                       & $(0.001)$      & $(0.001)$      & $(0.001)$      & $(0.001)$      \\
+Indigenous             & $0.039^{***}$  & $0.039^{***}$  & $0.026^{***}$  & $0.022^{***}$  \\
+                       & $(0.003)$      & $(0.003)$      & $(0.003)$      & $(0.003)$      \\
+Asian                  & $-0.003^{***}$ & $-0.006^{***}$ & $-0.005^{***}$ & $-0.005^{***}$ \\
+                       & $(0.001)$      & $(0.001)$      & $(0.001)$      & $(0.001)$      \\
+Latino                 & $0.022^{***}$  & $0.013^{***}$  & $-0.001$       & $-0.002^{**}$  \\
+                       & $(0.001)$      & $(0.001)$      & $(0.001)$      & $(0.001)$      \\
+\hline
+State fixed effects    & Yes            & Yes            & Yes            & Yes            \\
+Location fixed effects & Yes            & Yes            & Yes            & Yes            \\
+Grade fixed effects    & Yes            & Yes            & Yes            & Yes            \\
+Year linear effects    & Yes            & Yes            & Yes            & Yes            \\
+Year x grade effects   & Yes            & Yes            & Yes            & Yes            \\
+Nativity and language  & No             & Yes            & Yes            & Yes            \\
+Parent's education     & No             & No             & Yes            & Yes            \\
+Other family resources & No             & No             & No             & Yes            \\
+N                      & $2603331$      & $2603331$      & $2603331$      & $2603331$      \\
+\hline
+\multicolumn{5}{l}{\scriptsize{$^{***}p<0.001$; $^{**}p<0.01$; $^{*}p<0.05$}}
+\end{tabular}
+\label{tbl-monoracial}
+\end{center}
+\end{table}
+
+Model 1 only controls for structural factors such as state of residence,
+student location, grade, and year. These results provide a baseline
+estimate of the differences across monoracial groups without controlling
+for differences in cultural and material resources. The results show
+that Black, Indigenous, and Latino students all have substantially
+higher probability of being CBEG than White students. Indigenous
+students have substantially higher risk than all other students, with a
+probability of being CBEG that is 4.1\% percentage points higher than
+White students. Asian students have the lowest probability of being
+CBEG, and their risk is slightly lower than White students.
+
+The subsequent models control for a variety of additional variables.
+Model 2 includes controls for whether the student and each of their
+parents are native-born and speak English well. Model 3 controls for the
+highest degree received by each parent, and Model 4 controls for family
+income (square rooted), home ownership, and whether the student's
+parents are married.
+
+Model 2 and Model 3 have substantial effects on the observed inequality
+across racial groups, while the additional variables from Model 4 have
+less impact. Controlling for the characteristics related to immigration
+and acculturation in Model 2 cuts the gap between White and Latino
+students in half and increases the gap between Asian and White students.
+It has no impact on the gap between White and Black or White and
+Indigenous students because most of these students are native-born with
+native-born parents.
+
+Controlling for education in Model 3 reduces the gap substantially for
+Black and Indigenous students and removes the gap entirely for Latino
+students. In fact, the results of both Models 3 and 4 suggest that, when
+holding constant cultural and family resources, Latino students are
+slightly less likely than White students to be CBEG.
+
+In total, resource differentials account for a substantial part of the
+overall racial differences in the risk of being CBEG, but not its
+entireity. Black and Indigenous students remain at higher risk than
+other students. Asian students remain the group with lowest risk across
+all models. The most notable shift across models is for Latino students.
+Their higher risk of being CBEG relative to White students is completely
+accounted for by resource differentials. When comparing White and Latino
+students with the same level or resources in Model 4, Latino students
+actually have slightly lower risk of being CBEG.
+
+Although, the racial differences in risk of CBEG are substantially
+reduced by controlling for resource differentials, the remaining gaps
+across all pairwise combinations are still large enough in most cases to
+sustain the question of where biracial individuals fit within these
+gaps. Before turning to this question, however, I want to better
+understand how the resources of biracial individuals compare to their
+monoracial constituent groups.
+
+\hypertarget{the-distribution-of-resources-for-biracial-individuals}{%
+\subsection{The Distribution of Resources for Biracial
+Individuals}\label{the-distribution-of-resources-for-biracial-individuals}}
+
+Table~\ref{tbl-resources} shows the mean values of the resource
+variables across monoracial and biracial groups.\footnote{For
+  compactness, I combine the parent foreign-born and English proficiency
+  questions into whether either parent is foreign-born or speaks
+  English. In the models, I use separate variables for mothers and
+  fathers. Tables in the supplementary materials provide the full
+  breakdown of these variables by racial group.} I also calculate a
+counterfactual probability of CBEG for each racial group based solely on
+their observed distribution of resources. Differences in this
+counterfactual probability provide a summary measure of the resource
+differentials between groups. This counterfactual probability is
+calculated by estimating the average predicted probability for each
+group from Model 4 of Table 2 when all non-resource variables, including
+race, are held at their mean.\footnote{It might seem odd to hold
+  categorical variables at their mean, but because all categorical
+  variables are entered into the models as 0/1 numeric indicator
+  variables, their mean value can be calculated as the proportion of
+  cases with the indicated value.}
+
+\hypertarget{tbl-resources}{}
+\begin{table}
+\caption{\label{tbl-resources}Mean resources by racial group. All results are survey weighted. Results
+sorted by counterfactual probability of being clearly behind expected
+grade. Shading indicates biracial group. }\tabularnewline
+
+\centering
+\resizebox{\linewidth}{!}{
+\begin{tabular}[t]{l>{\raggedleft\arraybackslash}p{1.5cm}>{\raggedleft\arraybackslash}p{1.5cm}>{\raggedleft\arraybackslash}p{1.5cm}>{\raggedleft\arraybackslash}p{1.5cm}>{\raggedleft\arraybackslash}p{1.5cm}>{\raggedleft\arraybackslash}p{1.5cm}>{\raggedleft\arraybackslash}p{1.5cm}>{\raggedleft\arraybackslash}p{1.5cm}>{\raggedleft\arraybackslash}p{1.5cm}}
+\toprule
+Race & CBEG, counterfactual & Family income & Own home & Mother, 4-year college degree & Father, 4-year college degree & Foreign-born & Either parent foreign-born & Speak English well & Both parents speak english well\\
+\midrule
+\cellcolor[HTML]{D3D3D3}{White/Asian} & \cellcolor[HTML]{D3D3D3}{2.4\%} & \cellcolor[HTML]{D3D3D3}{\$187,049} & \cellcolor[HTML]{D3D3D3}{85.2\%} & \cellcolor[HTML]{D3D3D3}{63.9\%} & \cellcolor[HTML]{D3D3D3}{65.5\%} & \cellcolor[HTML]{D3D3D3}{6.2\%} & \cellcolor[HTML]{D3D3D3}{73.3\%} & \cellcolor[HTML]{D3D3D3}{99.4\%} & \cellcolor[HTML]{D3D3D3}{98.8\%}\\
+\cellcolor[HTML]{D3D3D3}{Black/Asian} & \cellcolor[HTML]{D3D3D3}{2.9\%} & \cellcolor[HTML]{D3D3D3}{\$131,156} & \cellcolor[HTML]{D3D3D3}{64.6\%} & \cellcolor[HTML]{D3D3D3}{44.3\%} & \cellcolor[HTML]{D3D3D3}{39.4\%} & \cellcolor[HTML]{D3D3D3}{7.3\%} & \cellcolor[HTML]{D3D3D3}{81.7\%} & \cellcolor[HTML]{D3D3D3}{99.4\%} & \cellcolor[HTML]{D3D3D3}{98.6\%}\\
+\cellcolor[HTML]{D3D3D3}{Latino/Asian} & \cellcolor[HTML]{D3D3D3}{2.9\%} & \cellcolor[HTML]{D3D3D3}{\$130,330} & \cellcolor[HTML]{D3D3D3}{70.3\%} & \cellcolor[HTML]{D3D3D3}{43.4\%} & \cellcolor[HTML]{D3D3D3}{40.5\%} & \cellcolor[HTML]{D3D3D3}{4.5\%} & \cellcolor[HTML]{D3D3D3}{71.1\%} & \cellcolor[HTML]{D3D3D3}{99.5\%} & \cellcolor[HTML]{D3D3D3}{96.8\%}\\
+White & 3.1\% & \$136,953 & 83.3\% & 46.7\% & 43.6\% & 1.9\% & 9.4\% & 99.6\% & 98.9\%\\
+Asian & 3.1\% & \$141,982 & 72.4\% & 56.7\% & 59.6\% & 21.9\% & 96.2\% & 96.5\% & 76.8\%\\
+\cellcolor[HTML]{D3D3D3}{White/Latino} & \cellcolor[HTML]{D3D3D3}{3.3\%} & \cellcolor[HTML]{D3D3D3}{\$125,805} & \cellcolor[HTML]{D3D3D3}{73.0\%} & \cellcolor[HTML]{D3D3D3}{38.8\%} & \cellcolor[HTML]{D3D3D3}{36.1\%} & \cellcolor[HTML]{D3D3D3}{2.0\%} & \cellcolor[HTML]{D3D3D3}{32.9\%} & \cellcolor[HTML]{D3D3D3}{99.3\%} & \cellcolor[HTML]{D3D3D3}{98.5\%}\\
+\cellcolor[HTML]{D3D3D3}{White/Indigenous} & \cellcolor[HTML]{D3D3D3}{3.6\%} & \cellcolor[HTML]{D3D3D3}{\$97,664} & \cellcolor[HTML]{D3D3D3}{70.7\%} & \cellcolor[HTML]{D3D3D3}{28.2\%} & \cellcolor[HTML]{D3D3D3}{24.2\%} & \cellcolor[HTML]{D3D3D3}{1.1\%} & \cellcolor[HTML]{D3D3D3}{9.6\%} & \cellcolor[HTML]{D3D3D3}{99.8\%} & \cellcolor[HTML]{D3D3D3}{99.9\%}\\
+\cellcolor[HTML]{D3D3D3}{Indigenous/Asian} & \cellcolor[HTML]{D3D3D3}{3.6\%} & \cellcolor[HTML]{D3D3D3}{\$100,783} & \cellcolor[HTML]{D3D3D3}{56.1\%} & \cellcolor[HTML]{D3D3D3}{28.8\%} & \cellcolor[HTML]{D3D3D3}{22.6\%} & \cellcolor[HTML]{D3D3D3}{9.9\%} & \cellcolor[HTML]{D3D3D3}{71.3\%} & \cellcolor[HTML]{D3D3D3}{100.0\%} & \cellcolor[HTML]{D3D3D3}{97.0\%}\\
+\cellcolor[HTML]{D3D3D3}{Black/White} & \cellcolor[HTML]{D3D3D3}{3.7\%} & \cellcolor[HTML]{D3D3D3}{\$94,841} & \cellcolor[HTML]{D3D3D3}{57.6\%} & \cellcolor[HTML]{D3D3D3}{31.9\%} & \cellcolor[HTML]{D3D3D3}{27.1\%} & \cellcolor[HTML]{D3D3D3}{2.0\%} & \cellcolor[HTML]{D3D3D3}{17.0\%} & \cellcolor[HTML]{D3D3D3}{99.8\%} & \cellcolor[HTML]{D3D3D3}{99.7\%}\\
+Black & 3.8\% & \$87,159 & 53.9\% & 30.9\% & 25.1\% & 6.4\% & 27.7\% & 99.4\% & 96.2\%\\
+\cellcolor[HTML]{D3D3D3}{Black/Latino} & \cellcolor[HTML]{D3D3D3}{3.8\%} & \cellcolor[HTML]{D3D3D3}{\$86,825} & \cellcolor[HTML]{D3D3D3}{47.2\%} & \cellcolor[HTML]{D3D3D3}{25.8\%} & \cellcolor[HTML]{D3D3D3}{23.4\%} & \cellcolor[HTML]{D3D3D3}{2.0\%} & \cellcolor[HTML]{D3D3D3}{32.4\%} & \cellcolor[HTML]{D3D3D3}{98.9\%} & \cellcolor[HTML]{D3D3D3}{98.5\%}\\
+\cellcolor[HTML]{D3D3D3}{Black/Indigenous} & \cellcolor[HTML]{D3D3D3}{4.1\%} & \cellcolor[HTML]{D3D3D3}{\$76,097} & \cellcolor[HTML]{D3D3D3}{44.7\%} & \cellcolor[HTML]{D3D3D3}{19.3\%} & \cellcolor[HTML]{D3D3D3}{21.5\%} & \cellcolor[HTML]{D3D3D3}{3.9\%} & \cellcolor[HTML]{D3D3D3}{23.6\%} & \cellcolor[HTML]{D3D3D3}{100.0\%} & \cellcolor[HTML]{D3D3D3}{99.9\%}\\
+\cellcolor[HTML]{D3D3D3}{Indigenous/Latino} & \cellcolor[HTML]{D3D3D3}{4.4\%} & \cellcolor[HTML]{D3D3D3}{\$72,164} & \cellcolor[HTML]{D3D3D3}{47.8\%} & \cellcolor[HTML]{D3D3D3}{14.4\%} & \cellcolor[HTML]{D3D3D3}{10.0\%} & \cellcolor[HTML]{D3D3D3}{1.1\%} & \cellcolor[HTML]{D3D3D3}{29.9\%} & \cellcolor[HTML]{D3D3D3}{99.3\%} & \cellcolor[HTML]{D3D3D3}{97.5\%}\\
+Indigenous & 4.5\% & \$63,115 & 50.7\% & 13.2\% & 8.8\% & 7.1\% & 23.6\% & 99.2\% & 96.1\%\\
+Latino & 5.3\% & \$62,226 & 50.2\% & 10.4\% & 8.5\% & 11.6\% & 83.0\% & 96.4\% & 50.8\%\\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+The results show different risks of being CBEG across biracial groups
+because of differences in resources. For example, White/Asian students
+have the lowest counterfactual risk of being CBEG of all groups at
+2.4\%, owing to their exceptionally high family income and the high
+college attainment of their parents. At the other end of the spectrum,
+Indigenous/Latino students have a counterfactual risk of CBEG nearly 2\%
+higher, given their much lower family resources.
+
+I am particularly interested in how each biracial group compares to its
+constituent monoracial groups. For example, while Indigenous/Latino
+students have the highest counterfactual risk of being CBEG among
+biracial students, their risk is still lower than their two constituent
+groups of Indigenous (4.5\%) and Latino (5.3\%) students, owing in large
+part to somewhat higher family income, greater parental educational
+attainment, and greater acculturation. These results suggest positive
+selection into Indigenous/Latino interracial unions.
+
+\hypertarget{tbl-resource-summary}{}
+\begin{table}
+\caption{\label{tbl-resource-summary}Relative placement for biracial groups in comparison to monoracial
+constituent groups based on counterfactual probability of being clearly
+behind expected grade due to resources alone. }\tabularnewline
+
+\centering
+\begin{tabular}[t]{>{\raggedright\arraybackslash}p{2cm}>{\raggedleft\arraybackslash}p{2cm}>{\raggedleft\arraybackslash}p{2cm}>{\raggedleft\arraybackslash}p{2cm}>{\raggedleft\arraybackslash}p{2cm}>{\raggedleft\arraybackslash}p{2cm}}
+\toprule
+Biacial & Lower probability than both & Similar probability as lower & Between & Similar probability as higher & Higher probability than both\\
+\midrule
+White/Asian & X &  &  &  & \\
+Black/Asian &  & X (Asian) &  &  & \\
+Latino/Asian &  & X (Asian) &  &  & \\
+White/Latino &  & X (White) &  &  & \\
+Black/Latino &  & X (Black) &  &  & \\
+Indigenous/Latino &  & X (Indig.) &  &  & \\
+White/Indigenous &  &  & X &  & \\
+Black/Indigenous &  &  & X &  & \\
+Indigenous/Latino &  &  & X &  & \\
+Black/White &  &  &  & X (Black) & \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Table 4 summarizes the patterns from Table~\ref{tbl-resources} across
+all ten biracial groups. In six of these cases, the biracial group would
+have outcomes similar to or better than the monoracial group with better
+resources. These results imply that for the majority of these groups,
+parents in these matches are being positively selected from their
+constituent groups.
+
+Only three groups exhibit an in-between status based on resources. All
+three of these groups are part-Indigenous. This finding does not hold
+for Indigenous/Latino students, but nonetheless suggests less
+selectivity in crossing this boundary.
+
+The Black/White case stands out as an outlier. Black/White students have
+similar resources as Black students and both groups have fewer resources
+than White students, as can be seen in Table~\ref{tbl-resources} for
+family income, home ownership, and parental educational attainment.
+Unlike most of these other groups, I observe no positive class
+selectivity into Black/White interracial unions.
+
+The effect of controlling for these resources will be complex and
+different across biracial groups. For those biracial groups with
+resources similar to their more advantaged constituent group,
+controlling for these resources should reduce their advantage relative
+to the less advantaged monoracial group. For the Black/White case, on
+the other hand, controlling for resource differentials should eliminate
+some of their disadvantage relative to Whites. For the remaining
+``in-between'' groups, it is more difficult to make a priori
+predictions.
+
+\hypertarget{biracial-placement}{%
+\subsection{Biracial Placement}\label{biracial-placement}}
+
+I now turn to the risk of CBEG for biracial respondents. Due to the
+number of comparisons being made, I split these results into two
+separate figures. In Figure~\ref{fig-black-models}, I show the placement
+of each biracial group involving one black parent in comparison to their
+two monoracial constituent groups. To allow comparison across models, I
+compare the results from the baseline model (Model 1 in Table 2) and the
+full model that accounts for all cultural and family resources (Model 4
+in Table 2).
+
+\begin{figure}[p]
+
+{\centering \includegraphics{main_files/figure-pdf/fig-black-models-1.pdf}
+
+}
+
+\caption{\label{fig-black-models}Probability of being clearly behind
+expected grade for biracial respondents with one black parent, in
+comparison to their monoracial comparison groups. Non-overlap in color
+corresponding confidence bands indicates statistically significant
+difference at the 5\% level, Baseline model includes year, grade,
+location, and state fixed effects. Full models include control variables
+for nativity, English proficiency, income, education, home ownership,
+and marital status of parents.}
+
+\end{figure}
+
+I focus first on biracial groups with one Black parent because of a
+stronger historical expectation that these students will be identified
+as Black by the ``one-drop rule'' and as a result will have similar
+outcomes to Black students. Figure~\ref{fig-black-models} provides
+little evidence for such a pattern, and soundly rejects it in the case
+of Black/White and Black/Latino students. Black/White and Black/Latino
+students have a risk of being CBEG substantially lower than Black
+students and closer to their non-Black constituent group. Solid
+conclusions are difficult for the remaining two groups because of
+smaller sample size and correspondingly wider confidence intervals on
+estimates. Nonetheless, the point estimates in each of these cases
+suggest probabilities of being CBEG roughly halfway between the two
+constituent groups.
+
+Controlling for resource variables has some effect on the placement of
+part-Black biracial respondents. Black/White biracial students initially
+have a risk of being CBEG slightly higher than and statistically
+distinguishable from White students. After controlling for cultural and
+family resources, however, Black/White students have a risk of being
+CBEG that is slightly lower but not statistically distinguishable from
+White students. This change reflects the relatively low level of
+parental education and income among Black/White students, which is much
+closer to Black students than White students, as shown on
+Table~\ref{tbl-resources}.
+
+Black/Latino students start from a very different position, having a
+risk of being CBEG substantially lower than both Black and Latino
+students, who have somewhat similar risks. However, after controlling
+for cultural and family resources, Black/Latino students have a risk of
+being CBEG that is statistically indistinguishable from the risk of
+Latino students and substantially lower than and statistically
+distinguishable from Black students. This change largely reflects the
+fact that Black/Latino students have greater resources than Latino (but
+not Black) students and once this advantage is held constant, they have
+a similar risk. After controlling for family resources, both Black/White
+and Black/Latino students have a risk of being CBEG similar to their
+monoracial constituent group with lower risk.
+
+The role of parental resources is harder to determine for Black/Asian
+and Black/Indigenous students due to the greater uncertainty in these
+estimates. Controlling for resources moves the point estimate for
+Black/Asian students from a risk similar to Asian students to more of a
+halfway position between the two constituent groups. Black/Indigenous
+students have risk of being CBEG roughly halfway between their two
+constituent groups in both models. However, this finding of a halfway
+position for both groups is highly tentative owing to wide confidence
+intervals.
+
+\begin{figure}[p]
+
+{\centering \includegraphics{main_files/figure-pdf/fig-other-models-1.pdf}
+
+}
+
+\caption{\label{fig-other-models}Probability of being clearly behind
+expected grade for non-black biracial respondents, in comparison to
+their monoracial comparison groups. Non-overlap in color corresponding
+confidence bands indicates statistically significant difference at the
+5\% level, Baseline model includes year, grade, location, and state
+fixed effects. Full models include control variables for nativity,
+English proficiency, income, education, home ownership, and marital
+status of parents.}
+
+\end{figure}
+
+Figure~\ref{fig-other-models} shows the results for the remaining
+biracial groups. For most of these groups, the full models indicate that
+each biracial group has a risk of being CBEG similar to the risk of the
+lower monoracial constituent group or has risk higher than this group
+but less than the halfway point. There are two exceptions to this
+general pattern. First, the point estimate of the probability of being
+CBEG for the Indigenous/Latino group is roughly halfway between the two
+constituent groups, although it is not statistically distinguishable
+from the lower group. Second, Latino/Asian students are the only case
+where the point estimate of the risk for the biracial group is higher
+than either monoracial group. However, the confidence bands suggest that
+the risk for this group cannot be statistically differentiated from
+either of the two monoracial constituent groups. This result only
+emerges in the model that controls for resources, because Latino/Asian
+students come from more advantaged households than both Latino and Asian
+students, on average.
+
+Aside from the case of Latino/Asian students, controlling for resources
+has moderate effects on the placement of the remaining biracial groups.
+White/Asian students are the only case with a substantial shift, owing
+to their highly advantaged households. Initially White/Asian students
+have risk of being CBEG substantially below both White and Asian
+students. After controlling for resources, the risk of being CBEG for
+White/Asian students is indistinguishable from those for Asian students,
+but still substantially and statistically distinguishable from the
+higher risk to White students.
+
+Results for part-Latino students are complicated by the substantial
+change in the monoracial Latino risk across models. For example, while
+Latino students have substantially higher risk of being CBEG than White
+students in the baseline model, there is only a very small difference
+favoring Latino students in the full model. Nonetheless, even in this
+case, we see that White/Latino students have risk closer to those of the
+lower Latino group, but distinguishable from both groups.
+
+\hypertarget{conclusions}{%
+\section{Conclusions}\label{conclusions}}
+
+In this article, I have used the risk of grade retention among K-12
+students to better understand how biracial students' life chances
+compare to their monoracial peers. Unlike prior work on this topic, the
+estimates used here for most biracial groups are relatively precise due
+to large sample sizes. For groups with a high level of precision, the
+results tell a consistent story - biracial students' risk of grade
+retention is similar to their monoracial constituent group with the
+lower risk.
+
+These results contradict expectations of both a ``halfway'' position and
+the dominance of the one drop rule. For no group do I observe clear
+evidence of a pattern of hypodescent in which the risk was similar to
+the higher risk constituent monoracial group. These results also
+strongly contradict the expectations of the marginal man hypothesis.
+
+Two possibilities emerge that may help us understand these results
+better. First, we may be witnessing a shift toward a new regime of
+hyperdescent that applies broadly across a wide variety of racial
+groups. Second, the relatively low risk for biracial students may be a
+product of the strength of hybridity in allowing biracial students to
+better negotiate racialized systems than their monoracial minority
+peers.
+
+Differences in family resources were expected to play some role in the
+relative position of biracial students' risk. The results on parent
+selection vary somewhat by group, but the majority of biracial groups
+had resources more similar to their monoracial constituent group with
+higher resources, indicating a strong positive selection into
+interracial unions in the prior generation. The most important exception
+to this trend is the case of Black/White biracial students who have far
+fewer resources than White students and resources closer to Black
+students.
+
+Regardless of variation in biracial students' parental resources,
+accounting for these resource differentials does not substantially
+change the overall result that biracial students' risk is more similar
+to the constituent monoracial group with lower risk. The one exception
+to this finding is for the Latino/Asian case where the much lower risk
+of these students compared to Latino and Asian students was entirely
+driven by resource differentials.
+
+Low relative risk for biracial individuals is sometimes treated as an
+indication of a positive future direction for the US in terms of
+ameliorating racial inequality. However, the improved prospects for
+biracial individuals do nothing to ameliorate the often strong and
+persistent inequalities between monoracial groups. The growth and
+relative success of biracial populations may isolate remaining members
+of monoracial minority groups as much as it assimilates mixed race
+individuals. The real question at stake is how existing divides and
+identities may be restructured in the context of a growing biracial
+population. This research suggests the potential for a growing divide
+between these mixed race populations and the most disadvantaged
+monoracial minority populations from which they derive at least part of
+their ancestry.
+
+These findings stand in contrast to earlier work which found more
+evidence of an ``in-between'' status in other educational outcomes
+(Campbell 2009; Herman 2009). I raise two possible explanations for this
+discrepancy that point to strengths and weaknesses of the current
+research and may help drive future work on the topic. First, this
+discrepancy may be due to the small sample sizes of multiracial
+respondents in prior work which led to statistically imprecise
+estimates. Because the current findings rely upon large samples, they
+present an important step forward in our understanding of how biracial
+individuals will fit into America's system of racial inequality.
+Nonetheless, sample sizes for some non-white biracial respondents remain
+small, limiting our understanding of the outcomes for those groups. In
+particular, results for non-white part-Indigenous populations are quite
+imprecise. The results counter-intuitively suggest that part-Indigenous
+populations are the least likely to be in the position expected by
+hyperdescent, but due to low sample sizes, that finding is highly
+tentative.
+
+Second, The current findings may also diverge from the findings of prior
+work because different outcomes were examined. While grade retention is
+an important early life outcome, it is far from the only one that these
+individuals will face in their life. Although, we often observe similar
+racial inequalities across a variety of outcomes, knowing the result for
+one outcome does not perfectly predict other outcomes. As biracial
+individuals age and face later outcomes in the educational system, the
+labor market, and elsewhere, their experiences may differ from what I
+observe here. Thus, collecting more detailed information on these
+outcomes in future studies remains critically important.
+
+\hypertarget{references}{%
+\section*{References}\label{references}}
+\addcontentsline{toc}{section}{References}
+
+\hypertarget{refs}{}
+\begin{CSLReferences}{1}{0}
+\leavevmode\vadjust pre{\hypertarget{ref-alba_great_2020}{}}%
+Alba, Richard. 2020.
+\emph{\href{https://press.princeton.edu/books/hardcover/9780691201634/the-great-demographic-illusion}{The
+{Great Demographic Illusion}}}. {Princeton University Press}.
+
+\leavevmode\vadjust pre{\hypertarget{ref-andrew_scarring_2014}{}}%
+Andrew, Megan. 2014. {``The {Scarring Effects} of {Primary-Grade
+Retention}? {A Study} of {Cumulative Advantage} in the {Educational
+Career}.''} \emph{Social Forces} 93(2):653--85. doi:
+\href{https://doi.org/10.1093/sf/sou074}{10.1093/sf/sou074}.
+
+\leavevmode\vadjust pre{\hypertarget{ref-bassok_academic_2013}{}}%
+Bassok, Daphna, and Sean F. Reardon. 2013. {``{`{Academic Redshirting}'}
+in {Kindergarten}: {Prevalence}, {Patterns}, and {Implications}.''}
+\emph{Educational Evaluation and Policy Analysis} 35(3):283--97. doi:
+\href{https://doi.org/10.3102/0162373713482764}{10.3102/0162373713482764}.
+
+\leavevmode\vadjust pre{\hypertarget{ref-bianchi_children_1984}{}}%
+Bianchi, Suzanne M. 1984. {``Children's {Progress Through School}: {A
+Research Note}.''} \emph{Sociology of Education} 57(3):184--92. doi:
+\href{https://doi.org/10.2307/2112602}{10.2307/2112602}.
+
+\leavevmode\vadjust pre{\hypertarget{ref-biblarz_family_1999}{}}%
+Biblarz, Timothy J., and Adrian E. Raftery. 1999. {``Family {Structure},
+{Educational Attainment}, and {Socioeconomic Success}: {Rethinking} the
+{`{Pathology} of {Matriarchy}'}.''} \emph{American Journal of Sociology}
+105(2):321--65.
+
+\leavevmode\vadjust pre{\hypertarget{ref-bonilla-silva_biracial_2004}{}}%
+Bonilla-Silva, Eduardo. 2004. {``From Bi-Racial to Tri-Racial: {Towards}
+a New System of Racial Stratification in the {USA}.''} \emph{Ethnic and
+Racial Studies} 27(6):931--50.
+
+\leavevmode\vadjust pre{\hypertarget{ref-bonilla-silva_racism_2006}{}}%
+Bonilla-Silva, Eduardo. 2006.
+\emph{\href{https://books.google.com?id=HKJE4rVZG1EC}{Racism Without
+{Racists}: {Color-Blind Racism} and the {Persistence} of {Racial
+Inequality} in the {United States}}}. {Rowman \& Littlefield
+Publishers}.
+
+\leavevmode\vadjust pre{\hypertarget{ref-bratter_multiracial_2018}{}}%
+Bratter, Jenifer L. 2018. {``Multiracial {Identification} and {Racial
+Gaps}: {A Work} in {Progress}.''} \emph{The ANNALS of the American
+Academy of Political and Social Science} 677(1):69--80. doi:
+\href{https://doi.org/10.1177/0002716218758622}{10.1177/0002716218758622}.
+
+\leavevmode\vadjust pre{\hypertarget{ref-bratter_poverty_2013}{}}%
+Bratter, Jenifer L., and Sarah Damaske. 2013. {``Poverty at a {Racial
+Crossroads}: {Poverty Among Multiracial Children} of {Single
+Mothers}.''} \emph{Journal of Marriage and Family} 75(2):486--502. doi:
+\href{https://doi.org/10.1111/jomf.12012}{10.1111/jomf.12012}.
+
+\leavevmode\vadjust pre{\hypertarget{ref-bratter_does_2011}{}}%
+Bratter, Jenifer L., and Bridget K. Gorman. 2011. {``Does {Multiracial
+Matter}? {A Study} of {Racial Disparities} in {Self-Rated Health}.''}
+\emph{Demography} 48(1):127--52. doi:
+\href{https://doi.org/10.1007/s13524-010-0005-0}{10.1007/s13524-010-0005-0}.
+
+\leavevmode\vadjust pre{\hypertarget{ref-bratter_mother_2009}{}}%
+Bratter, Jenifer, and Holly E. Heard. 2009.
+{``\href{http://www.jstor.org/stable/40542696}{Mother's, {Father}'s, or
+{Both}? {Parental Gender} and {Parent-Child Interactions} in the {Racial
+Classification} of {Adolescents}}.''} \emph{Sociological Forum}
+24(3):658--88.
+
+\leavevmode\vadjust pre{\hypertarget{ref-bratter_multiracial_2013}{}}%
+Bratter, Jenifer, and Rachel Tolbert Kimbro. 2013. {``Multiracial
+{Children} and {Poverty}: {Evidence From} the {Early Childhood
+Longitudinal Study} of~{Kindergartners}.''} \emph{Family Relations}
+62(1):175--89. doi:
+\href{https://doi.org/10.1111/j.1741-3729.2012.00750.x}{10.1111/j.1741-3729.2012.00750.x}.
+
+\leavevmode\vadjust pre{\hypertarget{ref-brunsma_interracial_2005}{}}%
+Brunsma, David L. 2005. {``Interracial {Families} and the {Racial
+Identification} of {Mixed-Race Children}: {Evidence} from the {Early
+Childhood Longitudinal Study}.''} \emph{Social Forces} 84(2):1131--57.
+doi: \href{https://doi.org/10.2307/3598493}{10.2307/3598493}.
+
+\leavevmode\vadjust pre{\hypertarget{ref-campbell_multiracial_2009}{}}%
+Campbell, Mary E. 2009. {``Multiracial {Groups} and {Educational
+Inequality}: {A Rainbow} or a {Divide}?''} \emph{Social Problems}
+56(3):425--46.
+
+\leavevmode\vadjust pre{\hypertarget{ref-campbell_what_2006}{}}%
+Campbell, Mary E., and Jennifer Eggerling-Boeck. 2006. {``"{What About}
+the {Children}?" {The Psychological} and {Social Well-Being} of
+{Multiracial Adolescents}.''} \emph{The Sociological Quarterly}
+47(1):147--73.
+
+\leavevmode\vadjust pre{\hypertarget{ref-cheng_multiracial_2009}{}}%
+Cheng, Simon, and Kathryn J. Lively. 2009. {``Multiracial
+{Self-Identification} and {Adolescent Outcomes}: {A Social Psychological
+Approach} to the {Marginal Man Theory}.''} \emph{Social Forces}
+88(1):61--98.
+
+\leavevmode\vadjust pre{\hypertarget{ref-chew_american_1989}{}}%
+Chew, Kenneth S. Y., David J. Eggebeen, and Peter R. Uhlenberg. 1989.
+{``American {Children} in {Multiracial Households}.''}
+\emph{Sociological Perspectives} 32(1):65--85. doi:
+\href{https://doi.org/10.2307/1389008}{10.2307/1389008}.
+
+\leavevmode\vadjust pre{\hypertarget{ref-conley_being_1999}{}}%
+Conley, Dalton. 1999. \emph{Being {Black}. {Living} in the {Red}:
+{Race}, {Wealth}, and {Social Policy} in {America}}. {Berkeley}:
+{University of California Press}.
+
+\leavevmode\vadjust pre{\hypertarget{ref-davenport_role_2016}{}}%
+Davenport, Lauren D. 2016.
+{``\href{http://asr.sagepub.com/content/81/1/57.short}{The {Role} of
+{Gender}, {Class}, and {Religion} in {Biracial Americans}' {Racial
+Labeling Decisions}}.''} \emph{American Sociological Review}
+81(1):57--84.
+
+\leavevmode\vadjust pre{\hypertarget{ref-davis_who_1991}{}}%
+Davis, F. James. 1991. \emph{Who Is {Black}?: {One Nation}'s
+{Definition}}. {University Park, PA}: {Pennsylvania State University
+Press}.
+
+\leavevmode\vadjust pre{\hypertarget{ref-davis_intermarriage_1941}{}}%
+Davis, Kingsley. 1941. {``Intermarriage in {Caste Societies}.''}
+\emph{American Anthropologist} 43:376--95.
+
+\leavevmode\vadjust pre{\hypertarget{ref-dimaggio_culture_1997}{}}%
+DiMaggio, Paul. 1997.
+{``\href{http://www.jstor.org/stable/2952552}{Culture and
+{Cognition}}.''} \emph{Annual Review of Sociology} 23:263--87.
+
+\leavevmode\vadjust pre{\hypertarget{ref-doyle_are_2007}{}}%
+Doyle, Jamie Mihoko, and Grace Kao. 2007.
+{``\href{http://www.jstor.org/stable/20141804}{Are {Racial Identities}
+of {Multiracials Stable}? {Changing Self-Identification} Among {Single}
+and {Multiple Race Individuals}}.''} \emph{Social Psychology Quarterly}
+70(4):405--23.
+
+\leavevmode\vadjust pre{\hypertarget{ref-ellis_agents_2012}{}}%
+Ellis, Mark, Steven R. Holloway, Richard Wright, and Christopher S.
+Fowler. 2012. {``Agents of {Change}: {Mixed-Race Households} and the
+{Dynamics} of {Neighborhood Segregation} in the {United States}.''}
+\emph{Annals of the Association of American Geographers} 102(3):549--70.
+doi:
+\href{https://doi.org/10.1080/00045608.2011.627057}{10.1080/00045608.2011.627057}.
+
+\leavevmode\vadjust pre{\hypertarget{ref-frederick_have_2008}{}}%
+Frederick, Carl B., and Robert M. Hauser. 2008. {``Have We Put an End to
+Social Promotion? {Changes} in School Progress Among Children Aged 6 to
+17 from 1972 to 2005.''} \emph{Demography} 45(3):719--40. doi:
+\href{https://doi.org/10.1353/dem.0.0015}{10.1353/dem.0.0015}.
+
+\leavevmode\vadjust pre{\hypertarget{ref-fu_racial_2001}{}}%
+Fu, Vincent Kang. 2001. {``Racial {Intermarriage Pairings}.''}
+\emph{Demography} 38(2):147--59.
+
+\leavevmode\vadjust pre{\hypertarget{ref-graue_redshirting_2000}{}}%
+Graue, M. Elizabeth, and James DiPerna. 2000. {``Redshirting and {Early
+Retention}: {Who Gets} the "{Gift} of {Time}" and {What Are} {Its
+Outcomes}?''} \emph{American Educational Research Journal}
+37(2):509--34. doi:
+\href{https://doi.org/10.3102/00028312037002509}{10.3102/00028312037002509}.
+
+\leavevmode\vadjust pre{\hypertarget{ref-gullickson_education_2006}{}}%
+Gullickson, Aaron. 2006. {``Education and Black-White Interracial
+Marriage.''} \emph{Demography} 43(4):673--89. doi:
+\href{https://doi.org/10.1353/dem.2006.0033}{10.1353/dem.2006.0033}.
+
+\leavevmode\vadjust pre{\hypertarget{ref-gullickson_racial_2019}{}}%
+Gullickson, Aaron. 2019. {``The {Racial Identification} of {Young
+Adults} in a {Racially Complex Society}.''} \emph{Emerging Adulthood}
+7(2):150--61. doi:
+\href{https://doi.org/10.1177/2167696818790306}{10.1177/2167696818790306}.
+
+\leavevmode\vadjust pre{\hypertarget{ref-gullickson_choosing_2011}{}}%
+Gullickson, Aaron, and Ann Morning. 2011. {``Choosing Race:
+{Multiracial} Ancestry and Identification.''} \emph{Social Science
+Research} 40(2):498--512. doi:
+\href{https://doi.org/10.1016/j.ssresearch.2010.12.010}{10.1016/j.ssresearch.2010.12.010}.
+
+\leavevmode\vadjust pre{\hypertarget{ref-herman_forced_2004}{}}%
+Herman, Melissa. 2004. {``Forced to {Choose}: {Some Determinants} of
+{Racial Identification} in {Multiracial Adolescents}.''} \emph{Child
+Development} 75(3):730--48. doi:
+\href{https://doi.org/10.2307/3696590}{10.2307/3696590}.
+
+\leavevmode\vadjust pre{\hypertarget{ref-herman_blackwhiteother_2009}{}}%
+Herman, Melissa R. 2009. {``The {Black-White-Other Achievement Gap}:
+{Testing Theories} of {Academic Performance Among Multiracial} and
+{Monoracial Adolescents}.''} \emph{Sociology of Education}
+82(20):20--46.
+
+\leavevmode\vadjust pre{\hypertarget{ref-hochschild_creating_2012}{}}%
+Hochschild, Jennifer L., Vesla M. Weaver, and Traci R. Burch. 2012.
+\emph{\href{https://books.google.com?id=BeTeF3iWG9sC}{Creating a {New
+Racial Order}: {How Immigration}, {Multiracialism}, {Genomics}, and the
+{Young Can Remake Race} in {America}}}. {Princeton University Press}.
+
+\leavevmode\vadjust pre{\hypertarget{ref-hollinger_postethnic_1995}{}}%
+Hollinger, David A. 1995. \emph{Postethnic {America}: {Beyond
+Multiculturalism}}. {New York, NY}: {Basic Books}.
+
+\leavevmode\vadjust pre{\hypertarget{ref-holloway_place_2009}{}}%
+Holloway, Steven R., Richard Wright, Mark Ellis, and Margaret East.
+2009. {``Place, Scale and the Racial Claims Made for Multiracial
+Children in the 1990 {US Census}.''} \emph{Ethnic and Racial Studies}
+32(3):522--47.
+
+\leavevmode\vadjust pre{\hypertarget{ref-hou_interracial_2011}{}}%
+Hou, Feng, and John Myles. 2011. {``Interracial Marriage and
+Status-Caste Exchange in {Canada} and the {United States}.''}
+\emph{Ethnic and Racial Studies}.
+
+\leavevmode\vadjust pre{\hypertarget{ref-hughes_effect_2017}{}}%
+Hughes, Jan N., Qian Cao, Stephen G. West, Paula Allee Smith, and
+Carissa Cerda. 2017. {``Effect of Retention in Elementary Grades on
+Dropping Out of School Early.''} \emph{Journal of School Psychology}
+65:11--27. doi:
+\href{https://doi.org/10.1016/j.jsp.2017.06.003}{10.1016/j.jsp.2017.06.003}.
+
+\leavevmode\vadjust pre{\hypertarget{ref-hughes_significance_1990}{}}%
+Hughes, Michael, and Bradley R. Hertel. 1990. {``The {Significance} of
+{Color Remains}: {A Study} of {Life Chances}, {Mate Selection}, and
+{Ethnic Consciousness Among} \{\vphantom\}{B}\vphantom\{\}lack
+\{\vphantom\}{A}\vphantom\{\}mericans.''} \emph{Social Forces}
+68(4):1105--20.
+
+\leavevmode\vadjust pre{\hypertarget{ref-iverson_regimes_2022}{}}%
+Iverson, Sarah, Ann Morning, Aliya Saperstein, and Janet Xu. 2022.
+{``Regimes Beyond the {One-Drop Rule}: {New Models} of {Multiracial
+Identity}.''} \emph{Genealogy} 6(2):57. doi:
+\href{https://doi.org/10.3390/genealogy6020057}{10.3390/genealogy6020057}.
+
+\leavevmode\vadjust pre{\hypertarget{ref-jimerson_metaanalysis_2001}{}}%
+Jimerson, Shane R. 2001. {``Meta-Analysis of {Grade Retention Research}:
+{Implications} for {Practice} in the 21st {Century}.''} \emph{School
+Psychology Review} 30(3):420--37. doi:
+\href{https://doi.org/10.1080/02796015.2001.12086124}{10.1080/02796015.2001.12086124}.
+
+\leavevmode\vadjust pre{\hypertarget{ref-kalmijn_educational_2010}{}}%
+Kalmijn, Matthijs. 2010. {``Educational Inequality, Homogamy, and Status
+Exchange in Black-White Intermarriage: A Comment on {Rosenfeld}.''}
+\emph{American Journal of Sociology} 115(4):1252--63.
+
+\leavevmode\vadjust pre{\hypertarget{ref-kao_racial_1999}{}}%
+Kao, Grace. 1999. {``Racial {Identity} and {Academic Performance}: {An
+Examination} of {Biracial Asian} and {African American Youth}.''}
+\emph{Journal of Asian American Studies} 2(3):223--49. doi:
+\href{https://doi.org/10.1353/jaas.1999.0023}{10.1353/jaas.1999.0023}.
+
+\leavevmode\vadjust pre{\hypertarget{ref-keith_skin_1991}{}}%
+Keith, Verna M., and Cedric Herring. 1991. {``Skin {Tone} and
+{Stratification} in the {Black Community}.''} \emph{American Journal of
+Sociology} 97(3):760--78.
+
+\leavevmode\vadjust pre{\hypertarget{ref-knol_mis_2011}{}}%
+Knol, Mirjam J., Wiebe R. Pestman, and Diederick E. Grobbee. 2011.
+{``The (Mis)use of Overlap of Confidence Intervals to Assess Effect
+Modification.''} \emph{European Journal of Epidemiology} 26(4):253--54.
+doi:
+\href{https://doi.org/10.1007/s10654-011-9563-8}{10.1007/s10654-011-9563-8}.
+
+\leavevmode\vadjust pre{\hypertarget{ref-liebler_boundaries_2016}{}}%
+Liebler, Carolyn A. 2016. {``On the {Boundaries} of {Race}:
+{Identification} of {Mixed-heritage Children} in the {United States},
+1960 to 2010.''} \emph{Sociology of Race and Ethnicity} 2(4):548--68.
+doi:
+\href{https://doi.org/10.1177/2332649216632546}{10.1177/2332649216632546}.
+
+\leavevmode\vadjust pre{\hypertarget{ref-liebler_america_2017}{}}%
+Liebler, Carolyn A., Sonya R. Porter, Leticia E. Fernandez, James M.
+Noon, and Sharon R. Ennis. 2017. {``America's {Churning Races}: {Race}
+and {Ethnicity Response Changes Between Census} 2000 and the 2010
+{Census}.''} \emph{Demography} 54(1):259--84. doi:
+\href{https://doi.org/10.1007/s13524-016-0544-0}{10.1007/s13524-016-0544-0}.
+
+\leavevmode\vadjust pre{\hypertarget{ref-maddox_cognitive_2002a}{}}%
+Maddox, Keith B., and Stephanie A. Gray. 2002. {``Cognitive
+{Representations} of {Black Americans}: {Reexploring} the {Role} of
+{Skin Tone}.''} \emph{Personality and Social Psychology Bulletin}
+28(2):250--59. doi:
+\href{https://doi.org/10.1177/0146167202282010}{10.1177/0146167202282010}.
+
+\leavevmode\vadjust pre{\hypertarget{ref-merton_intermarriage_1941}{}}%
+Merton, Robert K. 1941. {``Intermarriage and the {Social Structure}:
+{Fact} and {Theory}.''} \emph{Psychiatry} 4(3):361--74.
+
+\leavevmode\vadjust pre{\hypertarget{ref-monk_skin_2014}{}}%
+Monk, Ellis P. 2014.
+{``\href{https://www.jstor.org/stable/43287571}{Skin {Tone
+Stratification} Among {Black Americans}, 2001-2003}.''} \emph{Social
+Forces} 92(4):1313--37.
+
+\leavevmode\vadjust pre{\hypertarget{ref-morning_who_2000}{}}%
+Morning, Ann. 2000. {``Who Is {Multiracial}? {Definitions} and
+{Decisions}.''} \emph{Sociological Imagination} 37(4):209--29.
+
+\leavevmode\vadjust pre{\hypertarget{ref-morning_generational_2018}{}}%
+Morning, Ann, and Aliya Saperstein. 2018. {``The {Generational Locus} of
+{Multiraciality} and {Its Implications} for {Racial
+Self-Identification}.''} \emph{The ANNALS of the American Academy of
+Political and Social Science} 677(1):57--68. doi:
+\href{https://doi.org/10.1177/0002716218754774}{10.1177/0002716218754774}.
+
+\leavevmode\vadjust pre{\hypertarget{ref-pager_sociology_2008}{}}%
+Pager, Devah, and Hana Shepherd. 2008.
+{``\href{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2915460}{The
+{Sociology} of {Discrimination}: {Racial Discrimination} in
+{Employment}, {Housing}, {Credit}, and {Consumer Markets}}.''}
+\emph{Annual Review of Sociology} 34:181--209.
+
+\leavevmode\vadjust pre{\hypertarget{ref-park_human_1928}{}}%
+Park, Robert Ezra. 1928. {``Human {Migration} and the {Marginal Man}.''}
+\emph{American Journal of Sociology} 33(8):881--92.
+
+\leavevmode\vadjust pre{\hypertarget{ref-qian_options_2004}{}}%
+Qian, Zenchao. 2004. {``Options: {Racial}/{Ethnic Identification} of
+{Children} of {Intermarried Couples}.''} \emph{Social Science Quarterly}
+85(3):746--66.
+
+\leavevmode\vadjust pre{\hypertarget{ref-quillian_new_2006}{}}%
+Quillian, Lincoln. 2006.
+{``\href{https://www.jstor.org/stable/29737741}{New {Approaches} to
+{Understanding Racial Prejudice} and {Discrimination}}.''} \emph{Annual
+Review of Sociology} 32:299--328.
+
+\leavevmode\vadjust pre{\hypertarget{ref-reskin_race_2012}{}}%
+Reskin, Barbara. 2012. {``The {Race Discrimination System}.''}
+\emph{Annual Review of Sociology} 38(1):17--35. doi:
+\href{https://doi.org/10.1146/annurev-soc-071811-145508}{10.1146/annurev-soc-071811-145508}.
+
+\leavevmode\vadjust pre{\hypertarget{ref-root_racially_1992}{}}%
+Root, Maria P. P., ed. 1992. \emph{Racially {Mixed People} in
+{America}}. 1st edition. {Newbury Park, Calif}: {SAGE Publications,
+Inc}.
+
+\leavevmode\vadjust pre{\hypertarget{ref-rosenfeld_nontraditional_2010}{}}%
+Rosenfeld, Michael J. 2010.
+{``\href{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3000058}{Nontraditional
+{Families} and {Childhood Progress Through School}}.''}
+\emph{Demography} 47(3):755--75.
+
+\leavevmode\vadjust pre{\hypertarget{ref-roth_end_2005a}{}}%
+Roth, Wendy D. 2005. {``\href{http://www.jstor.org/stable/4540881}{The
+{End} of the {One-Drop Rule}? {Labeling} of {Multiracial Children} in
+{Black Intermarriages}}.''} \emph{Sociological Forum} 20(1):35--67.
+
+\leavevmode\vadjust pre{\hypertarget{ref-ruggles_ipums_2020}{}}%
+Ruggles, Steven, Sarah Flood, Ronald Goeken, Josiah Grover, Erin Meyer,
+Jose Pacas, and Matthew Sobek. 2020.
+\emph{\href{https://doi.org/10.18128/D010.V10.0}{{IPUMS USA}: {Version}
+10.0 {[}Dataset{]}}}. {Minneapolis, MN}: {IPUMS}.
+
+\leavevmode\vadjust pre{\hypertarget{ref-saenz_persistence_1995}{}}%
+Saenz, Rogelio, Sean-Shong Hwang, Benigno E. Aguirre, and Robert N.
+Anderson. 1995. {``Persistence and {Change} in {Asian Identity Among
+Children} of {Intermarried Couples}.''} \emph{Sociological Perspectives}
+38(2):175--94.
+
+\leavevmode\vadjust pre{\hypertarget{ref-saperstein_mulatto_2013}{}}%
+Saperstein, Aliya, and Aaron Gullickson. 2013. {``A "{Mulatto Escape
+Hatch}" in the {United States}? {Examining Evidence} of {Racial} and
+{Social Mobility During} the {Jim Crow Era}.''} \emph{Demography}
+50(5):1921--42. doi:
+\href{https://doi.org/10.1007/s13524-013-0210-8}{10.1007/s13524-013-0210-8}.
+
+\leavevmode\vadjust pre{\hypertarget{ref-saperstein_racial_2012}{}}%
+Saperstein, Aliya, and Andrew M. Penner. 2012. {``Racial {Fluidity} and
+{Inequality} in the {United States}.''} \emph{American Journal of
+Sociology} 118(3):676--727.
+
+\leavevmode\vadjust pre{\hypertarget{ref-shih_multiple_2019}{}}%
+Shih, Margaret, Leigh S. Wilton, Serena Does, Brianna M. Goodale, and
+Diana T. Sanchez. 2019. {``Multiple Racial Identities as Sources of
+Psychological Resilience.''} \emph{Social and Personality Psychology
+Compass} 13(6):e12469. doi:
+\href{https://doi.org/10.1111/spc3.12469}{10.1111/spc3.12469}.
+
+\leavevmode\vadjust pre{\hypertarget{ref-snipp_american_1989}{}}%
+Snipp, C. Matthew. 1989.
+\emph{\href{https://books.google.com?id=E0CsvVoVA90C}{American
+{Indians}: {The First} of {This Land}}}. {Russell Sage Foundation}.
+
+\leavevmode\vadjust pre{\hypertarget{ref-stearns_staying_2007}{}}%
+Stearns, Elizabeth, Stephanie Moller, Judith Blau, and Stephanie
+Potochnick. 2007. {``Staying {Back} and {Dropping Out}: {The
+Relationship Between Grade Retention} and {School Dropout}.''}
+\emph{Sociology of Education} 80(3):210--40. doi:
+\href{https://doi.org/10.1177/003804070708000302}{10.1177/003804070708000302}.
+
+\leavevmode\vadjust pre{\hypertarget{ref-stonequist_problem_1935}{}}%
+Stonequist, Everett V. 1935. {``The {Problem} of the {Marginal Man}.''}
+\emph{American Journal of Sociology} 41(1):1--12.
+
+\leavevmode\vadjust pre{\hypertarget{ref-swidler_culture_1986}{}}%
+Swidler, Ann. 1986. {``Culture in {Action}: {Symbols} and
+{Strategies}.''} \emph{American Sociological Review} 51(2):273--86. doi:
+\href{https://doi.org/10.2307/2095521}{10.2307/2095521}.
+
+\leavevmode\vadjust pre{\hypertarget{ref-telles_race_2009}{}}%
+Telles, Edward E., and Christina A. Sue. 2009. {``Race {Mixture}:
+{Boundary Crossing} in {Comparative Perspective}.''} \emph{Annual Review
+of Sociology} 35:129--46.
+
+\leavevmode\vadjust pre{\hypertarget{ref-udry_health_2003}{}}%
+Udry, J. Richard, Rose Maria Li, and Janet Hendrickson-Smith. 2003.
+{``Health and {Behavior Risks} of {Adolescents} with {Mixed-Race
+Identity}.''} \emph{American Journal of Public Health} 93(11):1865--70.
+
+\leavevmode\vadjust pre{\hypertarget{ref-warren_patterns_2014}{}}%
+Warren, John Robert, Emily Hoffman, and Megan Andrew. 2014. {``Patterns
+and {Trends} in {Grade Retention Rates} in the {United States},
+1995--2010.''} \emph{Educational Researcher} 43(9):433--43. doi:
+\href{https://doi.org/10.3102/0013189X14563599}{10.3102/0013189X14563599}.
+
+\leavevmode\vadjust pre{\hypertarget{ref-wolfe_land_2001}{}}%
+Wolfe, Patrick. 2001. {``Land, {Labor}, and {Difference}: {Elementary
+Structures} of {Race}.''} \emph{The American Historical Review}
+106(3):866--905.
+
+\leavevmode\vadjust pre{\hypertarget{ref-xie_racial_1997}{}}%
+Xie, Yu, and Kimberly Goyette. 1997. {``The {Racial Identification} of
+{Biracial Children} with {One Asian Parent}: {Evidence} from the 1990
+{Census}.''} \emph{Social Forces} 76(2):547--70. doi:
+\href{https://doi.org/10.2307/2580724}{10.2307/2580724}.
+
+\end{CSLReferences}
+
+
+
+\end{document}
