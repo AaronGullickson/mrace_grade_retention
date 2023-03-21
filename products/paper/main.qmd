@@ -1,16 +1,43 @@
 ---
 title: Differences in the Risk of Grade Retention for Biracial and Monoracial Students in the US, 2010-2019
-#author: 
-#  - Aaron Gullickson, *University of Oregon*
+author: 
+  - name: Aaron Gullickson
+    orcid: 0000-0001-7237-8131
+    email: aarong@uoregon.edu
+    url: https://aarongullickson.netlify.app/
+    attributes:
+      corresponding: true
+      equal-contributor: true
+    affiliations:
+      - name: University of Oregon
+        department: Sociology
+        address: 727 PLC
+        city: Eugene
+        region: OR
+        country: USA
+        postal-code: 97405
 abstract: Understanding how outcomes for biracial individuals compare to their monoracial peers is critical for understanding how patterns of racial inequality in the contemporary United States might be shifting. Yet, we know very little about the life chances of biracial individuals due to limitations in most available data sources. In this article, I utilize American Community Survey data from 2010-2019 to examine the risk of being clearly behind expected grade among biracial and monoracial K-12 students, helping to fill a gap in our understanding. With large sample sizes for most biracial groups, I am able to estimate grade retention risk for biracial students with enough precision to differentiate even modest differences in risk relative to monoracial groups. The results indicate that for most biracial groups, biracial students have risk similar to their monoracial constituent group with lower risk. Although biracial students tend to have favorable family resource characteristics, controlling for these characteristics does little to change the overall placement of their outcomes.
 thanks: Supplementary materials provided with this article include full model results upon which figures are based as well as any sensitivity analysis described herein. All code and data for this project are available at [https://osf.io/4fevt/?view_only=4abc6d86595c4313a8d4792471e9bc0d](https://osf.io/4fevt/?view_only=4abc6d86595c4313a8d4792471e9bc0d).
 format:
+  submittable-pdf:
+    papersize: letter
+    fontsize: 12pt          # font size (typically 10pt, 11pt, or 12pt)
+    geometry: margin=1in    # controls the margin size
+    fig-height: 4
+    fig-pos: t
+    linestretch: 1
+    keep-tex: true
+    titlepage: false
+    cite-method: biblatex
+    #biblatexoptions: 
+    #natbiboptions: authoryear,round
+    biblio-style: apa
   pdf:
     documentclass: scrartcl
     papersize: letter
     fig-height: 4
     fig-pos: t
-    linestretch: 1.5
+    linestretch: 1
     keep-tex: false
   docx:
     toc: false
