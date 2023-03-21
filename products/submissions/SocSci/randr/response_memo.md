@@ -1,3 +1,8 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
 # Response Memo, Sociological Science
 
 Thank you to the reviewer and editor for the helpful comments and to the editor for the opportunity to revise my manuscript. I have made changes to the manuscript as requested and I believe those changes have improved the overall manuscript. Those changes are described below. 
@@ -8,7 +13,7 @@ From the editor's letter:
 
 > Please provide descriptives on the distribution of CBEG across racial groups and discuss the (im-)possibility of false positives and how this could (not) have impacted the results. DE: “What is the distribution of this measure across across groups? Some descriptives here would help us. For example, do some groups systematically enroll their kids in school later than others? In other words, is the measure truly capturing what we want it to capture? (For example, in Figure 2, we see that it is possible to have a CBEG status even in kindergarten. What is keeping these students behind? Or are they simply starting later than others?)”
 
-There are a couple of points to address here. First, I believe the concern that the reviewer is raising, although they do not name it directly, is the phenomenon of "academic redshirting" in which parents hold back kindergarten enrollment for a child whose birthday falls close to the cutoff date for enrollment. It is true that I should have addressed this issue more directly in the paper and I have done so in the revised draft. 
+I believe the concern that the reviewer is raising, although they do not name it directly, is the phenomenon of "academic redshirting" in which parents hold back kindergarten enrollment for a child whose birthday falls close to the cutoff date for enrollment. It is true that I should have addressed this issue more directly in the paper and I have done so in the revised draft. 
 
 * The distribution of CBEG across racial groups was already provided in the first draft in table 1. However, I think what the reviewer is interested in is the distribution of CBEG across racial groups and grades with a particular focus on kindergarten. I have added a table to the supplementary appendix (Table 2) that shows the probability of CBEG jointly across race and current grade. There is some evidence at the kindergarten level of the usual racial disparities being reversed. Most notably, Black and Latino kindergarteners are less likely to be CBEG than White kindergartners. This finding is consistent with prior work on the topic of redshirting (Bassok and Reardon 2013). However, these inverted racial differences quickly flip at higher grades.
 * Based on the belief that redshirting is more likely to affect results at younger grades where it is a larger share, I ran a sensitivity analysis that repeated my full models but separately for the elementary grades w/o kindergarten (1st-5th), middle school (6th-8th), and high school (9th-12th). The results from this sensitivity analysis are provided in Figure 1 of the supplementary materials. Although somewhat noisier, they are consistent with the patterns found in the main text. This sensitivity analysis is described in footnote 1 of the main text which reads:
